@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace API.Entities;
 
+[Table("FoodItems")]
 public class FoodItem
 {
     public int Id { get; set; }
@@ -8,4 +11,7 @@ public class FoodItem
     public required Photo FoodItemPhoto { get; set; }
     public required double Price { get; set; }
 
+    //Navigation properties (required for entity framework one to many relationship)
+    public int RestaurantId { get; set; }
+    public Restaurant Restaurant { get; set; } = null!;
 }

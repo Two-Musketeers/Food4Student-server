@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace API.Entities;
 
+[Table("Restaurants")]
 public class Restaurant
 {
     public int Id { get; set; }
