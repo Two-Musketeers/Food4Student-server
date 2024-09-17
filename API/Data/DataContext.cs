@@ -6,10 +6,14 @@ namespace API.Data;
 public class DataContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<AppUser> Users { get; set; }
-    public DbSet<RestaurantLike> UserFavoriteRestaurants { get; set; }
-
+    public DbSet<Rating> Ratings { get; set; }
+    public DbSet<Restaurant> Restaurants { get; set; }
+    public DbSet<RestaurantLike> RestaurantLikes { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
+        // Configuration for RestaurantLike
         modelBuilder.Entity<RestaurantLike>()
             .HasKey(k => new { k.SourceUserId, k.LikedRestaurantId });
 
@@ -24,5 +28,19 @@ public class DataContext(DbContextOptions options) : DbContext(options)
             .WithMany(u => u.LikedByUsers)
             .HasForeignKey(r => r.LikedRestaurantId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Configuration for Rating
+        modelBuilder.Entity<Rating>()
+            .HasKey(r => r.Id);
+
+        modelBuilder.Entity<Rating>()
+            .HasOne(r => r.User)
+            .WithMany(u => u.Ratings)
+            .HasForeignKey(r => r.UserId);
+
+        modelBuilder.Entity<Rating>()
+            .HasOne(r => r.Restaurant)
+            .WithMany(res => res.Ratings)
+            .HasForeignKey(r => r.RestaurantId);
     }
 }
