@@ -4,8 +4,8 @@ public class AppUser
 {
     public int Id { get; set; }
     public required string Address { get; set; }
-    public required string Latitude { get; set; }
-    public required string Longitude { get; set; }
+    public required double Latitude { get; set; }
+    public required double Longitude { get; set; }
     public required string Email { get; set; }
     public required string UserName { get; set; }
     public required string PhoneNumber { get; set; }
