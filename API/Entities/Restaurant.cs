@@ -11,6 +11,7 @@ public class Restaurant
     public required Photo Logo { get; set; }
     public required Photo Banner { get; set; }
     public required List<FoodItem> Menu { get; set; } = [];
+    public required List<RestaurantLike> LikedByUsers { get; set; } = [];
     //public required StarRating Rating { get; set; }
 
 }
