@@ -9,6 +9,9 @@ public class DataContext(DbContextOptions options) : DbContext(options)
     public DbSet<Rating> Ratings { get; set; }
     public DbSet<Restaurant> Restaurants { get; set; }
     public DbSet<RestaurantLike> RestaurantLikes { get; set; }
+    public DbSet<FoodItem> FoodItems { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -42,5 +45,20 @@ public class DataContext(DbContextOptions options) : DbContext(options)
             .HasOne(r => r.Restaurant)
             .WithMany(res => res.Ratings)
             .HasForeignKey(r => r.RestaurantId);
+
+        // Configuration for OrderItem
+        modelBuilder.Entity<OrderItem>()
+            .HasKey(oi => new { oi.OrderId, oi.FoodName });
+
+        modelBuilder.Entity<OrderItem>()
+            .HasOne(oi => oi.Order)
+            .WithMany(o => o.OrderItems)
+            .HasForeignKey(oi => oi.OrderId);
+
+        modelBuilder.Entity<OrderItem>()
+            .HasOne(oi => oi.OriginalFoodItem)
+            .WithMany()
+            .HasForeignKey(oi => oi.OriginalFoodItemId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
