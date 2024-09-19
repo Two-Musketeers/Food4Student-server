@@ -11,6 +11,10 @@ builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 
+// Initialize Firebase
+var firebaseInitializer = app.Services.GetRequiredService<FirebaseInitializer>();
+firebaseInitializer.Initialize();
+
 // Configure the HTTP request pipeline.
 app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod()
     .WithOrigins("http://localhost:5000", "http://localhost:5001"));
