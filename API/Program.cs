@@ -1,5 +1,6 @@
 using API.Data;
 using API.Extensions;
+using API.Middleware;
 using API.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +18,10 @@ firebaseInitializer.Initialize();
 
 // Configure the HTTP request pipeline.
 app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod()
-    .WithOrigins("http://localhost:5000", "http://localhost:5001"));
+    .WithOrigins("http://localhost:5000", "https://localhost:5001"));
+
+// Use the custom Firebase authentication middleware
+app.UseMiddleware<FirebaseAuthenticationMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
