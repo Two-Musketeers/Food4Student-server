@@ -27,7 +27,7 @@ public static class ApplicationServiceExtensions
         // Add Firebase services
         services.AddSingleton<FirebaseInitializer>();
         services.AddSingleton<FirebaseAuthenticationService>();
-
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         return services;
     }
 }
