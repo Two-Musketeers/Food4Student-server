@@ -12,6 +12,6 @@ public class RestaurantDto
     public Photo? Logo { get; set; }
     public Photo? Banner { get; set; }
     public List<FoodItemDto>? Menu { get; set; }
-    public List<Rating>? Ratings { get; set; }
-    public double AverageRating => Ratings?.Count != 0 ? Ratings.Average(r => r.Stars) : 0;
+    public int TotalRatings { get; set; }
+    public double AverageRating { get; set; }
 }
