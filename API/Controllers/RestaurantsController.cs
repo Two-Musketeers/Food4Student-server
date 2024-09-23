@@ -17,6 +17,14 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository, I
 
         return Ok(restaurantsToReturn);
     }
+    [HttpGet("{id}")]
+    public async Task<ActionResult<RestaurantDto>> GetRestaurantById(string id)
+    {
+        var restaurant = await restaurantRepository.GetRestaurantByIdAsync(id);
 
+        if (restaurant == null) return NotFound();
+
+        return Ok(restaurant);
+    }
 }
 
