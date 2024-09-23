@@ -5,7 +5,7 @@ namespace API.Entities;
 public class OrderItem
 {
     // Composite Key
-    public int OrderId { get; set; }
+    public string? OrderId { get; set; }
     public Order Order { get; set; } = null!;
 
     public string FoodName { get; set; } = null!;
@@ -16,6 +16,6 @@ public class OrderItem
     public string ImageLink { get; set; } = null!;
 
     // Foreign Key to Original FoodItem
-    public int? OriginalFoodItemId { get; set; }
+    public string? OriginalFoodItemId { get; set; }
     public FoodItem? OriginalFoodItem { get; set; }
 }

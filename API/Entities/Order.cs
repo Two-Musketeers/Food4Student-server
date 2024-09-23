@@ -2,10 +2,10 @@ namespace API.Entities;
 
 public class Order
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public List<OrderItem> OrderItems { get; set; } = [];
 
     //AppUser navigation purpose
-    public int AppUserId { get; set; }
+    public string AppUserId { get; set; }
     public AppUser AppUser { get; set; } = null!;
 }

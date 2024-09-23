@@ -5,7 +5,7 @@ namespace API.Entities;
 [Table("Restaurants")]
 public class Restaurant
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public required string Name { get; set; }
     public required string Address { get; set; }
     public required double Latitude { get; set; }

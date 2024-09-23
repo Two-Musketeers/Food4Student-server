@@ -1,14 +1,19 @@
 using System.Security.Claims;
 
-namespace API.Extensions;
-
-public static class ClaimsPrincipleExtensions
+namespace API.Extensions
 {
-    public static string GetUsername(this ClaimsPrincipal user)
+    public static class ClaimsPrincipalExtensions
     {
-        var username = user.FindFirstValue(ClaimTypes.NameIdentifier) 
-            ?? throw new Exception("Cannot get username from token");
+        public static string GetUserId(this ClaimsPrincipal user)
+        {
+            var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? user.FindFirstValue("user_id") ?? user.FindFirstValue("sub");
 
-        return username;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                throw new Exception("Cannot get user ID from token");
+            }
+
+            return userIdClaim;
+        }
     }
 }

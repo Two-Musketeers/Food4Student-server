@@ -2,7 +2,7 @@ namespace API.Entities;
 
 public class AppUser
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public required string Address { get; set; }
     public required double Latitude { get; set; }
     public required double Longitude { get; set; }

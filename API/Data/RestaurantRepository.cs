@@ -10,12 +10,12 @@ namespace API.Data;
 
 public class RestaurantRepository(DataContext context, IMapper mapper) : IRestaurantRepository
 {
-    public async Task<Restaurant?> GetRestaurantByIdAsync(int id)
-    {
-        return await context.Restaurants
-            .Include(r => r.Menu)
-            .SingleOrDefaultAsync(r => r.Id == id);
-    }
+    // public async Task<Restaurant?> GetRestaurantByIdAsync(int id)
+    // {
+    //     return await context.Restaurants
+    //         .Include(r => r.Menu)
+    //         .SingleOrDefaultAsync(r => r.Id == id);
+    // }
 
     public async Task<Restaurant?> GetRestaurantByNameAsync(string name)
     {

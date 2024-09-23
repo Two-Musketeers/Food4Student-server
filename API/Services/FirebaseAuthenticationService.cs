@@ -4,19 +4,17 @@ namespace API.Services;
 
 public class FirebaseAuthenticationService
 {
-    public async Task<bool> VerifyIdToken(string idToken)
+    public async Task<string?> VerifyIdToken(string idToken)
     {
         try
         {
             FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
-            string uid = decodedToken.Uid;
-            // Token is valid
-            return true;
+            return decodedToken.Uid;
         }
         catch (FirebaseAuthException)
         {
             // Token is invalid
-            return false;
+            return null;
         }
     }
 }
