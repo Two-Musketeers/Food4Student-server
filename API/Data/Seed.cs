@@ -7,33 +7,40 @@ namespace API.Data;
 
 public class Seed
 {
-    public static async Task SeedUsers(DataContext context)
+    // Cache and reuse JsonSerializerOptions instance
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    public static async Task SeedUsersAndRestaurants(DataContext context)
     {
-        if (await context.Users.AnyAsync()) return;
+        if (await context.Users.AnyAsync() || await context.Restaurants.AnyAsync()) return;
 
+        // Read and parse user data
         var userData = await File.ReadAllTextAsync("Data/appuser.json");
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var users = JsonSerializer.Deserialize<List<AppUser>>(userData, options);
+        var users = JsonSerializer.Deserialize<List<AppUser>>(userData, JsonOptions);
 
-        if (users == null) return;
+        // Read and parse restaurant data
+        var restaurantData = await File.ReadAllTextAsync("Data/restaurant.json");
+        var restaurants = JsonSerializer.Deserialize<List<Restaurant>>(restaurantData, JsonOptions);
 
+        if (users == null || restaurants == null) return;
+
+        // Add users to context
         context.Users.AddRange(users);
 
-        await context.SaveChangesAsync();
-    }
+        // Assign restaurants to users
+        var random = new Random();
+        foreach (var restaurant in restaurants)
+        {
+            // Randomly assign a restaurant to a user
+            var owner = users[random.Next(users.Count)];
+            restaurant.OwnerId = owner.Id;
+            restaurant.Owner = owner;
+        }
 
-    public static async Task SeedRestaurants(DataContext context)
-    {
-        if (await context.Restaurants.AnyAsync()) return;
-
-        var restaurantData = await File.ReadAllTextAsync("Data/restaurant.json");
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var restaurants = JsonSerializer.Deserialize<List<Restaurant>>(restaurantData, options);
-
-        if (restaurants == null) return;
-
+        // Add restaurants to context
         context.Restaurants.AddRange(restaurants);
 
+        // Save changes to context
         await context.SaveChangesAsync();
     }
 }

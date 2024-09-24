@@ -16,5 +16,8 @@ public class Restaurant
     public List<RestaurantLike> LikedByUsers { get; set; } = [];
     public List<Rating> Ratings { get; set; } = [];
     public double AverageRating => Ratings.Count != 0 ? Ratings.Average(r => r.Stars) : 0;
-    
+
+    // Navigation properties
+    public string OwnerId { get; set; }
+    public AppUser Owner { get; set; }
 }

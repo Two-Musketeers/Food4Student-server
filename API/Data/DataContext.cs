@@ -1,9 +1,11 @@
 using API.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
 
-public class DataContext(DbContextOptions options) : DbContext(options)
+public class DataContext(DbContextOptions options) : IdentityDbContext<AppUser, AppRole, string, IdentityUserClaim<string>, AppUserRole, IdentityUserLogin<string>, IdentityRoleClaim<string>, IdentityUserToken<string>>(options)
 {
     public DbSet<AppUser> Users { get; set; }
     public DbSet<Rating> Ratings { get; set; }
@@ -60,5 +62,19 @@ public class DataContext(DbContextOptions options) : DbContext(options)
             .WithMany()
             .HasForeignKey(oi => oi.OriginalFoodItemId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Configure the relationship between AppUser and AppUserRole
+        modelBuilder.Entity<AppUser>()
+            .HasMany(ur => ur.UserRoles)
+            .WithOne(u => u.User)
+            .HasForeignKey(ur => ur.UserId)
+            .IsRequired();
+
+        modelBuilder.Entity<AppRole>()
+            .HasMany(ur => ur.UserRoles)
+            .WithOne(u => u.Role)
+            .HasForeignKey(ur => ur.RoleId)
+            .IsRequired();
+
     }
 }
