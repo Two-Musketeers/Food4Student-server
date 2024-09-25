@@ -1,9 +1,13 @@
+using API.DTOs;
 using API.Entities;
+using API.Helpers;
 using API.Interfaces;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
-public class UserRepository(DataContext context) : IUserRepository
+public class UserRepository(DataContext context, IMapper mapper) : IUserRepository
 {
 
     public async Task<AppUser?> GetMemberAsync(string username)
@@ -13,9 +17,15 @@ public class UserRepository(DataContext context) : IUserRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<AppUser>> GetMembersAsync()
+    public async Task<PagedList<UserDto>> GetMembersAsync(PaginationParams paginationParams)
     {
-        return await context.Users.ToListAsync();
+        var query = context.Users
+            .Include(x => x.OwnedRestaurants)
+            .Include(x => x.FavoriteRestaurants)
+            .ProjectTo<UserDto>(mapper.ConfigurationProvider)
+            .AsQueryable();
+
+        return await PagedList<UserDto>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
     }
 
     public async Task<AppUser?> GetUserByIdAsync(int id)

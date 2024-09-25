@@ -1,4 +1,3 @@
-using System;
 using System.Text.Json;
 using API.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -33,8 +32,8 @@ public class Seed
         {
             // Randomly assign a restaurant to a user
             var owner = users[random.Next(users.Count)];
-            restaurant.OwnerId = owner.Id;
-            restaurant.Owner = owner;
+            restaurant.AppUserId = owner.Id;
+            restaurant.Appuser = owner;
         }
 
         // Add restaurants to context

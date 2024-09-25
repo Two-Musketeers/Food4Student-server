@@ -18,6 +18,6 @@ public class Restaurant
     public double AverageRating => Ratings.Count != 0 ? Ratings.Average(r => r.Stars) : 0;
 
     // Navigation properties
-    public string OwnerId { get; set; }
-    public AppUser Owner { get; set; }
+    public string? AppUserId { get; set; }
+    public AppUser Appuser { get; set; } = null!;
 }

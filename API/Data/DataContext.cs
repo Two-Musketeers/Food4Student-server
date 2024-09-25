@@ -1,19 +1,20 @@
 using API.Entities;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
 
-public class DataContext(DbContextOptions options) : IdentityDbContext<AppUser, AppRole, string, IdentityUserClaim<string>, AppUserRole, IdentityUserLogin<string>, IdentityRoleClaim<string>, IdentityUserToken<string>>(options)
+public class DataContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<AppUser> Users { get; set; }
+    public DbSet<AppRole> Roles { get; set; }
+    public DbSet<AppUserRole> UserRoles { get; set; }
     public DbSet<Rating> Ratings { get; set; }
     public DbSet<Restaurant> Restaurants { get; set; }
     public DbSet<RestaurantLike> RestaurantLikes { get; set; }
     public DbSet<FoodItem> FoodItems { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -64,6 +65,9 @@ public class DataContext(DbContextOptions options) : IdentityDbContext<AppUser, 
             .OnDelete(DeleteBehavior.SetNull);
 
         // Configure the relationship between AppUser and AppUserRole
+        modelBuilder.Entity<AppUserRole>()
+                .HasKey(ur => new { ur.UserId, ur.RoleId });
+                
         modelBuilder.Entity<AppUser>()
             .HasMany(ur => ur.UserRoles)
             .WithOne(u => u.User)
@@ -75,6 +79,5 @@ public class DataContext(DbContextOptions options) : IdentityDbContext<AppUser, 
             .WithOne(u => u.Role)
             .HasForeignKey(ur => ur.RoleId)
             .IsRequired();
-
     }
 }
