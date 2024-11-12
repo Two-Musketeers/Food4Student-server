@@ -6,9 +6,9 @@ namespace API.Interfaces;
 
 public interface IUserRepository
 {
-    void Update(AppUser user);
-    Task<bool> SaveAllAsync();
-    Task<PagedList<UserDto>> GetMembersAsync(PaginationParams paginationParams);
-    Task<AppUser?> GetUserByIdAsync(int id);
-    Task<AppUser?> GetUserByUsernameAsync(string username);
+    Task<IEnumerable<UserDto>> GetMembersAsync(PaginationParams paginationParams);
+    Task<AppUser> GetUserByUsernameAsync(string username);
+    Task<bool> UserRoleExistsAsync(string userId, string roleId);
+    Task AddUserAsync(AppUser user);
+    Task AddRoleToUserAsync(string userId, string roleId);
 }

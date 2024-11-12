@@ -9,6 +9,28 @@ using Microsoft.EntityFrameworkCore;
 namespace API.Data;
 public class UserRepository(DataContext context, IMapper mapper) : IUserRepository
 {
+    public async Task<AppUser> GetUserByUsernameAsync(string username)
+    {
+        return await context.Users.SingleOrDefaultAsync(u => u.UserName == username);
+    }
+
+    public async Task<bool> UserRoleExistsAsync(string userId, string roleId)
+    {
+        return await context.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+    }
+
+    public async Task AddUserAsync(AppUser user)
+    {
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task AddRoleToUserAsync(string userId, string roleId)
+    {
+        var userRole = new AppUserRole { UserId = userId, RoleId = roleId };
+        context.UserRoles.Add(userRole);
+        await context.SaveChangesAsync();
+    }
 
     public async Task<AppUser?> GetMemberAsync(string username)
     {
@@ -17,27 +39,9 @@ public class UserRepository(DataContext context, IMapper mapper) : IUserReposito
             .SingleOrDefaultAsync();
     }
 
-    public async Task<PagedList<UserDto>> GetMembersAsync(PaginationParams paginationParams)
-    {
-        var query = context.Users
-            .Include(x => x.OwnedRestaurants)
-            .Include(x => x.FavoriteRestaurants)
-            .ProjectTo<UserDto>(mapper.ConfigurationProvider)
-            .AsQueryable();
-
-        return await PagedList<UserDto>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
-    }
-
     public async Task<AppUser?> GetUserByIdAsync(int id)
     {
         return await context.Users.FindAsync(id);
-    }
-
-    public async Task<AppUser?> GetUserByUsernameAsync(string username)
-    {
-        return await context.Users
-            .Include(x => x.Avatar)
-            .SingleOrDefaultAsync(x => x.UserName == username);
     }
 
     public async Task<IEnumerable<AppUser>> GetUsersAsync()
@@ -55,5 +59,10 @@ public class UserRepository(DataContext context, IMapper mapper) : IUserReposito
     public void Update(AppUser user)
     {
         context.Entry(user).State = EntityState.Modified;
+    }
+
+    Task<IEnumerable<UserDto>> IUserRepository.GetMembersAsync(PaginationParams paginationParams)
+    {
+        throw new NotImplementedException();
     }
 }

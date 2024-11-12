@@ -13,6 +13,9 @@ public class Seed
     {
         if (await context.Users.AnyAsync() || await context.Restaurants.AnyAsync()) return;
 
+        // Seed roles
+        await SeedRoles(context);
+
         // Read and parse user data
         var userData = await File.ReadAllTextAsync("Data/appuser.json");
         var users = JsonSerializer.Deserialize<List<AppUser>>(userData, JsonOptions);
@@ -40,6 +43,26 @@ public class Seed
         context.Restaurants.AddRange(restaurants);
 
         // Save changes to context
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedRoles(DataContext context)
+    {
+        var roles = new List<AppRole>
+        {
+            new() { Name = "AppUser" },
+            new() { Name = "RestaurantOwner" },
+            new() { Name = "Admin" }
+        };
+
+        foreach (var role in roles)
+        {
+            if (!await context.Roles.AnyAsync(r => r.Name == role.Name))
+            {
+                context.Roles.Add(role);
+            }
+        }
+
         await context.SaveChangesAsync();
     }
 }
