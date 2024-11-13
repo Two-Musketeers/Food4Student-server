@@ -26,6 +26,12 @@ public class Seed
 
         if (users == null || restaurants == null) return;
 
+        // Assign unique Ids to users
+        foreach (var user in users)
+        {
+            user.Id = Guid.NewGuid().ToString();
+        }
+
         // Add users to context
         context.Users.AddRange(users);
 
@@ -50,7 +56,7 @@ public class Seed
     {
         var roles = new List<AppRole>
         {
-            new() { Name = "AppUser" },
+            new() { Name = "User" },
             new() { Name = "RestaurantOwner" },
             new() { Name = "Admin" }
         };

@@ -2,6 +2,7 @@
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20241113163730_UserRole")]
+    partial class UserRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -36,22 +39,9 @@ namespace API.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("AvatarId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<double>("Latitude")
-                        .HasColumnType("REAL");
-
-                    b.Property<double>("Longitude")
-                        .HasColumnType("REAL");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -62,8 +52,6 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AvatarId");
 
                     b.ToTable("Users");
                 });
@@ -253,17 +241,6 @@ namespace API.Data.Migrations
                     b.HasIndex("LikedRestaurantId");
 
                     b.ToTable("RestaurantLikes");
-                });
-
-            modelBuilder.Entity("API.Entities.AppUser", b =>
-                {
-                    b.HasOne("API.Entities.Photo", "Avatar")
-                        .WithMany()
-                        .HasForeignKey("AvatarId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Avatar");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserRole", b =>

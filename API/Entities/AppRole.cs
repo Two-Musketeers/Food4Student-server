@@ -1,8 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace API.Entities;
 
 public class AppRole
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string Name { get; set; } = null!;
+    [Key]
+    public int Id { get; set; }
+    public required string Name { get; set; }
     public ICollection<AppUserRole> UserRoles { get; set; } = [];
 }

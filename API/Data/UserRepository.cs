@@ -7,35 +7,34 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
-public class UserRepository(DataContext context, IMapper mapper) : IUserRepository
+public class UserRepository(DataContext context) : IUserRepository
 {
-    public async Task<AppUser> GetUserByUsernameAsync(string username)
+    public async Task<AppUser?> GetUserByUsernameAsync(string username)
     {
         return await context.Users.SingleOrDefaultAsync(u => u.UserName == username);
     }
 
-    public async Task<bool> UserRoleExistsAsync(string userId, string roleId)
-    {
-        return await context.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
-    }
-
-    public async Task AddUserAsync(AppUser user)
+    public async Task<bool> AddUserAsync(AppUser user)
     {
         context.Users.Add(user);
-        await context.SaveChangesAsync();
+        return await context.SaveChangesAsync() > 0;
     }
 
-    public async Task AddRoleToUserAsync(string userId, string roleId)
+    public async Task AddRoleToUserAsync(string userId, string roleName)
     {
-        var userRole = new AppUserRole { UserId = userId, RoleId = roleId };
-        context.UserRoles.Add(userRole);
-        await context.SaveChangesAsync();
+        var role = await context.Roles.SingleOrDefaultAsync(r => r.Name == roleName);
+        if (role != null)
+        {
+            var userRole = new AppUserRole { UserId = userId, RoleId = role.Id };
+            context.UserRoles.Add(userRole);
+            await context.SaveChangesAsync();
+        }
     }
 
-    public async Task<AppUser?> GetMemberAsync(string username)
+    public async Task<AppUser?> GetMemberAsync(string userid)
     {
         return await context.Users
-            .Where(x => x.UserName == username)
+            .Where(x => x.Id == userid)
             .SingleOrDefaultAsync();
     }
 
@@ -46,9 +45,7 @@ public class UserRepository(DataContext context, IMapper mapper) : IUserReposito
 
     public async Task<IEnumerable<AppUser>> GetUsersAsync()
     {
-        return await context.Users
-            .Include(x => x.Avatar)
-            .ToListAsync();
+        return await context.Users.ToListAsync();
     }
 
     public async Task<bool> SaveAllAsync()
