@@ -2,8 +2,6 @@ using API.DTOs;
 using API.Entities;
 using API.Helpers;
 using API.Interfaces;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
@@ -14,9 +12,13 @@ public class UserRepository(DataContext context) : IUserRepository
         return await context.Users.SingleOrDefaultAsync(u => u.UserName == username);
     }
 
-    public async Task<bool> AddUserAsync(AppUser user)
+    public async Task AddUserAsync(AppUser user)
     {
         context.Users.Add(user);
+    }
+
+    public async Task<bool> SaveAllAsync()
+    {
         return await context.SaveChangesAsync() > 0;
     }
 
@@ -49,11 +51,6 @@ public class UserRepository(DataContext context) : IUserRepository
     public async Task<IEnumerable<AppUser>> GetUsersAsync()
     {
         return await context.Users.ToListAsync();
-    }
-
-    public async Task<bool> SaveAllAsync()
-    {
-        return await context.SaveChangesAsync() > 0;
     }
 
     public void Update(AppUser user)

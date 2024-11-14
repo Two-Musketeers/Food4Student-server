@@ -10,6 +10,7 @@ public interface IUserRepository
     Task<AppUser?> GetUserByIdAsync(string id);
     Task<AppUser?> GetUserByUsernameAsync(string username);
     Task<AppUser?> GetMemberAsync(string userid);
-    Task<bool> AddUserAsync(AppUser user);
+    Task AddUserAsync(AppUser user);
+    Task<bool> SaveAllAsync();
     Task AddRoleToUserAsync(string userId, string roleName);
 }

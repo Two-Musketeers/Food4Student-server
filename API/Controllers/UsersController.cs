@@ -38,7 +38,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IRo
 
         role.Users.Add(user); 
 
-        var result = await userRepository.AddUserAsync(user);
+        var result = await userRepository.SaveAllAsync();
 
         if (!result) return BadRequest("Failed to register user");
 
@@ -82,7 +82,8 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IRo
         
         user.ShippingAddresses.Add(shippingAddress);
 
-        var result = await userRepository.AddUserAsync(user);
+        var result = await userRepository.SaveAllAsync();
+
         if (!result) return BadRequest("Failed to add shipping address");
 
         return Ok("Shipping address has been added successfully");
