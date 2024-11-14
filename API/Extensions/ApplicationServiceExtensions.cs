@@ -23,6 +23,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IRestaurantRepository, RestaurantRepository>();
         services.AddScoped<ILikeRepository, LikesRepository>();
         services.AddScoped<IRatingRepository, RatingRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IShippingAddressRepository, ShippingAddressRepository>();
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
 

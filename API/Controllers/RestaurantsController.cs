@@ -26,5 +26,6 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository, I
 
         return Ok(restaurant);
     }
+    
 }
 

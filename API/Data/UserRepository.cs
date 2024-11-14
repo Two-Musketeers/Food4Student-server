@@ -22,13 +22,16 @@ public class UserRepository(DataContext context) : IUserRepository
 
     public async Task AddRoleToUserAsync(string userId, string roleName)
     {
+        var user = await context.Users.Include(u => u.AppRole).SingleOrDefaultAsync(u => u.Id == userId);
         var role = await context.Roles.SingleOrDefaultAsync(r => r.Name == roleName);
-        if (role != null)
+
+        if (user == null || role == null)
         {
-            var userRole = new AppUserRole { UserId = userId, RoleId = role.Id };
-            context.UserRoles.Add(userRole);
-            await context.SaveChangesAsync();
+            throw new Exception("User or Role not found");
         }
+
+        user.AppRole = role;
+        await context.SaveChangesAsync();
     }
 
     public async Task<AppUser?> GetMemberAsync(string userid)
@@ -61,5 +64,11 @@ public class UserRepository(DataContext context) : IUserRepository
     Task<IEnumerable<UserDto>> IUserRepository.GetMembersAsync(PaginationParams paginationParams)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<AppUser?> GetUserByIdAsync(string id)
+    {
+        var user = await context.Users.FindAsync(id);
+        return user;
     }
 }

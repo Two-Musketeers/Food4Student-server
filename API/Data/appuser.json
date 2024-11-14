@@ -1,282 +1,322 @@
 [
   {
     "Id": "1",
-    "Address": "887 Cranberry Street, Bedias, Missouri, 1713",
-    "Latitude": 76.128154,
-    "Longitude": -156.36634,
+    "ShippingAddresses": [
+      {
+        "Address": "887 Cranberry Street, Bedias, Missouri, 1713",
+        "Latitude": 76.128154,
+        "Longitude": -156.36634
+      }
+    ],
     "Email": "rosaliebanks@cinaster.com",
     "UserName": "Sally",
     "PhoneNumber": "+1 (878) 519-3741",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/women/93.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/women/93.jpg"
+    }
   },
   {
     "Id": "2",
-    "Address": "899 Cooper Street, Harrison, Virginia, 7837",
-    "Latitude": -33.294187,
-    "Longitude": 70.419581,
+    "ShippingAddresses": [
+      {
+        "Address": "899 Cooper Street, Harrison, Virginia, 7837",
+        "Latitude": -33.294187,
+        "Longitude": 70.419581
+      }
+    ],
     "Email": "sallybanks@cinaster.com",
     "UserName": "Augusta",
     "PhoneNumber": "+1 (866) 584-2779",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/women/24.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/women/24.jpg"
+    }
   },
   {
     "Id": "3",
-    "Address": "170 Chester Avenue, Forestburg, New Mexico, 3746",
-    "Latitude": -67.312045,
-    "Longitude": 79.624863,
+    "ShippingAddresses": [
+      {
+        "Address": "170 Chester Avenue, Forestburg, New Mexico, 3746",
+        "Latitude": -67.312045,
+        "Longitude": 79.624863
+      }
+    ],
     "Email": "augustabanks@cinaster.com",
     "UserName": "Marisol",
     "PhoneNumber": "+1 (984) 592-3104",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/women/32.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/women/32.jpg"
+    }
   },
   {
     "Id": "4",
-    "Address": "727 Ruby Street, Clarksburg, Arizona, 1680",
-    "Latitude": 46.614461,
-    "Longitude": 43.993183,
+    "ShippingAddresses": [
+      {
+        "Address": "727 Ruby Street, Clarksburg, Arizona, 1680",
+        "Latitude": 46.614461,
+        "Longitude": 43.993183
+      }
+    ],
     "Email": "marisolbanks@cinaster.com",
     "UserName": "Melissa",
     "PhoneNumber": "+1 (954) 577-3566",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/women/68.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/women/68.jpg"
+    }
   },
   {
     "Id": "5",
-    "Address": "120 Elliott Place, Terlingua, Kentucky, 679",
-    "Latitude": -26.975721,
-    "Longitude": -59.848495,
+    "ShippingAddresses": [
+      {
+        "Address": "120 Elliott Place, Terlingua, Kentucky, 679",
+        "Latitude": -26.975721,
+        "Longitude": -59.848495
+      }
+    ],
     "Email": "melissabanks@cinaster.com",
     "UserName": "Fannie",
     "PhoneNumber": "+1 (822) 509-3569",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/women/83.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/women/83.jpg"
+    }
   },
   {
     "Id": "6",
-    "Address": "668 Duffield Street, Advance, Montana, 466",
-    "Latitude": -31.218618,
-    "Longitude": -0.464124,
+    "ShippingAddresses": [
+      {
+        "Address": "668 Duffield Street, Advance, Montana, 466",
+        "Latitude": -31.218618,
+        "Longitude": -0.464124
+      }
+    ],
     "Email": "fanniebanks@cinaster.com",
     "UserName": "Lynda",
     "PhoneNumber": "+1 (916) 585-2487",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/women/34.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/women/34.jpg"
+    }
   },
   {
     "Id": "7",
-    "Address": "345 Clermont Avenue, Whipholt, Georgia, 1589",
-    "Latitude": -30.608078,
-    "Longitude": -110.171317,
+    "ShippingAddresses": [
+      {
+        "Address": "345 Clermont Avenue, Whipholt, Georgia, 1589",
+        "Latitude": -30.608078,
+        "Longitude": -110.171317
+      }
+    ],
     "Email": "lyndabanks@cinaster.com",
     "UserName": "Phyllis",
     "PhoneNumber": "+1 (840) 434-2182",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/women/95.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/women/95.jpg"
+    }
   },
   {
     "Id": "8",
-    "Address": "940 Martense Street, Valle, Massachusetts, 4375",
-    "Latitude": 56.395061,
-    "Longitude": -37.296488,
+    "ShippingAddresses": [
+      {
+        "Address": "940 Martense Street, Valle, Massachusetts, 4375",
+        "Latitude": 56.395061,
+        "Longitude": -37.296488
+      }
+    ],
     "Email": "phyllisbanks@cinaster.com",
     "UserName": "Angie",
     "PhoneNumber": "+1 (833) 428-2411",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/women/73.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/women/73.jpg"
+    }
   },
   {
     "Id": "9",
-    "Address": "833 Brooklyn Avenue, Keyport, Colorado, 3614",
-    "Latitude": -47.867203,
-    "Longitude": 146.328853,
+    "ShippingAddresses": [
+      {
+        "Address": "833 Brooklyn Avenue, Keyport, Colorado, 3614",
+        "Latitude": -47.867203,
+        "Longitude": 146.328853
+      }
+    ],
     "Email": "angiebanks@cinaster.com",
     "UserName": "Greta",
     "PhoneNumber": "+1 (816) 598-3534",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/women/19.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/women/19.jpg"
+    }
   },
   {
     "Id": "10",
-    "Address": "414 Florence Avenue, Calverton, Wyoming, 5698",
-    "Latitude": -70.834012,
-    "Longitude": 15.720963,
+    "ShippingAddresses": [
+      {
+        "Address": "414 Florence Avenue, Calverton, Wyoming, 5698",
+        "Latitude": -70.834012,
+        "Longitude": 15.720963
+      }
+    ],
     "Email": "gretabanks@cinaster.com",
     "UserName": "Pam",
     "PhoneNumber": "+1 (989) 509-2735",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/women/93.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/women/93.jpg"
+    }
   },
   {
     "Id": "11",
-    "Address": "891 Hillel Place, Farmington, New Jersey, 4441",
-    "Latitude": 55.329581,
-    "Longitude": 55.90711,
+    "ShippingAddresses": [
+      {
+        "Address": "891 Hillel Place, Farmington, New Jersey, 4441",
+        "Latitude": 55.329581,
+        "Longitude": 55.90711
+      }
+    ],
     "Email": "pambanks@cinaster.com",
     "UserName": "Gonzalez",
     "PhoneNumber": "+1 (831) 465-3607",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/men/57.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/57.jpg"
+    }
   },
   {
     "Id": "12",
-    "Address": "563 Pulaski Street, Century, Oregon, 953",
-    "Latitude": 70.151728,
-    "Longitude": 137.488278,
+    "ShippingAddresses": [
+      {
+        "Address": "563 Pulaski Street, Century, Oregon, 953",
+        "Latitude": 70.151728,
+        "Longitude": 137.488278
+      }
+    ],
     "Email": "gonzalezbanks@cinaster.com",
     "UserName": "Camacho",
     "PhoneNumber": "+1 (823) 442-2326",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/men/65.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/65.jpg"
+    }
   },
   {
     "Id": "13",
-    "Address": "834 Livonia Avenue, Curtice, Utah, 8250",
-    "Latitude": 22.821857,
-    "Longitude": -173.850041,
+    "ShippingAddresses": [
+      {
+        "Address": "834 Livonia Avenue, Curtice, Utah, 8250",
+        "Latitude": 22.821857,
+        "Longitude": -173.850041
+      }
+    ],
     "Email": "camachobanks@cinaster.com",
     "UserName": "King",
     "PhoneNumber": "+1 (966) 524-3221",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/men/18.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/18.jpg"
+    }
   },
   {
     "Id": "14",
-    "Address": "664 Ocean Avenue, Savage, Guam, 929",
-    "Latitude": 9.582572,
-    "Longitude": 11.013498,
+    "ShippingAddresses": [
+      {
+        "Address": "664 Ocean Avenue, Savage, Guam, 929",
+        "Latitude": 9.582572,
+        "Longitude": 11.013498
+      }
+    ],
     "Email": "kingbanks@cinaster.com",
     "UserName": "Snow",
     "PhoneNumber": "+1 (899) 538-3164",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/men/51.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/51.jpg"
+    }
   },
   {
     "Id": "15",
-    "Address": "767 Conduit Boulevard, Floriston, Oklahoma, 4653",
-    "Latitude": 12.521288,
-    "Longitude": -1.707927,
+    "ShippingAddresses": [
+      {
+        "Address": "767 Conduit Boulevard, Floriston, Oklahoma, 4653",
+        "Latitude": 12.521288,
+        "Longitude": -1.707927
+      }
+    ],
     "Email": "snowbanks@cinaster.com",
     "UserName": "Parsons",
     "PhoneNumber": "+1 (809) 591-3947",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/men/77.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/77.jpg"
+    }
   },
   {
     "Id": "16",
-    "Address": "905 Grove Street, Keyport, Northern Mariana Islands, 435",
-    "Latitude": 47.29458,
-    "Longitude": -10.065979,
+    "ShippingAddresses": [
+      {
+        "Address": "905 Grove Street, Keyport, Northern Mariana Islands, 435",
+        "Latitude": 47.29458,
+        "Longitude": -10.065979
+      }
+    ],
     "Email": "parsonsbanks@cinaster.com",
     "UserName": "Odonnell",
     "PhoneNumber": "+1 (877) 416-3647",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/men/94.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/94.jpg"
+    }
   },
   {
     "Id": "17",
-    "Address": "149 Lefferts Avenue, Kidder, Georgia, 6313",
-    "Latitude": 16.765055,
-    "Longitude": -3.619254,
+    "ShippingAddresses": [
+      {
+        "Address": "149 Lefferts Avenue, Kidder, Georgia, 6313",
+        "Latitude": 16.765055,
+        "Longitude": -3.619254
+      }
+    ],
     "Email": "odonnellbanks@cinaster.com",
     "UserName": "Webb",
     "PhoneNumber": "+1 (922) 415-2933",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/men/20.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/20.jpg"
+    }
   },
   {
     "Id": "18",
-    "Address": "516 Fay Court, Urbana, Louisiana, 5008",
-    "Latitude": -79.553076,
-    "Longitude": -27.541819,
+    "ShippingAddresses": [
+      {
+        "Address": "516 Fay Court, Urbana, Louisiana, 5008",
+        "Latitude": -79.553076,
+        "Longitude": -27.541819
+      }
+    ],
     "Email": "webbbanks@cinaster.com",
     "UserName": "Mccray",
     "PhoneNumber": "+1 (910) 438-2465",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/men/26.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/26.jpg"
+    }
   },
   {
     "Id": "19",
-    "Address": "396 Ferry Place, Greenwich, New Hampshire, 5076",
-    "Latitude": 6.516788,
-    "Longitude": -31.402944,
+    "ShippingAddresses": [
+      {
+        "Address": "396 Ferry Place, Greenwich, New Hampshire, 5076",
+        "Latitude": 6.516788,
+        "Longitude": -31.402944
+      }
+    ],
     "Email": "mccraybanks@cinaster.com",
     "UserName": "Mcgowan",
     "PhoneNumber": "+1 (880) 458-3604",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/men/29.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/29.jpg"
+    }
   },
   {
     "Id": "20",
-    "Address": "450 Bedford Avenue, Farmers, Nebraska, 1335",
-    "Latitude": -18.183123,
-    "Longitude": -27.478735,
+    "ShippingAddresses": [
+      {
+        "Address": "450 Bedford Avenue, Farmers, Nebraska, 1335",
+        "Latitude": -18.183123,
+        "Longitude": -27.478735
+      }
+    ],
     "Email": "mcgowanbanks@cinaster.com",
     "UserName": "Walls",
     "PhoneNumber": "+1 (917) 442-2304",
-    "Avatar": 
-      {
-        "Url": "https://randomuser.me/api/portraits/men/82.jpg"
-      }
-    
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/82.jpg"
+    }
   }
 ]

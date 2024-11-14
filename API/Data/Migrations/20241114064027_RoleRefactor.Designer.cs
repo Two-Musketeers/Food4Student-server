@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20241114064027_RoleRefactor")]
+    partial class RoleRefactor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -47,7 +50,7 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("OwnedRestaurantId")
+                    b.Property<string>("OwnedRestaurantsId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PhoneNumber")
@@ -64,7 +67,7 @@ namespace API.Data.Migrations
 
                     b.HasIndex("AvatarId");
 
-                    b.HasIndex("OwnedRestaurantId");
+                    b.HasIndex("OwnedRestaurantsId");
 
                     b.ToTable("Users");
                 });
@@ -259,7 +262,7 @@ namespace API.Data.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("ShippingAddresses");
+                    b.ToTable("ShippingAddress");
                 });
 
             modelBuilder.Entity("API.Entities.AppUser", b =>
@@ -274,15 +277,15 @@ namespace API.Data.Migrations
                         .WithMany()
                         .HasForeignKey("AvatarId");
 
-                    b.HasOne("API.Entities.Restaurant", "OwnedRestaurant")
+                    b.HasOne("API.Entities.Restaurant", "OwnedRestaurants")
                         .WithMany()
-                        .HasForeignKey("OwnedRestaurantId");
+                        .HasForeignKey("OwnedRestaurantsId");
 
                     b.Navigation("AppRole");
 
                     b.Navigation("Avatar");
 
-                    b.Navigation("OwnedRestaurant");
+                    b.Navigation("OwnedRestaurants");
                 });
 
             modelBuilder.Entity("API.Entities.FoodItem", b =>

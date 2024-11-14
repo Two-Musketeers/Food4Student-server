@@ -26,24 +26,32 @@ public class Seed
 
         if (users == null || restaurants == null) return;
 
-        // Assign unique Ids to users
-        foreach (var user in users)
+        // Get the roles
+        var restaurantOwnerRole = await context.Roles.SingleOrDefaultAsync(r => r.Name == "RestaurantOwner");
+        var userRole = await context.Roles.SingleOrDefaultAsync(r => r.Name == "User");
+        if (restaurantOwnerRole == null || userRole == null) return;
+
+        // Assign unique Ids to users and set their roles
+        for (int i = 0; i < users.Count; i++)
         {
+            var user = users[i];
             user.Id = Guid.NewGuid().ToString();
+
+            // Assign role and restaurant
+            if (i < restaurants.Count)
+            {
+                user.AppRole = restaurantOwnerRole;
+
+                // Assign restaurant to user
+                var restaurant = restaurants[i];
+                restaurant.Id = user.Id; // Use user Id as restaurant Id
+                user.OwnedRestaurant = restaurant;
+            }
+            else user.AppRole = userRole;
         }
 
         // Add users to context
         context.Users.AddRange(users);
-
-        // Assign restaurants to users
-        var random = new Random();
-        foreach (var restaurant in restaurants)
-        {
-            // Randomly assign a restaurant to a user
-            var owner = users[random.Next(users.Count)];
-            restaurant.AppUserId = owner.Id;
-            restaurant.Appuser = owner;
-        }
 
         // Add restaurants to context
         context.Restaurants.AddRange(restaurants);
@@ -58,7 +66,8 @@ public class Seed
         {
             new() { Name = "User" },
             new() { Name = "RestaurantOwner" },
-            new() { Name = "Admin" }
+            new() { Name = "Admin" },
+            new() { Name = "Banned" }
         };
 
         foreach (var role in roles)

@@ -7,8 +7,8 @@ public class DataContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<AppUser> Users { get; set; }
     public DbSet<AppRole> Roles { get; set; }
-    public DbSet<AppUserRole> UserRoles { get; set; }
     public DbSet<Rating> Ratings { get; set; }
+    public DbSet<ShippingAddress> ShippingAddresses { get; set; }
     public DbSet<Restaurant> Restaurants { get; set; }
     public DbSet<RestaurantLike> RestaurantLikes { get; set; }
     public DbSet<FoodItem> FoodItems { get; set; }
@@ -64,20 +64,5 @@ public class DataContext(DbContextOptions options) : DbContext(options)
             .HasForeignKey(oi => oi.OriginalFoodItemId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // Configure the relationship between AppUser and AppUserRole
-        modelBuilder.Entity<AppUserRole>()
-                .HasKey(ur => new { ur.UserId, ur.RoleId });
-                
-        modelBuilder.Entity<AppUser>()
-            .HasMany(ur => ur.UserRoles)
-            .WithOne(u => u.User)
-            .HasForeignKey(ur => ur.UserId)
-            .IsRequired();
-
-        modelBuilder.Entity<AppRole>()
-            .HasMany(ur => ur.UserRoles)
-            .WithOne(u => u.Role)
-            .HasForeignKey(ur => ur.RoleId)
-            .IsRequired();
     }
 }

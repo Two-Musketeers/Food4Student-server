@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API.Entities;
@@ -5,7 +6,8 @@ namespace API.Entities;
 [Table("Restaurants")]
 public class Restaurant
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    [Key]
+    public required string Id { get; set; }
     public required string Name { get; set; }
     public required string Address { get; set; }
     public required double Latitude { get; set; }
@@ -16,8 +18,4 @@ public class Restaurant
     public List<RestaurantLike> LikedByUsers { get; set; } = [];
     public List<Rating> Ratings { get; set; } = [];
     public double AverageRating => Ratings.Count != 0 ? Ratings.Average(r => r.Stars) : 0;
-
-    // Navigation properties
-    public string? AppUserId { get; set; }
-    public AppUser Appuser { get; set; } = null!;
 }
