@@ -12,10 +12,9 @@ public class UserRepository(DataContext context) : IUserRepository
         return await context.Users.SingleOrDefaultAsync(u => u.UserName == username);
     }
 
-    public Task AddUserAsync(AppUser user)
+    public void AddUser(AppUser user)
     {
         context.Users.Add(user);
-        return Task.CompletedTask;
     }
 
     public async Task<bool> SaveAllAsync()

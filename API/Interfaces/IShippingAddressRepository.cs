@@ -4,6 +4,7 @@ namespace API.Interfaces;
 
 public interface IShippingAddressRepository
 {
-    Task AddShippingAddressAsync(ShippingAddress shippingAddress);
+    void AddShippingAddress(ShippingAddress shippingAddress);
     Task<ShippingAddress> GetShippingAddressByIdAsync(int id);
+    void DeleteShippingAddress(ShippingAddress shippingAddress);
 }

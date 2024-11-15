@@ -115,4 +115,19 @@ public class UsersController(IUserRepository userRepository,
 
         return Ok(mapper.Map<IEnumerable<ShippingAddressDto>>(shippingAddresses));
     }
+    [HttpDelete("{shippingAddressId}/delete-address")]
+    public async Task<ActionResult> DeleteShippingAddress(int shippingAddressId)
+    {
+        var shippingAddress = await shippingAddressRepository.GetShippingAddressByIdAsync(shippingAddressId);
+
+        if (shippingAddress == null) return NotFound("Shipping address not found");
+
+        shippingAddressRepository.DeleteShippingAddress(shippingAddress);
+
+        var result = await userRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to delete shipping address");
+
+        return Ok("Shipping address has been deleted successfully");
+    }
 }
