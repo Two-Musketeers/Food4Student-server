@@ -49,9 +49,12 @@ public class UserRepository(DataContext context) : IUserRepository
         throw new NotImplementedException();
     }
 
-    public async Task<AppUser?> GetUserByIdAsync(string id)
+    public async Task<AppUser> GetUserByIdAsync(string id)
     {
-        var user = await context.Users.FindAsync(id);
+        var user = await context.Users
+            .Include(u => u.ShippingAddresses)
+            .SingleOrDefaultAsync(u => u.Id == id)
+                ?? throw new Exception("User not found");
         return user;
     }
 }

@@ -18,5 +18,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<Rating, RatingDto>();
         CreateMap<RatingDto, Rating>();
         CreateMap<ShippingAddressDto, ShippingAddress>();
+        CreateMap<ShippingAddress, ShippingAddressDto>();
     }
 }

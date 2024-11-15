@@ -104,4 +104,15 @@ public class UsersController(IUserRepository userRepository,
 
         return Ok("Shipping address has been updated successfully");
     }
+
+    [HttpGet("{userId}/shipping-addresses")]
+    public async Task<ActionResult<IEnumerable<ShippingAddressDto>>> GetShippingAddresses(string userId)
+    {
+        var user = await userRepository.GetUserByIdAsync(userId);
+        if (user == null) return NotFound("User not found");
+
+        var shippingAddresses = user.ShippingAddresses;
+
+        return Ok(mapper.Map<IEnumerable<ShippingAddressDto>>(shippingAddresses));
+    }
 }
