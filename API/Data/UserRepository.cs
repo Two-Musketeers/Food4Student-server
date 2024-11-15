@@ -12,9 +12,10 @@ public class UserRepository(DataContext context) : IUserRepository
         return await context.Users.SingleOrDefaultAsync(u => u.UserName == username);
     }
 
-    public async Task AddUserAsync(AppUser user)
+    public Task AddUserAsync(AppUser user)
     {
         context.Users.Add(user);
+        return Task.CompletedTask;
     }
 
     public async Task<bool> SaveAllAsync()
@@ -41,21 +42,6 @@ public class UserRepository(DataContext context) : IUserRepository
         return await context.Users
             .Where(x => x.Id == userid)
             .SingleOrDefaultAsync();
-    }
-
-    public async Task<AppUser?> GetUserByIdAsync(int id)
-    {
-        return await context.Users.FindAsync(id);
-    }
-
-    public async Task<IEnumerable<AppUser>> GetUsersAsync()
-    {
-        return await context.Users.ToListAsync();
-    }
-
-    public void Update(AppUser user)
-    {
-        context.Entry(user).State = EntityState.Modified;
     }
 
     Task<IEnumerable<UserDto>> IUserRepository.GetMembersAsync(PaginationParams paginationParams)

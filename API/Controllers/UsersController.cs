@@ -1,4 +1,3 @@
-using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Helpers;
@@ -8,7 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-public class UsersController(IUserRepository userRepository, IMapper mapper, IRoleRepository roleRepository) : BaseApiController
+public class UsersController(IUserRepository userRepository, 
+        IMapper mapper, IRoleRepository roleRepository, IShippingAddressRepository shippingAddressRepository) : BaseApiController
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers([FromQuery] PaginationParams paginationParams)
@@ -87,5 +87,21 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IRo
         if (!result) return BadRequest("Failed to add shipping address");
 
         return Ok("Shipping address has been added successfully");
+    }
+
+    [HttpPut("update-address")]
+    public async Task<ActionResult> UpdateShippingAddress(ShippingAddressDto shippingAddressDto)
+    {
+        var shippingAddress = await shippingAddressRepository.GetShippingAddressByIdAsync(shippingAddressDto.Id);
+
+        if (shippingAddress == null) return NotFound("Shipping address not found");
+
+        mapper.Map(shippingAddressDto, shippingAddress);
+
+        var result = await userRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to update shipping address");
+
+        return Ok("Shipping address has been updated successfully");
     }
 }
