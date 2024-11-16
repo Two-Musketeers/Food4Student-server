@@ -1,30 +1,43 @@
-using API.Services;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using FirebaseAdmin.Auth;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Options;
 
 namespace API.Middleware;
 
-public class FirebaseAuthenticationMiddleware(RequestDelegate next, FirebaseAuthenticationService firebaseAuthService)
+public class FirebaseAuthenticationMiddleware(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder
+) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
+
 {
-    public async Task InvokeAsync(HttpContext context)
+    protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!context.Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
+        if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
         {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await context.Response.WriteAsync("Authorization header missing");
-            return;
+            return AuthenticateResult.Fail("Authorization header missing");
         }
 
         var token = authorizationHeader.ToString().Split(" ").Last();
 
-        var userId = await firebaseAuthService.VerifyIdToken(token);
+        if (string.IsNullOrEmpty(token)) return AuthenticateResult.Fail("There's no token");
 
-        if (string.IsNullOrEmpty(userId))
+        FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
 
-        {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await context.Response.WriteAsync("Invalid token");
-            return;
-        }
+        if (decodedToken == null) return AuthenticateResult.Fail("Invalid token");
 
-        await next(context);
+        if (string.IsNullOrEmpty(decodedToken.Uid)) return AuthenticateResult.Fail("Invalid token");
+
+        // Add the userId to the HttpContext.User claims
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, decodedToken.Uid) };
+        var identity = new ClaimsIdentity(claims, "Firebase");
+        var principal = new ClaimsPrincipal(identity);
+
+        var ticket = new AuthenticationTicket(principal, Scheme.Name);
+        return AuthenticateResult.Success(ticket);
     }
+        
 }

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using API.DTOs;
 using API.Extensions;
 using API.Helpers;
@@ -7,12 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-public class LikesController(ILikeRepository likeRepository, FirebaseAuthenticationService firebaseService) : BaseApiController
+public class LikesController(ILikeRepository likeRepository) : BaseApiController
 {
     [HttpGet]
     public async Task<ActionResult<PagedList<RestaurantDto>>> GetRestaurantLikes([FromQuery] LikesParams likesParams)
     {
-        var userId = await GetUserIdFromToken();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return Unauthorized();
 
         likesParams.UserId = userId;
@@ -26,7 +27,7 @@ public class LikesController(ILikeRepository likeRepository, FirebaseAuthenticat
     [HttpPost("{restaurantId}")]
     public async Task<ActionResult> ToggleRestaurantLike(string restaurantId)
     {
-        var userId = await GetUserIdFromToken();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return Unauthorized();
 
         var result = await likeRepository.ToggleRestaurantLikeAsync(userId, restaurantId);
@@ -34,14 +35,5 @@ public class LikesController(ILikeRepository likeRepository, FirebaseAuthenticat
         if (result) return Ok();
 
         return BadRequest("Failed to like/unlike the restaurant");
-    }
-
-    private async Task<string?> GetUserIdFromToken()
-    {
-        var authHeader = Request.Headers.Authorization.FirstOrDefault();
-        if (authHeader == null || !authHeader.StartsWith("Bearer ")) return null;
-
-        var token = authHeader["Bearer ".Length..].Trim();
-        return await firebaseService.VerifyIdToken(token);
     }
 }

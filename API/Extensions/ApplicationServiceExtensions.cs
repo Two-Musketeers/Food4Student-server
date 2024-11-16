@@ -1,7 +1,9 @@
 using API.Data;
 using API.Helpers;
 using API.Interfaces;
+using API.Middleware;
 using API.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions;
@@ -30,7 +32,13 @@ public static class ApplicationServiceExtensions
 
         // Add Firebase services
         services.AddSingleton<FirebaseInitializer>();
-        services.AddSingleton<FirebaseAuthenticationService>();
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = "Firebase";
+            options.DefaultChallengeScheme = "Firebase";
+        })
+        .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationMiddleware>("Firebase", options => {});
+        
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         return services;
     }

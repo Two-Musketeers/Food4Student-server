@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using API.DTOs;
 using API.Interfaces;
 using API.Services;
@@ -5,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-public class RatingController(IRatingRepository ratingRepository, FirebaseAuthenticationService firebaseService) : BaseApiController
+public class RatingController(IRatingRepository ratingRepository) : BaseApiController
 {
     [HttpGet("average/{restaurantId}")]
     public async Task<ActionResult<double>> GetAverageRating(string restaurantId)
@@ -17,7 +18,7 @@ public class RatingController(IRatingRepository ratingRepository, FirebaseAuthen
     [HttpPost("{restaurantId}")]
     public async Task<ActionResult> RateRestaurant(string restaurantId, [FromBody] RatingDto ratingDto)
     {
-        var userId = await GetUserIdFromToken();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
         ratingDto.UserId = userId;
@@ -40,14 +41,6 @@ public class RatingController(IRatingRepository ratingRepository, FirebaseAuthen
     public async Task<ActionResult> DeleteRating(int id)
     {
         return await ratingRepository.DeleteRating(id);
-    }
-    private async Task<string?> GetUserIdFromToken()
-    {
-        var authHeader = Request.Headers.Authorization.FirstOrDefault();
-        if (authHeader == null || !authHeader.StartsWith("Bearer ")) return null;
-
-        var token = authHeader["Bearer ".Length..].Trim();
-        return await firebaseService.VerifyIdToken(token);
     }
 }
 

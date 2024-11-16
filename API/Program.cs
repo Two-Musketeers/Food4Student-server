@@ -19,9 +19,6 @@ firebaseInitializer.Initialize();
 app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod()
     .WithOrigins("http://localhost:5000", "https://localhost:5001"));
 
-// Use the custom Firebase authentication middleware
-app.UseMiddleware<FirebaseAuthenticationMiddleware>();
-
 app.UseAuthentication();
 app.UseAuthorization();
 

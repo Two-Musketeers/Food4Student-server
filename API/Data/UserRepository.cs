@@ -48,6 +48,11 @@ public class UserRepository(DataContext context) : IUserRepository
         throw new NotImplementedException();
     }
 
+    public async Task<bool> UserExists(string userId)
+    {
+        return await context.Users.AnyAsync(u => u.Id == userId);
+    }
+
     public async Task<AppUser> GetUserByIdAsync(string id)
     {
         var user = await context.Users
