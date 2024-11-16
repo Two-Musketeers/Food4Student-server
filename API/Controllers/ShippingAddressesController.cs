@@ -24,7 +24,7 @@ public class ShippingAddressesController(IShippingAddressRepository shippingAddr
         
         user.ShippingAddresses.Add(shippingAddress);
 
-        var result = await userRepository.SaveAllAsync();
+        var result = await shippingAddressRepository.SaveAllAsync();
 
         if (!result) return BadRequest("Failed to add shipping address");
 
@@ -46,7 +46,7 @@ public class ShippingAddressesController(IShippingAddressRepository shippingAddr
         
         mapper.Map(shippingAddressDto, shippingAddress);
 
-        var result = await userRepository.SaveAllAsync();
+        var result = await shippingAddressRepository.SaveAllAsync();
 
         if (!result) return BadRequest("Failed to update shipping address");
 
@@ -79,7 +79,7 @@ public class ShippingAddressesController(IShippingAddressRepository shippingAddr
 
         shippingAddressRepository.DeleteShippingAddress(shippingAddress);
 
-        var result = await userRepository.SaveAllAsync();
+        var result = await shippingAddressRepository.SaveAllAsync();
 
         if (!result) return BadRequest("Failed to delete shipping address");
 

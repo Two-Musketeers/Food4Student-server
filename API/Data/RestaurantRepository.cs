@@ -10,6 +10,11 @@ namespace API.Data;
 
 public class RestaurantRepository(DataContext context, IMapper mapper) : IRestaurantRepository
 {
+    public void AddRestaurant(Restaurant restaurant)
+    {
+        context.Restaurants.Add(restaurant);
+    }
+
     public async Task<RestaurantDto?> GetRestaurantByIdAsync(string id)
     {
         return await context.Restaurants
@@ -17,7 +22,7 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
             .ProjectTo<RestaurantDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
     }
-
+    
     public async Task<Restaurant?> GetRestaurantByNameAsync(string name)
     {
         return await context.Restaurants
@@ -37,11 +42,6 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
             .AsQueryable();
 
         return await PagedList<RestaurantDto>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
-    }
-
-    public Task<IEnumerable<Restaurant>> GetRestaurantsAsync()
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<bool> SaveAllAsync()

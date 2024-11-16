@@ -27,6 +27,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IRatingRepository, RatingRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IShippingAddressRepository, ShippingAddressRepository>();
+        services.AddScoped<IFirebaseService, FirebaseService>();
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
 

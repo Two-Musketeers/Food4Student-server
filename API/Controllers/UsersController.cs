@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-public class UsersController(IUserRepository userRepository, IRoleRepository roleRepository) : BaseApiController
+public class UsersController(IUserRepository userRepository, 
+        IRoleRepository roleRepository, IFirebaseService firebaseService) : BaseApiController
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers([FromQuery] PaginationParams paginationParams)
@@ -41,6 +42,8 @@ public class UsersController(IUserRepository userRepository, IRoleRepository rol
 
         if (!result) return BadRequest("Failed to register user");
 
+        await firebaseService.AssignRoleAsync(userId, "User");
+
         return Ok("User has successfully registered");
     }
 
@@ -65,6 +68,8 @@ public class UsersController(IUserRepository userRepository, IRoleRepository rol
         var result = await userRepository.SaveAllAsync();
 
         if (!result) return BadRequest("Failed to register restaurant owner");
+
+        await firebaseService.AssignRoleAsync(registerDto.Id, "RestaurantOwner");
 
         return Ok("Restaurant Owner has successfully registered");
     }

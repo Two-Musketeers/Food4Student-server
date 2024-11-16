@@ -21,4 +21,9 @@ public class ShippingAddressRepository(DataContext context) : IShippingAddressRe
     {
         context.ShippingAddresses.Remove(shippingAddress);
     }
+
+    public async Task<bool> SaveAllAsync()
+    {
+        return await context.SaveChangesAsync() > 0;
+    }
 }

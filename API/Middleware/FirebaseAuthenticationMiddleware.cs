@@ -31,8 +31,13 @@ public class FirebaseAuthenticationMiddleware(
 
         if (string.IsNullOrEmpty(decodedToken.Uid)) return AuthenticateResult.Fail("Invalid token");
 
+        var role = decodedToken.Claims.ContainsKey("role") ? decodedToken.Claims["role"].ToString() : "NotRegistered";
+
         // Add the userId to the HttpContext.User claims
-        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, decodedToken.Uid) };
+        var claims = new[] { 
+            new Claim(ClaimTypes.NameIdentifier, decodedToken.Uid), 
+            new Claim(ClaimTypes.Role, role!)
+        };
         var identity = new ClaimsIdentity(claims, "Firebase");
         var principal = new ClaimsPrincipal(identity);
 
