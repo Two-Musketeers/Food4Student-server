@@ -44,6 +44,15 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
         return await PagedList<RestaurantDto>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
     }
 
+    public async Task<PagedList<GeneralRestaurantDto>> GetGeneralRestaurantsAsync(PaginationParams paginationParams)
+    {
+        var query = context.Restaurants
+            .ProjectTo<GeneralRestaurantDto>(mapper.ConfigurationProvider)
+            .AsQueryable();
+
+        return await PagedList<GeneralRestaurantDto>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
+    }
+
     public async Task<bool> SaveAllAsync()
     {
         return await context.SaveChangesAsync() > 0;

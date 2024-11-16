@@ -13,9 +13,6 @@ public class Seed
     {
         if (await context.Users.AnyAsync() || await context.Restaurants.AnyAsync()) return;
 
-        // Seed roles
-        await SeedRoles(context);
-
         // Read and parse user data
         var userData = await File.ReadAllTextAsync("Data/appuser.json");
         var users = JsonSerializer.Deserialize<List<AppUser>>(userData, JsonOptions);
@@ -26,11 +23,6 @@ public class Seed
 
         if (users == null || restaurants == null) return;
 
-        // Get the roles
-        var restaurantOwnerRole = await context.Roles.SingleOrDefaultAsync(r => r.Name == "RestaurantOwner");
-        var userRole = await context.Roles.SingleOrDefaultAsync(r => r.Name == "User");
-        if (restaurantOwnerRole == null || userRole == null) return;
-
         // Assign unique Ids to users and set their roles
         for (int i = 0; i < users.Count; i++)
         {
@@ -40,14 +32,11 @@ public class Seed
             // Assign role and restaurant
             if (i < restaurants.Count)
             {
-                user.AppRole = restaurantOwnerRole;
-
                 // Assign restaurant to user
                 var restaurant = restaurants[i];
                 restaurant.Id = user.Id; // Use user Id as restaurant Id
                 user.OwnedRestaurant = restaurant;
             }
-            else user.AppRole = userRole;
         }
 
         // Add users to context
@@ -57,27 +46,6 @@ public class Seed
         context.Restaurants.AddRange(restaurants);
 
         // Save changes to context
-        await context.SaveChangesAsync();
-    }
-
-    private static async Task SeedRoles(DataContext context)
-    {
-        var roles = new List<AppRole>
-        {
-            new() { Name = "User" },
-            new() { Name = "RestaurantOwner" },
-            new() { Name = "Admin" },
-            new() { Name = "Banned" }
-        };
-
-        foreach (var role in roles)
-        {
-            if (!await context.Roles.AnyAsync(r => r.Name == role.Name))
-            {
-                context.Roles.Add(role);
-            }
-        }
-
         await context.SaveChangesAsync();
     }
 }

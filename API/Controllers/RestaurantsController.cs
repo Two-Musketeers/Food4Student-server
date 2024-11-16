@@ -10,13 +10,20 @@ namespace API.Controllers;
 public class RestaurantsController(IRestaurantRepository restaurantRepository, IMapper mapper) : BaseApiController
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants([FromQuery]RestaurantParams restaurantParams)
+    public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants([FromQuery] RestaurantParams restaurantParams)
     {
         var restaurants = await restaurantRepository.GetRestaurantsAsync(restaurantParams);
 
         var restaurantsToReturn = mapper.Map<IEnumerable<RestaurantDto>>(restaurants);
 
         return Ok(restaurantsToReturn);
+    }
+    [HttpGet("general")]
+    public async Task<ActionResult<IEnumerable<GeneralRestaurantDto>>> GetGeneralRestaurants([FromQuery] RestaurantParams restaurantParams)
+    {
+        var restaurants = await restaurantRepository.GetGeneralRestaurantsAsync(restaurantParams);
+
+        return Ok(restaurants);
     }
     [HttpGet("{id}")]
     public async Task<ActionResult<RestaurantDto>> GetRestaurantById(string id)

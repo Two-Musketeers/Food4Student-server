@@ -6,7 +6,6 @@ namespace API.Data;
 public class DataContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<AppUser> Users { get; set; }
-    public DbSet<AppRole> Roles { get; set; }
     public DbSet<Rating> Ratings { get; set; }
     public DbSet<ShippingAddress> ShippingAddresses { get; set; }
     public DbSet<Restaurant> Restaurants { get; set; }

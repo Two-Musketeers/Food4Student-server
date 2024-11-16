@@ -15,8 +15,5 @@ public class AppUser
     public List<RestaurantLike> FavoriteRestaurants { get; set; } = [];
     public Restaurant? OwnedRestaurant { get; set; }
     public List<Rating> Ratings { get; set; } = [];
-    //Role navigation
-    public int AppRoleId { get; set; }
-    public AppRole AppRole { get; set; } = null!;
 
 }

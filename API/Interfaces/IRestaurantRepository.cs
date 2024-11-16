@@ -12,5 +12,5 @@ public interface IRestaurantRepository
     Task<RestaurantDto?> GetRestaurantByIdAsync(string id);
     Task<Restaurant?> GetRestaurantByNameAsync(string name);
     Task<PagedList<RestaurantDto>> GetRestaurantsAsync(PaginationParams paginationParams);
-    
+    Task<PagedList<GeneralRestaurantDto>> GetGeneralRestaurantsAsync(PaginationParams paginationParams);
 }

@@ -8,8 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-public class UsersController(IUserRepository userRepository, 
-        IRoleRepository roleRepository, IFirebaseService firebaseService) : BaseApiController
+public class UsersController(IUserRepository userRepository, IFirebaseService firebaseService) : BaseApiController
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers([FromQuery] PaginationParams paginationParams)
@@ -34,9 +33,7 @@ public class UsersController(IUserRepository userRepository,
             Avatar = registerDto.Avatar
         };
 
-        var role = await roleRepository.GetRoleByNameAsync("User");
-
-        role.Users.Add(user); 
+        userRepository.AddUser(user);
 
         var result = await userRepository.SaveAllAsync();
 
@@ -61,9 +58,7 @@ public class UsersController(IUserRepository userRepository,
             Avatar = registerDto.Avatar
         };
 
-        var role = await roleRepository.GetRoleByNameAsync("RestaurantOwner");
-
-        role.Users.Add(user); 
+        userRepository.AddUser(user);
 
         var result = await userRepository.SaveAllAsync();
 

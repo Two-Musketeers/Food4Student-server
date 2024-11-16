@@ -13,6 +13,7 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Menu, opt => opt.MapFrom(src => src.Menu))
             .ForMember(dest => dest.TotalRatings, opt => opt.MapFrom(src => src.Ratings.Count))
             .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.Ratings.Count != 0 ? src.Ratings.Average(r => r.Stars) : 0));
+        CreateMap<Restaurant, GeneralRestaurantDto>();
         CreateMap<AppUser, UserDto>();
         CreateMap<FoodItem, FoodItemDto>();
         CreateMap<Rating, RatingDto>();

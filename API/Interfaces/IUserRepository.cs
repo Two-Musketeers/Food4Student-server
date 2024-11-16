@@ -13,5 +13,4 @@ public interface IUserRepository
     void AddUser(AppUser user);
     Task<bool> SaveAllAsync();
     Task<bool> UserExists(string userId);
-    Task AddRoleToUserAsync(string userId, string roleName);
 }

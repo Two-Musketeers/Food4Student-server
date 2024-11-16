@@ -15,5 +15,4 @@ public class UserDto
     public List<Order> Orders { get; set; } = [];
     public List<RestaurantLike>? FavoriteRestaurants { get; set; }
     public List<Restaurant>? OwnedRestaurants { get; set; }
-    public AppRole Role { get; set; } = null!;
 }
