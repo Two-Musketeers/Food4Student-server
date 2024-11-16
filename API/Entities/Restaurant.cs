@@ -9,6 +9,7 @@ public class Restaurant
     [Key]
     public required string Id { get; set; }
     public required string Name { get; set; }
+    public string? Description { get; set; }
     public required string Address { get; set; }
     public required double Latitude { get; set; }
     public required double Longitude { get; set; }
@@ -17,5 +18,6 @@ public class Restaurant
     public required List<FoodItem> Menu { get; set; } = [];
     public List<RestaurantLike> LikedByUsers { get; set; } = [];
     public List<Rating> Ratings { get; set; } = [];
+    public bool IsApproved { get; set; } = false;
     public double AverageRating => Ratings.Count != 0 ? Ratings.Average(r => r.Stars) : 0;
 }
