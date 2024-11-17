@@ -19,7 +19,9 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
 
     public async Task<FoodItem?> GetFoodItemByIdAsync(string id)
     {
-        return await context.FoodItems.FindAsync(id);
+        return await context.FoodItems
+            .Include(f => f.FoodItemPhoto)
+            .FirstOrDefaultAsync(f => f.Id == id);
     }
 
     public async Task<IEnumerable<FoodItem>> GetFoodItemsByRestaurantIdAsync(string restaurantId)

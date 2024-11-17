@@ -22,19 +22,21 @@ public static class ApplicationServiceExtensions
 
         // Add repositories
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IPhotoService, PhotoService>();
         services.AddScoped<IRestaurantRepository, RestaurantRepository>();
         services.AddScoped<ILikeRepository, LikesRepository>();
         services.AddScoped<IRatingRepository, RatingRepository>();
         services.AddScoped<IShippingAddressRepository, ShippingAddressRepository>();
         services.AddScoped<IFoodItemRepository, FoodItemRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
         
-        services.AddScoped<IFirebaseService, FirebaseService>();
-        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        services.AddScoped<IPhotoService, PhotoService>();
         services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
+
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
         // Add Firebase services
         services.AddSingleton<FirebaseInitializer>();
+        services.AddScoped<IFirebaseService, FirebaseService>();
 
         //Add Firebase custom tokenKey
         services.AddAuthentication(options =>

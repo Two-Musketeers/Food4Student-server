@@ -4,16 +4,16 @@ namespace API.Entities;
 
 public class OrderItem
 {
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public required string FoodName { get; set; }
+    public string? FoodDescription { get; set; }
+    public required decimal Price { get; set; }
+    public required int Quantity { get; set; }
+    public Photo? FoodItemPhoto { get; set; }
+
     // Composite Key
     public string? OrderId { get; set; }
     public Order Order { get; set; } = null!;
-
-    public string FoodName { get; set; } = null!;
-
-    // Additional Properties
-    public decimal Price { get; set; }
-    public int Quantity { get; set; }
-    public string ImageLink { get; set; } = null!;
 
     // Foreign Key to Original FoodItem
     public string? OriginalFoodItemId { get; set; }

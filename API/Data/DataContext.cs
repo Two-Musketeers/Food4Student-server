@@ -5,14 +5,15 @@ namespace API.Data;
 
 public class DataContext(DbContextOptions options) : DbContext(options)
 {
-    public DbSet<AppUser> Users { get; set; }
-    public DbSet<Rating> Ratings { get; set; }
-    public DbSet<ShippingAddress> ShippingAddresses { get; set; }
-    public DbSet<Restaurant> Restaurants { get; set; }
-    public DbSet<RestaurantLike> RestaurantLikes { get; set; }
-    public DbSet<FoodItem> FoodItems { get; set; }
-    public DbSet<Order> Orders { get; set; }
-    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<AppUser> Users { get; set; } = null!;
+    public DbSet<Rating> Ratings { get; set; } = null!;
+    public DbSet<ShippingAddress> ShippingAddresses { get; set; } = null!;
+    public DbSet<Restaurant> Restaurants { get; set; } = null!;
+    public DbSet<RestaurantLike> RestaurantLikes { get; set; } = null!;
+    public DbSet<FoodItem> FoodItems { get; set; } = null!;
+    public DbSet<Order> Orders { get; set; } = null!;
+    public DbSet<OrderItem> OrderItems { get; set; } = null!;
+    public DbSet<Photo> Photos { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -62,6 +63,5 @@ public class DataContext(DbContextOptions options) : DbContext(options)
             .WithMany()
             .HasForeignKey(oi => oi.OriginalFoodItemId)
             .OnDelete(DeleteBehavior.SetNull);
-
     }
 }
