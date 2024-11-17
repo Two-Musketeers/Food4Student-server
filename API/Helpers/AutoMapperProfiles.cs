@@ -16,6 +16,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<Restaurant, GeneralRestaurantDto>();
         CreateMap<AppUser, UserDto>();
         CreateMap<FoodItem, FoodItemDto>();
+        CreateMap<FoodItemDto, FoodItem>();
+        CreateMap<FoodItemRegisterDto, FoodItem>();
         CreateMap<Rating, RatingDto>();
         CreateMap<RatingDto, Rating>();
         CreateMap<ShippingAddressDto, ShippingAddress>();

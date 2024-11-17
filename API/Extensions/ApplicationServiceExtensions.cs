@@ -20,12 +20,15 @@ public static class ApplicationServiceExtensions
         });
         services.AddCors();
 
+        // Add repositories
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPhotoService, PhotoService>();
         services.AddScoped<IRestaurantRepository, RestaurantRepository>();
         services.AddScoped<ILikeRepository, LikesRepository>();
         services.AddScoped<IRatingRepository, RatingRepository>();
         services.AddScoped<IShippingAddressRepository, ShippingAddressRepository>();
+        services.AddScoped<IFoodItemRepository, FoodItemRepository>();
+        
         services.AddScoped<IFirebaseService, FirebaseService>();
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));

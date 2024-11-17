@@ -66,6 +66,8 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         var user = await userRepository.GetUserByIdAsync(userId);
 
+        if (user.OwnedRestaurant != null) return BadRequest("User already owns a restaurant");
+
         var restaurant = new Restaurant
         {
             Id = userId,
@@ -77,6 +79,28 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         };
 
         user.OwnedRestaurant = restaurant;
+
+        await restaurantRepository.SaveAllAsync();
+
+        return Ok(mapper.Map<RestaurantDto>(restaurant));
+    }
+
+    [HttpPut]
+    public async Task<ActionResult<RestaurantDto>> UpdateRestaurant(RestaurantRegisterDto restaurantUpdateDto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var user = await userRepository.GetUserByIdAsync(userId);
+
+        if (user.OwnedRestaurant == null) return BadRequest("User does not own a restaurant");
+
+        var restaurant = user.OwnedRestaurant;
+
+        restaurant.Name = restaurantUpdateDto.Name;
+        restaurant.Description = restaurantUpdateDto.Description;
+        restaurant.Address = restaurantUpdateDto.Address;
+        restaurant.Latitude = restaurantUpdateDto.Latitude;
+        restaurant.Longitude = restaurantUpdateDto.Longitude;
 
         await restaurantRepository.SaveAllAsync();
 
