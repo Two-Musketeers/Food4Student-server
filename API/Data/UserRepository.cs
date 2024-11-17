@@ -17,6 +17,11 @@ public class UserRepository(DataContext context) : IUserRepository
         context.Users.Add(user);
     }
 
+    public void RemoveUser(AppUser user)
+    {
+        context.Users.Remove(user);
+    }
+
     public async Task<bool> SaveAllAsync()
     {
         return await context.SaveChangesAsync() > 0;
@@ -43,6 +48,9 @@ public class UserRepository(DataContext context) : IUserRepository
     {
         var user = await context.Users
             .Include(u => u.ShippingAddresses)
+            .Include(u => u.OwnedRestaurant)
+                .ThenInclude(r => r.Menu)
+                    .ThenInclude(m => m.FoodItemPhoto)
             .SingleOrDefaultAsync(u => u.Id == id)
                 ?? throw new Exception("User not found");
         return user;

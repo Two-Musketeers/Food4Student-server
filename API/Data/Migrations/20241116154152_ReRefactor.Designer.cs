@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20241116154152_ReRefactor")]
+    partial class ReRefactor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -29,8 +32,8 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("OwnedRestaurantId")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("OwnedRestaurantId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -68,8 +71,8 @@ namespace API.Data.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("REAL");
 
-                    b.Property<string>("RestaurantId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("RestaurantId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -148,8 +151,8 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("RestaurantId")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("RestaurantId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Stars")
                         .HasColumnType("INTEGER");
@@ -168,8 +171,9 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Restaurant", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -211,8 +215,8 @@ namespace API.Data.Migrations
                     b.Property<string>("SourceUserId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("LikedRestaurantId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("LikedRestaurantId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("SourceUserId", "LikedRestaurantId");
 
@@ -273,7 +277,9 @@ namespace API.Data.Migrations
 
                     b.HasOne("API.Entities.Restaurant", "Restaurant")
                         .WithMany("Menu")
-                        .HasForeignKey("RestaurantId");
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("FoodItemPhoto");
 

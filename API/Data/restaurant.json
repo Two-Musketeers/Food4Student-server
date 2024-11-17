@@ -1,6 +1,5 @@
 [
   {
-    "Id": "1",
     "Name": "SULTRAXIN",
     "Address": "386 Regent Place, Twilight, Rhode Island, 9148",
     "Latitude": -55.365976,
@@ -71,7 +70,6 @@
     ]
   },
   {
-    "Id": "2",
     "Name": "ZEROLOGY",
     "Address": "764 Homecrest Avenue, Chestnut, Indiana, 8597",
     "Latitude": -20.792678,
@@ -134,7 +132,6 @@
     ]
   },
   {
-    "Id": "3",
     "Name": "APEXIA",
     "Address": "801 Elm Place, Allison, New Jersey, 4050",
     "Latitude": -54.620805,
@@ -181,7 +178,6 @@
     ]
   },
   {
-    "Id": "4",
     "Name": "ATOMICA",
     "Address": "703 Manhattan Court, Welch, Kentucky, 5714",
     "Latitude": 75.271,
@@ -236,7 +232,6 @@
     ]
   },
   {
-    "Id": "5",
     "Name": "MARKETOID",
     "Address": "524 Gerritsen Avenue, Dana, New Hampshire, 8293",
     "Latitude": -36.585957,
@@ -291,7 +286,6 @@
     ]
   },
   {
-    "Id": "6",
     "Name": "SKINSERVE",
     "Address": "681 Kenilworth Place, Spelter, Washington, 1308",
     "Latitude": -66.182981,
@@ -346,7 +340,6 @@
     ]
   },
   {
-    "Id": "7",
     "Name": "EXERTA",
     "Address": "809 Hunts Lane, Stewart, Virginia, 7508",
     "Latitude": -51.621168,
@@ -409,7 +402,6 @@
     ]
   },
   {
-    "Id": "8",
     "Name": "CUIZINE",
     "Address": "403 Rugby Road, Chalfant, Puerto Rico, 3333",
     "Latitude": 10.410587,
@@ -472,7 +464,6 @@
     ]
   },
   {
-    "Id": "9",
     "Name": "COMVEY",
     "Address": "701 Troutman Street, Cawood, Alaska, 748",
     "Latitude": -51.145552,
@@ -535,7 +526,6 @@
     ]
   },
   {
-    "Id": "10",
     "Name": "CORPORANA",
     "Address": "603 Bay Street, Lawrence, North Carolina, 208",
     "Latitude": 85.772699,

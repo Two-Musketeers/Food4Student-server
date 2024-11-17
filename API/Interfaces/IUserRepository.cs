@@ -11,6 +11,7 @@ public interface IUserRepository
     Task<AppUser?> GetUserByUsernameAsync(string username);
     Task<AppUser?> GetMemberAsync(string userid);
     void AddUser(AppUser user);
+    void RemoveUser(AppUser user);
     Task<bool> SaveAllAsync();
     Task<bool> UserExists(string userId);
 }

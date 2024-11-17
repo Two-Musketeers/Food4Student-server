@@ -1,14 +1,18 @@
+using System.Security.Claims;
 using API.DTOs;
 using API.Entities;
 using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-public class RestaurantsController(IRestaurantRepository restaurantRepository, IMapper mapper) : BaseApiController
+public class RestaurantsController(IRestaurantRepository restaurantRepository,
+        IMapper mapper, IUserRepository userRepository) : BaseApiController
 {
+    //Get all restaurant details
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants([FromQuery] RestaurantParams restaurantParams)
     {
@@ -18,13 +22,30 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository, I
 
         return Ok(restaurantsToReturn);
     }
+
+    //Get restaurant basic info only like name, logo, location, rating
     [HttpGet("general")]
     public async Task<ActionResult<IEnumerable<GeneralRestaurantDto>>> GetGeneralRestaurants([FromQuery] RestaurantParams restaurantParams)
     {
-        var restaurants = await restaurantRepository.GetGeneralRestaurantsAsync(restaurantParams);
+        var restaurants = await restaurantRepository.GetRestaurantsAsync(restaurantParams);
 
-        return Ok(restaurants);
+        var restaurantsToReturn = mapper.Map<IEnumerable<GeneralRestaurantDto>>(restaurants);
+
+        return Ok(restaurantsToReturn);
     }
+
+    //Get all unapproved restaurants
+    [Authorize(Policy = "RequireModeratorRole")]
+    [HttpGet("unapproved")]
+    public async Task<ActionResult<IEnumerable<GeneralRestaurantDto>>> GetUnapprovedRestaurants([FromQuery] RestaurantParams restaurantParams)
+    {
+        var restaurants = await restaurantRepository.UnapprovedRestaurantsAsync(restaurantParams);
+
+        var restaurantsToReturn = mapper.Map<IEnumerable<GeneralRestaurantDto>>(restaurants);
+
+        return Ok(restaurantsToReturn);
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<RestaurantDto>> GetRestaurantById(string id)
     {
@@ -32,16 +53,51 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository, I
 
         if (restaurant == null) return NotFound();
 
-        return Ok(restaurant);
+        var restaurantToReturn = mapper.Map<RestaurantDto>(restaurant);
+
+        return Ok(restaurantToReturn);
     }
+
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpPost]
-    public async Task<ActionResult<RestaurantDto>> AddRestaurant(RestaurantDto restaurantDto)
+    public async Task<ActionResult<RestaurantDto>> AddRestaurant(RestaurantRegisterDto restaurantRegisterDto)
     {
-        var restaurant = mapper.Map<Restaurant>(restaurantDto);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        restaurantRepository.AddRestaurant(restaurant);
+        var user = await userRepository.GetUserByIdAsync(userId);
 
-        return CreatedAtAction(nameof(GetRestaurantById), new { id = restaurant.Id }, restaurant);
+        var restaurant = new Restaurant
+        {
+            Id = userId,
+            Name = restaurantRegisterDto.Name,
+            Description = restaurantRegisterDto.Description,
+            Address = restaurantRegisterDto.Address,
+            Latitude = restaurantRegisterDto.Latitude,
+            Longitude = restaurantRegisterDto.Longitude,
+        };
+
+        user.OwnedRestaurant = restaurant;
+
+        await restaurantRepository.SaveAllAsync();
+
+        return Ok(mapper.Map<RestaurantDto>(restaurant));
+    }
+
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
+    [HttpDelete]
+    public async Task<ActionResult> DeleteRestaurant()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var user = await userRepository.GetUserByIdAsync(userId);
+
+        if (user.OwnedRestaurant == null) return BadRequest("User does not own a restaurant");
+
+        restaurantRepository.DeleteRestaurant(user.OwnedRestaurant);
+
+        await restaurantRepository.SaveAllAsync();
+
+        return NoContent();
     }
 }
 

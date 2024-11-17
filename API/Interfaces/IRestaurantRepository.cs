@@ -8,9 +8,10 @@ public interface IRestaurantRepository
 {
     void Update(Restaurant restaurant);
     void AddRestaurant(Restaurant restaurant);
+    void DeleteRestaurant(Restaurant restaurant);
     Task<bool> SaveAllAsync();
-    Task<RestaurantDto?> GetRestaurantByIdAsync(string id);
+    Task<Restaurant?> GetRestaurantByIdAsync(string id);
     Task<Restaurant?> GetRestaurantByNameAsync(string name);
-    Task<PagedList<RestaurantDto>> GetRestaurantsAsync(PaginationParams paginationParams);
-    Task<PagedList<GeneralRestaurantDto>> GetGeneralRestaurantsAsync(PaginationParams paginationParams);
+    Task<PagedList<Restaurant>> GetRestaurantsAsync(PaginationParams paginationParams);
+    Task<PagedList<Restaurant>> UnapprovedRestaurantsAsync(PaginationParams paginationParams);
 }

@@ -32,13 +32,26 @@ public static class ApplicationServiceExtensions
 
         // Add Firebase services
         services.AddSingleton<FirebaseInitializer>();
+
+        //Add Firebase custom tokenKey
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = "Firebase";
             options.DefaultChallengeScheme = "Firebase";
         })
-        .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationMiddleware>("Firebase", options => {});
-        
+        .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationMiddleware>("Firebase", options => { });
+
+        //Add role based authorization
+        services.AddAuthorizationBuilder()
+            .AddPolicy("RequireAdminRole", policy =>
+                policy.RequireRole("Admin"))
+            .AddPolicy("RequireModeratorRole", policy =>
+                policy.RequireRole("Moderator", "Admin"))
+            .AddPolicy("RequireRestaurantOwnerRole", policy =>
+                policy.RequireRole("RestaurantOwner", "Admin", "Moderator"))
+            .AddPolicy("RequireUserRole", policy =>
+                policy.RequireRole("User", "Admin", "Moderator"));
+
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         return services;
     }

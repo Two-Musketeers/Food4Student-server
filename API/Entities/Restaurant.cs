@@ -7,15 +7,15 @@ namespace API.Entities;
 public class Restaurant
 {
     [Key]
-    public required string Id { get; set; }
+    public string Id { get; set; }
     public required string Name { get; set; }
     public string? Description { get; set; }
     public required string Address { get; set; }
     public required double Latitude { get; set; }
     public required double Longitude { get; set; }
-    public required Photo Logo { get; set; }
-    public required Photo Banner { get; set; }
-    public required List<FoodItem> Menu { get; set; } = [];
+    public Photo? Logo { get; set; }
+    public Photo? Banner { get; set; }
+    public List<FoodItem> Menu { get; set; } = [];
     public List<RestaurantLike> LikedByUsers { get; set; } = [];
     public List<Rating> Ratings { get; set; } = [];
     public bool IsApproved { get; set; } = false;

@@ -1,9 +1,7 @@
-using API.DTOs;
 using API.Entities;
 using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
@@ -15,14 +13,26 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
         context.Restaurants.Add(restaurant);
     }
 
-    public async Task<RestaurantDto?> GetRestaurantByIdAsync(string id)
+    public async Task<Restaurant?> GetRestaurantByIdAsync(string id)
     {
         return await context.Restaurants
             .Where(r => r.Id == id)
-            .ProjectTo<RestaurantDto>(mapper.ConfigurationProvider)
+            .Include(r => r.Menu)
+                .ThenInclude(m => m.FoodItemPhoto)
             .SingleOrDefaultAsync();
     }
     
+    public async Task<PagedList<Restaurant>> GetRestaurantsAsync(PaginationParams paginationParams)
+    {
+        var query = context.Restaurants
+            .Include(r => r.Menu)
+                .ThenInclude(m => m.FoodItemPhoto)
+            .Include(r => r.Logo)
+            .Include(r => r.Banner)
+            .AsQueryable();
+
+        return await PagedList<Restaurant>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
+    }
     public async Task<Restaurant?> GetRestaurantByNameAsync(string name)
     {
         return await context.Restaurants
@@ -31,26 +41,14 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
             .Include(r => r.Banner)
             .SingleOrDefaultAsync(r => r.Name == name);
     }
-    public async Task<PagedList<RestaurantDto>> GetRestaurantsAsync(PaginationParams paginationParams)
+
+    public async Task<PagedList<Restaurant>> UnapprovedRestaurantsAsync(PaginationParams paginationParams)
     {
         var query = context.Restaurants
-            .Include(r => r.Menu)
-                .ThenInclude(m => m.FoodItemPhoto)
-            .Include(r => r.Logo)
-            .Include(r => r.Banner)
-            .ProjectTo<RestaurantDto>(mapper.ConfigurationProvider)
+            .Where(r => !r.IsApproved)
             .AsQueryable();
 
-        return await PagedList<RestaurantDto>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
-    }
-
-    public async Task<PagedList<GeneralRestaurantDto>> GetGeneralRestaurantsAsync(PaginationParams paginationParams)
-    {
-        var query = context.Restaurants
-            .ProjectTo<GeneralRestaurantDto>(mapper.ConfigurationProvider)
-            .AsQueryable();
-
-        return await PagedList<GeneralRestaurantDto>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
+        return await PagedList<Restaurant>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
     }
 
     public async Task<bool> SaveAllAsync()
@@ -61,5 +59,10 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
     public void Update(Restaurant restaurant)
     {
         context.Entry(restaurant).State = EntityState.Modified;
+    }
+
+    public void DeleteRestaurant(Restaurant restaurant)
+    {
+        context.Restaurants.Remove(restaurant);
     }
 }

@@ -4,7 +4,7 @@ namespace API.DTOs;
 
 public class RestaurantDto
 {
-    public string? Id { get; set; }
+    public string Id { get; set; }
     public bool IsApproved { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
