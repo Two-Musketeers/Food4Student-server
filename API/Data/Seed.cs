@@ -39,13 +39,8 @@ public class Seed
             }
         }
 
-        /*
-        Only run this code if you have the appuser.json that i gave you
-
         restaurants[9].Id = users[22].Id;
         users[22].OwnedRestaurant = restaurants[9];
-
-        */
         
         // Add users to context
         context.Users.AddRange(users);

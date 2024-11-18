@@ -318,5 +318,32 @@
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/82.jpg"
     }
+  },
+  {
+    "Id": "hcz8XP1E2og0W3UrqOwWwi8Q4D92",
+    "Email": "23520906@gm.uit.edu.vn",
+    "UserName": "Ly Hua",
+    "PhoneNumber": "0765088561",
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/24.jpg"
+    }
+  },
+  {
+    "Id": "87UmF1DIVtWTLjvo7ak54diwN3w2",
+    "Email": "usertest@gmail.com",
+    "UserName": "User Test",
+    "PhoneNumber": "0123456789",
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/45.jpg"
+    }
+  },
+  {
+    "Id": "jS15TdaITTfjZB7eycCXOfzp7WW2",
+    "Email": "restaurantownertest@gmail.com",
+    "UserName": "RestaurantOwner Test",
+    "PhoneNumber": "0987654321",
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/84.jpg"
+    }
   }
 ]
