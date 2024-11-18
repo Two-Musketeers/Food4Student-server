@@ -31,6 +31,14 @@ public class OrderRepository(DataContext context) : IOrderRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Order>> GetOrdersByRestaurantIdAsync(string restaurantId)
+    {
+        return await context.Orders
+            .Where(o => o.RestaurantId == restaurantId)
+            .Include(o => o.OrderItems)
+            .ToListAsync();
+    }
+
     public async Task<bool> SaveAllAsync()
     {
         return await context.SaveChangesAsync() > 0;

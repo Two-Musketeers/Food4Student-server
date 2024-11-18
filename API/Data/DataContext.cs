@@ -49,6 +49,19 @@ public class DataContext(DbContextOptions options) : DbContext(options)
             .WithMany(res => res.Ratings)
             .HasForeignKey(r => r.RestaurantId);
 
+        // Configuration for Order
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.Restaurant)
+            .WithMany(r => r.Orders)
+            .HasForeignKey(o => o.RestaurantId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.AppUser)
+            .WithMany(u => u.Orders)
+            .HasForeignKey(o => o.AppUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         // Configuration for OrderItem
         modelBuilder.Entity<OrderItem>()
             .HasKey(oi => new { oi.OrderId, oi.FoodName });

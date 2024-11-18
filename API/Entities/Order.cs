@@ -10,4 +10,8 @@ public class Order
     //AppUser navigation purpose
     public string AppUserId { get; set; }
     public AppUser AppUser { get; set; } = null!;
+
+    //Restaurant navigation purpose
+    public string RestaurantId { get; set; }
+    public Restaurant Restaurant { get; set; } = null!;
 }

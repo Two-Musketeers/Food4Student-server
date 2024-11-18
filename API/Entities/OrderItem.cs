@@ -11,7 +11,7 @@ public class OrderItem
     public required int Quantity { get; set; }
     public Photo? FoodItemPhoto { get; set; }
 
-    // Composite Key
+    // Order navigation purpose
     public string? OrderId { get; set; }
     public Order Order { get; set; } = null!;
 

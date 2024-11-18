@@ -24,13 +24,13 @@ public class Seed
         if (users == null || restaurants == null) return;
 
         // Assign unique Ids to users and set their roles
-        for (int i = 0; i < users.Count; i++)
+        for (int i = 0; i < 20; i++)
         {
             var user = users[i];
             user.Id = Guid.NewGuid().ToString();
 
             // Assign role and restaurant
-            if (i < restaurants.Count)
+            if (i < restaurants.Count - 1)
             {
                 // Assign restaurant to user
                 var restaurant = restaurants[i];
@@ -39,6 +39,14 @@ public class Seed
             }
         }
 
+        /*
+        Only run this code if you have the appuser.json that i gave you
+
+        restaurants[9].Id = users[22].Id;
+        users[22].OwnedRestaurant = restaurants[9];
+
+        */
+        
         // Add users to context
         context.Users.AddRange(users);
 
