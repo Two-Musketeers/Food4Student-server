@@ -13,6 +13,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         IMapper mapper, IUserRepository userRepository) : BaseApiController
 {
     //Get all restaurant details
+    [Authorize(Policy = "RequireUserRole")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants([FromQuery] RestaurantParams restaurantParams)
     {
@@ -28,18 +29,6 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
     public async Task<ActionResult<IEnumerable<GeneralRestaurantDto>>> GetGeneralRestaurants([FromQuery] RestaurantParams restaurantParams)
     {
         var restaurants = await restaurantRepository.GetRestaurantsAsync(restaurantParams);
-
-        var restaurantsToReturn = mapper.Map<IEnumerable<GeneralRestaurantDto>>(restaurants);
-
-        return Ok(restaurantsToReturn);
-    }
-
-    //Get all unapproved restaurants
-    [Authorize(Policy = "RequireModeratorRole")]
-    [HttpGet("unapproved")]
-    public async Task<ActionResult<IEnumerable<GeneralRestaurantDto>>> GetUnapprovedRestaurants([FromQuery] RestaurantParams restaurantParams)
-    {
-        var restaurants = await restaurantRepository.UnapprovedRestaurantsAsync(restaurantParams);
 
         var restaurantsToReturn = mapper.Map<IEnumerable<GeneralRestaurantDto>>(restaurants);
 
@@ -62,7 +51,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
     [HttpPost]
     public async Task<ActionResult<RestaurantDto>> AddRestaurant(RestaurantRegisterDto restaurantRegisterDto)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         var user = await userRepository.GetUserByIdAsync(userId);
 
@@ -85,10 +74,11 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         return Ok(mapper.Map<RestaurantDto>(restaurant));
     }
 
+
     [HttpPut]
     public async Task<ActionResult<RestaurantDto>> UpdateRestaurant(RestaurantRegisterDto restaurantUpdateDto)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         var user = await userRepository.GetUserByIdAsync(userId);
 
@@ -111,7 +101,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
     [HttpDelete]
     public async Task<ActionResult> DeleteRestaurant()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         var user = await userRepository.GetUserByIdAsync(userId);
 

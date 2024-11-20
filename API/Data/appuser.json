@@ -9,8 +9,7 @@
       }
     ],
     "Email": "rosaliebanks@cinaster.com",
-    "UserName": "Sally",
-    "PhoneNumber": "+1 (878) 519-3741",
+    "DisplayName": "Sally",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/women/93.jpg"
     }
@@ -25,8 +24,7 @@
       }
     ],
     "Email": "sallybanks@cinaster.com",
-    "UserName": "Augusta",
-    "PhoneNumber": "+1 (866) 584-2779",
+    "DisplayName": "Augusta",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/women/24.jpg"
     }
@@ -41,8 +39,7 @@
       }
     ],
     "Email": "augustabanks@cinaster.com",
-    "UserName": "Marisol",
-    "PhoneNumber": "+1 (984) 592-3104",
+    "DisplayName": "Marisol",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/women/32.jpg"
     }
@@ -57,8 +54,7 @@
       }
     ],
     "Email": "marisolbanks@cinaster.com",
-    "UserName": "Melissa",
-    "PhoneNumber": "+1 (954) 577-3566",
+    "DisplayName": "Melissa",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/women/68.jpg"
     }
@@ -73,8 +69,7 @@
       }
     ],
     "Email": "melissabanks@cinaster.com",
-    "UserName": "Fannie",
-    "PhoneNumber": "+1 (822) 509-3569",
+    "DisplayName": "Fannie",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/women/83.jpg"
     }
@@ -89,8 +84,7 @@
       }
     ],
     "Email": "fanniebanks@cinaster.com",
-    "UserName": "Lynda",
-    "PhoneNumber": "+1 (916) 585-2487",
+    "DisplayName": "Lynda",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/women/34.jpg"
     }
@@ -105,8 +99,7 @@
       }
     ],
     "Email": "lyndabanks@cinaster.com",
-    "UserName": "Phyllis",
-    "PhoneNumber": "+1 (840) 434-2182",
+    "DisplayName": "Phyllis",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/women/95.jpg"
     }
@@ -121,8 +114,7 @@
       }
     ],
     "Email": "phyllisbanks@cinaster.com",
-    "UserName": "Angie",
-    "PhoneNumber": "+1 (833) 428-2411",
+    "DisplayName": "Angie",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/women/73.jpg"
     }
@@ -137,8 +129,7 @@
       }
     ],
     "Email": "angiebanks@cinaster.com",
-    "UserName": "Greta",
-    "PhoneNumber": "+1 (816) 598-3534",
+    "DisplayName": "Greta",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/women/19.jpg"
     }
@@ -153,8 +144,7 @@
       }
     ],
     "Email": "gretabanks@cinaster.com",
-    "UserName": "Pam",
-    "PhoneNumber": "+1 (989) 509-2735",
+    "DisplayName": "Pam",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/women/93.jpg"
     }
@@ -169,8 +159,7 @@
       }
     ],
     "Email": "pambanks@cinaster.com",
-    "UserName": "Gonzalez",
-    "PhoneNumber": "+1 (831) 465-3607",
+    "DisplayName": "Gonzalez",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/57.jpg"
     }
@@ -185,8 +174,7 @@
       }
     ],
     "Email": "gonzalezbanks@cinaster.com",
-    "UserName": "Camacho",
-    "PhoneNumber": "+1 (823) 442-2326",
+    "DisplayName": "Camacho",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/65.jpg"
     }
@@ -201,8 +189,7 @@
       }
     ],
     "Email": "camachobanks@cinaster.com",
-    "UserName": "King",
-    "PhoneNumber": "+1 (966) 524-3221",
+    "DisplayName": "King",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/18.jpg"
     }
@@ -217,8 +204,7 @@
       }
     ],
     "Email": "kingbanks@cinaster.com",
-    "UserName": "Snow",
-    "PhoneNumber": "+1 (899) 538-3164",
+    "DisplayName": "Snow",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/51.jpg"
     }
@@ -233,8 +219,7 @@
       }
     ],
     "Email": "snowbanks@cinaster.com",
-    "UserName": "Parsons",
-    "PhoneNumber": "+1 (809) 591-3947",
+    "DisplayName": "Parsons",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/77.jpg"
     }
@@ -249,8 +234,7 @@
       }
     ],
     "Email": "parsonsbanks@cinaster.com",
-    "UserName": "Odonnell",
-    "PhoneNumber": "+1 (877) 416-3647",
+    "DisplayName": "Odonnell",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/94.jpg"
     }
@@ -265,8 +249,7 @@
       }
     ],
     "Email": "odonnellbanks@cinaster.com",
-    "UserName": "Webb",
-    "PhoneNumber": "+1 (922) 415-2933",
+    "DisplayName": "Webb",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/20.jpg"
     }
@@ -281,8 +264,7 @@
       }
     ],
     "Email": "webbbanks@cinaster.com",
-    "UserName": "Mccray",
-    "PhoneNumber": "+1 (910) 438-2465",
+    "DisplayName": "Mccray",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/26.jpg"
     }
@@ -297,8 +279,7 @@
       }
     ],
     "Email": "mccraybanks@cinaster.com",
-    "UserName": "Mcgowan",
-    "PhoneNumber": "+1 (880) 458-3604",
+    "DisplayName": "Mcgowan",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/29.jpg"
     }
@@ -313,8 +294,7 @@
       }
     ],
     "Email": "mcgowanbanks@cinaster.com",
-    "UserName": "Walls",
-    "PhoneNumber": "+1 (917) 442-2304",
+    "DisplayName": "Walls",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/82.jpg"
     }
@@ -322,8 +302,7 @@
   {
     "Id": "hcz8XP1E2og0W3UrqOwWwi8Q4D92",
     "Email": "23520906@gm.uit.edu.vn",
-    "UserName": "Ly Hua",
-    "PhoneNumber": "0765088561",
+    "DisplayName": "Ly Hua",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/24.jpg"
     }
@@ -331,8 +310,7 @@
   {
     "Id": "87UmF1DIVtWTLjvo7ak54diwN3w2",
     "Email": "usertest@gmail.com",
-    "UserName": "User Test",
-    "PhoneNumber": "0123456789",
+    "DisplayName": "User Test",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/45.jpg"
     }
@@ -340,10 +318,17 @@
   {
     "Id": "jS15TdaITTfjZB7eycCXOfzp7WW2",
     "Email": "restaurantownertest@gmail.com",
-    "UserName": "RestaurantOwner Test",
-    "PhoneNumber": "0987654321",
+    "DisplayName": "RestaurantOwner Test",
     "Avatar": {
       "Url": "https://randomuser.me/api/portraits/men/84.jpg"
     }
+  },
+  {
+    "Id": "O5xEKJ4dqeese07J42uKF1EKhkG3",
+    "Email": "moderatortest@gmail.com",
+    "DisplayName": "Moderator Test",
+    "Avatar": {
+      "Url": "https://randomuser.me/api/portraits/men/18.jpg"
+    }
   }
-]
+] 

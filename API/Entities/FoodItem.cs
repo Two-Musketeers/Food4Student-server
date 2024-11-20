@@ -9,7 +9,7 @@ public class FoodItem
     public required string Name { get; set; }
     public string? Description { get; set; }
     public Photo? FoodItemPhoto { get; set; }
-    public required double Price { get; set; }
+    public required int Price { get; set; }
 
     //Navigation properties (required for entity framework one to many relationship)
     public string? RestaurantId { get; set; }

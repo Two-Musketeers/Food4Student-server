@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-[Authorize]
+[Authorize(Policy = "RequireUserRole")]
 public class LikesController(ILikeRepository likeRepository) : BaseApiController
 {
     [HttpGet]

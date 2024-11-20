@@ -3,12 +3,14 @@ using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 public class FoodItemController(IFoodItemRepository foodItemRepository,
         IUserRepository userRepository, IMapper mapper) : BaseApiController
 {
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpPost]
     public async Task<ActionResult<FoodItemDto>> CreateFoodItem(FoodItemRegisterDto foodItemCreateDto)
     {
@@ -31,6 +33,7 @@ public class FoodItemController(IFoodItemRepository foodItemRepository,
         return BadRequest("Failed to create food item");
     }
 
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpPut("update-food-item")]
     public async Task<ActionResult> UpdateFoodItem(FoodItemDto foodItemDto)
     {
@@ -53,6 +56,7 @@ public class FoodItemController(IFoodItemRepository foodItemRepository,
     }
 
     //The get restaurant by id already contain the menu so i just make this in case
+    [Authorize(Policy = "RequireUserRole")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<FoodItemDto>>> GetFoodItems()
     {
@@ -68,6 +72,7 @@ public class FoodItemController(IFoodItemRepository foodItemRepository,
         return Ok(foodItemsToReturn);
     }
 
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteFoodItem(string id)
     {

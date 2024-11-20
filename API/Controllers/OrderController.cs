@@ -11,6 +11,7 @@ public class OrderController(IMapper mapper,
     IOrderRepository orderRepository,
     IFoodItemRepository foodItemRepository) : BaseApiController
 {
+    [Authorize(Policy = "RequireUserRole")]
     [HttpPost]
     public async Task<ActionResult<OrderDto>> CreateOrder(OrderCreateDto orderCreateDto)
     {
@@ -72,6 +73,7 @@ public class OrderController(IMapper mapper,
         return BadRequest("Failed to create order.");
     }
 
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<OrderDto>> GetOrder(string id)
     {
@@ -92,23 +94,25 @@ public class OrderController(IMapper mapper,
     [HttpGet("restaurant")]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersByRestaurant()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var orders = await orderRepository.GetOrdersByRestaurantIdAsync(userId);
 
         var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
         return Ok(ordersDto);
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var orders = await orderRepository.GetOrdersByUserIdAsync(userId);
 
         var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
         return Ok(ordersDto);
     }
 
+    
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteOrder(string id)
     {

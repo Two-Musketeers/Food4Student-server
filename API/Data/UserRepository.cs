@@ -9,7 +9,7 @@ public class UserRepository(DataContext context) : IUserRepository
 {
     public async Task<AppUser?> GetUserByUsernameAsync(string username)
     {
-        return await context.Users.SingleOrDefaultAsync(u => u.UserName == username);
+        return await context.Users.SingleOrDefaultAsync(u => u.DisplayName == username);
     }
 
     public void AddUser(AppUser user)

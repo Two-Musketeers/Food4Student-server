@@ -1,5 +1,5 @@
 namespace API.Entities;
-
+// TODO: add shipping address
 public class Order
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
