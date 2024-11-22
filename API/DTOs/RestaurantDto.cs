@@ -11,10 +11,8 @@ public class RestaurantDto
     public string? Address { get; set; }
     public double Latitude { get; set; }
     public double Longitude { get; set; }
-    // BIG ASS TODO:
     public string? LogoUrl { get; set; }
     public string? BannerUrl { get; set; }
-    // TODO: delete menu
     public int TotalRatings { get; set; }
     public double AverageRating { get; set; }
 }

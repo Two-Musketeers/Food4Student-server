@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
-public class OrderController(IMapper mapper,
+public class OrdersController(IMapper mapper,
     IOrderRepository orderRepository,
     IFoodItemRepository foodItemRepository) : BaseApiController
 {
@@ -18,7 +18,7 @@ public class OrderController(IMapper mapper,
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         // Ensure the order contains items
-        if (orderCreateDto.OrderItems == null || !orderCreateDto.OrderItems.Any())
+        if (orderCreateDto.OrderItems == null || orderCreateDto.OrderItems.Count == 0)
             return BadRequest("Order must contain at least one item.");
 
         // Get the restaurant ID from the first item
@@ -41,7 +41,7 @@ public class OrderController(IMapper mapper,
 
         var order = new Order
         {
-            AppUserId = userId,
+            AppUserId = userId!,
             RestaurantId = restaurantId
         };
 
@@ -54,7 +54,7 @@ public class OrderController(IMapper mapper,
                 OriginalFoodItemId = foodItem.Id,
                 FoodName = foodItem.Name,
                 FoodDescription = foodItem.Description,
-                Price = (decimal)foodItem.Price,
+                Price = foodItem.Price,
                 FoodItemPhoto = foodItem.FoodItemPhoto,
                 Quantity = itemDto.Quantity
             };
@@ -67,7 +67,7 @@ public class OrderController(IMapper mapper,
         if (await orderRepository.SaveAllAsync())
         {
             var orderDto = mapper.Map<OrderDto>(order);
-            return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, orderDto);
+            return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, orderDto);
         }
 
         return BadRequest("Failed to create order.");
@@ -75,10 +75,25 @@ public class OrderController(IMapper mapper,
 
     [Authorize]
     [HttpGet("{id}")]
-    public async Task<ActionResult<OrderDto>> GetOrder(string id)
+    public async Task<ActionResult<OrderDto>> GetOrderById(string id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var role = User.FindFirstValue(ClaimTypes.Role);
+
         var order = await orderRepository.GetOrderByIdAsync(id);
+        var orderDto = mapper.Map<OrderDto>(order);
+
+        if (role == "RestaurantOwner")
+        {
+            if (order == null)
+                return NotFound("Order not found.");
+
+            if (order.RestaurantId != userId)
+                return Unauthorized("You do not have access to this order.");
+
+            orderDto = mapper.Map<OrderDto>(order);
+            return Ok(orderDto);
+        }
 
         if (order == null)
             return NotFound("Order not found.");
@@ -86,19 +101,7 @@ public class OrderController(IMapper mapper,
         if (order.AppUserId != userId)
             return Unauthorized("You do not have access to this order.");
 
-        var orderDto = mapper.Map<OrderDto>(order);
         return Ok(orderDto);
-    }
-
-    [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpGet("restaurant")]
-    public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersByRestaurant()
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var orders = await orderRepository.GetOrdersByRestaurantIdAsync(userId);
-
-        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
-        return Ok(ordersDto);
     }
 
     [Authorize]
@@ -106,13 +109,27 @@ public class OrderController(IMapper mapper,
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var orders = await orderRepository.GetOrdersByUserIdAsync(userId);
 
-        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+        var role = User.FindFirstValue(ClaimTypes.Role);
+
+        IEnumerable<Order> orders;
+
+        IEnumerable<OrderDto> ordersDto;
+
+        if (role == "RestaurantOwner")
+        {
+            orders = await orderRepository.GetOrdersByRestaurantIdAsync(userId);
+
+            ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+            return Ok(ordersDto);
+        }
+
+        orders = await orderRepository.GetOrdersByUserIdAsync(userId);
+
+        ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
         return Ok(ordersDto);
     }
 
-    
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteOrder(string id)
     {
@@ -137,7 +154,7 @@ public class OrderController(IMapper mapper,
         return BadRequest("Failed to delete order.");
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("approve-order/{id}")]
     public async Task<ActionResult> ApproveOrder(string id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

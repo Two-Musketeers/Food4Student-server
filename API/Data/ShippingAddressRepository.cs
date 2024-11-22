@@ -5,7 +5,7 @@ namespace API.Data;
 
 public class ShippingAddressRepository(DataContext context) : IShippingAddressRepository
 {
-    public async Task<ShippingAddress> GetShippingAddressByIdAsync(int id)
+    public async Task<ShippingAddress> GetShippingAddressByIdAsync(string id)
     {
 
         var shippingAddress = await context.ShippingAddresses.FindAsync(id) ?? throw new Exception("Shipping Address not found");

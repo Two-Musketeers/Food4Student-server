@@ -1,334 +1,98 @@
 [
   {
-    "Id": "1",
-    "ShippingAddresses": [
-      {
-        "Address": "887 Cranberry Street, Bedias, Missouri, 1713",
-        "Latitude": 76.128154,
-        "Longitude": -156.36634
-      }
-    ],
-    "Email": "rosaliebanks@cinaster.com",
-    "DisplayName": "Sally",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/women/93.jpg"
-    }
+    "Id": "089aec06-ae8b-403d-aeb4-3acfb95f1eb9",
+    "PhoneNumber": "(921) 451-2757"
   },
   {
-    "Id": "2",
-    "ShippingAddresses": [
-      {
-        "Address": "899 Cooper Street, Harrison, Virginia, 7837",
-        "Latitude": -33.294187,
-        "Longitude": 70.419581
-      }
-    ],
-    "Email": "sallybanks@cinaster.com",
-    "DisplayName": "Augusta",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/women/24.jpg"
-    }
+    "Id": "4c0e8900-3ba0-4661-9ec1-ddd4610d48f4",
+    "PhoneNumber": "(980) 583-2027"
   },
   {
-    "Id": "3",
-    "ShippingAddresses": [
-      {
-        "Address": "170 Chester Avenue, Forestburg, New Mexico, 3746",
-        "Latitude": -67.312045,
-        "Longitude": 79.624863
-      }
-    ],
-    "Email": "augustabanks@cinaster.com",
-    "DisplayName": "Marisol",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/women/32.jpg"
-    }
+    "Id": "d8df1eac-12b9-4a78-ab2b-19b451108781",
+    "PhoneNumber": "(822) 487-2470"
   },
   {
-    "Id": "4",
-    "ShippingAddresses": [
-      {
-        "Address": "727 Ruby Street, Clarksburg, Arizona, 1680",
-        "Latitude": 46.614461,
-        "Longitude": 43.993183
-      }
-    ],
-    "Email": "marisolbanks@cinaster.com",
-    "DisplayName": "Melissa",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/women/68.jpg"
-    }
+    "Id": "9b28bb95-a75f-417b-8eac-a1bf5e4c1727",
+    "PhoneNumber": "(876) 454-3241"
   },
   {
-    "Id": "5",
-    "ShippingAddresses": [
-      {
-        "Address": "120 Elliott Place, Terlingua, Kentucky, 679",
-        "Latitude": -26.975721,
-        "Longitude": -59.848495
-      }
-    ],
-    "Email": "melissabanks@cinaster.com",
-    "DisplayName": "Fannie",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/women/83.jpg"
-    }
+    "Id": "115d01cf-6181-4f88-ac62-7c3e8f70322f",
+    "PhoneNumber": "(858) 526-2747"
   },
   {
-    "Id": "6",
-    "ShippingAddresses": [
-      {
-        "Address": "668 Duffield Street, Advance, Montana, 466",
-        "Latitude": -31.218618,
-        "Longitude": -0.464124
-      }
-    ],
-    "Email": "fanniebanks@cinaster.com",
-    "DisplayName": "Lynda",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/women/34.jpg"
-    }
+    "Id": "592b24e6-84c5-4af3-8e1c-b32efb841566",
+    "PhoneNumber": "(857) 480-2896"
   },
   {
-    "Id": "7",
-    "ShippingAddresses": [
-      {
-        "Address": "345 Clermont Avenue, Whipholt, Georgia, 1589",
-        "Latitude": -30.608078,
-        "Longitude": -110.171317
-      }
-    ],
-    "Email": "lyndabanks@cinaster.com",
-    "DisplayName": "Phyllis",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/women/95.jpg"
-    }
+    "Id": "28ae69d9-27c2-478d-9b11-6b1fe221cc05",
+    "PhoneNumber": "(889) 534-2648"
   },
   {
-    "Id": "8",
-    "ShippingAddresses": [
-      {
-        "Address": "940 Martense Street, Valle, Massachusetts, 4375",
-        "Latitude": 56.395061,
-        "Longitude": -37.296488
-      }
-    ],
-    "Email": "phyllisbanks@cinaster.com",
-    "DisplayName": "Angie",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/women/73.jpg"
-    }
+    "Id": "2144ac6b-cb68-4b74-a855-441b6e09fd85",
+    "PhoneNumber": "(898) 498-2125"
   },
   {
-    "Id": "9",
-    "ShippingAddresses": [
-      {
-        "Address": "833 Brooklyn Avenue, Keyport, Colorado, 3614",
-        "Latitude": -47.867203,
-        "Longitude": 146.328853
-      }
-    ],
-    "Email": "angiebanks@cinaster.com",
-    "DisplayName": "Greta",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/women/19.jpg"
-    }
+    "Id": "e18de0fc-74d3-469a-9df3-d1df8124341a",
+    "PhoneNumber": "(838) 573-3582"
   },
   {
-    "Id": "10",
-    "ShippingAddresses": [
-      {
-        "Address": "414 Florence Avenue, Calverton, Wyoming, 5698",
-        "Latitude": -70.834012,
-        "Longitude": 15.720963
-      }
-    ],
-    "Email": "gretabanks@cinaster.com",
-    "DisplayName": "Pam",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/women/93.jpg"
-    }
+    "Id": "03100123-3ccf-4517-9263-9d3ad74b233b",
+    "PhoneNumber": "(982) 511-3076"
   },
   {
-    "Id": "11",
-    "ShippingAddresses": [
-      {
-        "Address": "891 Hillel Place, Farmington, New Jersey, 4441",
-        "Latitude": 55.329581,
-        "Longitude": 55.90711
-      }
-    ],
-    "Email": "pambanks@cinaster.com",
-    "DisplayName": "Gonzalez",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/57.jpg"
-    }
+    "Id": "eda4bf55-ab88-497c-b179-d61570c596be",
+    "PhoneNumber": "(835) 411-3225"
   },
   {
-    "Id": "12",
-    "ShippingAddresses": [
-      {
-        "Address": "563 Pulaski Street, Century, Oregon, 953",
-        "Latitude": 70.151728,
-        "Longitude": 137.488278
-      }
-    ],
-    "Email": "gonzalezbanks@cinaster.com",
-    "DisplayName": "Camacho",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/65.jpg"
-    }
+    "Id": "9e7e51db-c6f3-4063-9a3d-5853b6068211",
+    "PhoneNumber": "(962) 499-2157"
   },
   {
-    "Id": "13",
-    "ShippingAddresses": [
-      {
-        "Address": "834 Livonia Avenue, Curtice, Utah, 8250",
-        "Latitude": 22.821857,
-        "Longitude": -173.850041
-      }
-    ],
-    "Email": "camachobanks@cinaster.com",
-    "DisplayName": "King",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/18.jpg"
-    }
+    "Id": "15344313-5887-4fb1-b274-264b9903fdd5",
+    "PhoneNumber": "(838) 418-3814"
   },
   {
-    "Id": "14",
-    "ShippingAddresses": [
-      {
-        "Address": "664 Ocean Avenue, Savage, Guam, 929",
-        "Latitude": 9.582572,
-        "Longitude": 11.013498
-      }
-    ],
-    "Email": "kingbanks@cinaster.com",
-    "DisplayName": "Snow",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/51.jpg"
-    }
+    "Id": "0fc793d0-e96b-461f-b032-a2efe2ab9a07",
+    "PhoneNumber": "(885) 423-3054"
   },
   {
-    "Id": "15",
-    "ShippingAddresses": [
-      {
-        "Address": "767 Conduit Boulevard, Floriston, Oklahoma, 4653",
-        "Latitude": 12.521288,
-        "Longitude": -1.707927
-      }
-    ],
-    "Email": "snowbanks@cinaster.com",
-    "DisplayName": "Parsons",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/77.jpg"
-    }
+    "Id": "6627101e-2920-40bd-82fb-2fb912b0de51",
+    "PhoneNumber": "(862) 400-3323"
   },
   {
-    "Id": "16",
-    "ShippingAddresses": [
-      {
-        "Address": "905 Grove Street, Keyport, Northern Mariana Islands, 435",
-        "Latitude": 47.29458,
-        "Longitude": -10.065979
-      }
-    ],
-    "Email": "parsonsbanks@cinaster.com",
-    "DisplayName": "Odonnell",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/94.jpg"
-    }
+    "Id": "c353d18c-e2fc-4b87-b431-4b1b4057350a",
+    "PhoneNumber": "(841) 440-3130"
   },
   {
-    "Id": "17",
-    "ShippingAddresses": [
-      {
-        "Address": "149 Lefferts Avenue, Kidder, Georgia, 6313",
-        "Latitude": 16.765055,
-        "Longitude": -3.619254
-      }
-    ],
-    "Email": "odonnellbanks@cinaster.com",
-    "DisplayName": "Webb",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/20.jpg"
-    }
+    "Id": "c2dcee1c-e747-4b9b-9932-2e60c16b8f1e",
+    "PhoneNumber": "(998) 541-2692"
   },
   {
-    "Id": "18",
-    "ShippingAddresses": [
-      {
-        "Address": "516 Fay Court, Urbana, Louisiana, 5008",
-        "Latitude": -79.553076,
-        "Longitude": -27.541819
-      }
-    ],
-    "Email": "webbbanks@cinaster.com",
-    "DisplayName": "Mccray",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/26.jpg"
-    }
+    "Id": "74c13288-9aec-4152-8d0a-1eb05b5faa8a",
+    "PhoneNumber": "(838) 465-3822"
   },
   {
-    "Id": "19",
-    "ShippingAddresses": [
-      {
-        "Address": "396 Ferry Place, Greenwich, New Hampshire, 5076",
-        "Latitude": 6.516788,
-        "Longitude": -31.402944
-      }
-    ],
-    "Email": "mccraybanks@cinaster.com",
-    "DisplayName": "Mcgowan",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/29.jpg"
-    }
+    "Id": "0ccc77ac-5d08-4daa-a0b7-1b2e3732abd9",
+    "PhoneNumber": "(837) 422-3739"
   },
   {
-    "Id": "20",
-    "ShippingAddresses": [
-      {
-        "Address": "450 Bedford Avenue, Farmers, Nebraska, 1335",
-        "Latitude": -18.183123,
-        "Longitude": -27.478735
-      }
-    ],
-    "Email": "mcgowanbanks@cinaster.com",
-    "DisplayName": "Walls",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/82.jpg"
-    }
+    "Id": "21b8ef40-47b1-4c31-a071-099b1ab2152a",
+    "PhoneNumber": "(818) 503-2485"
   },
   {
     "Id": "hcz8XP1E2og0W3UrqOwWwi8Q4D92",
-    "Email": "23520906@gm.uit.edu.vn",
-    "DisplayName": "Ly Hua",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/24.jpg"
-    }
+    "PhoneNumber": "0765088561"
   },
   {
     "Id": "87UmF1DIVtWTLjvo7ak54diwN3w2",
-    "Email": "usertest@gmail.com",
-    "DisplayName": "User Test",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/45.jpg"
-    }
+    "PhoneNumber": "0123456789"
   },
   {
     "Id": "jS15TdaITTfjZB7eycCXOfzp7WW2",
-    "Email": "restaurantownertest@gmail.com",
-    "DisplayName": "RestaurantOwner Test",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/84.jpg"
-    }
+    "PhoneNumber": "0987654321"
   },
   {
     "Id": "O5xEKJ4dqeese07J42uKF1EKhkG3",
-    "Email": "moderatortest@gmail.com",
-    "DisplayName": "Moderator Test",
-    "Avatar": {
-      "Url": "https://randomuser.me/api/portraits/men/18.jpg"
-    }
+    "PhoneNumber": "0999999999"
   }
-] 
+]

@@ -2,7 +2,7 @@ namespace API.Entities;
 
 public class ShippingAddress
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public required string Address { get; set; }
     public double Latitude { get; set; }
     public double Longitude { get; set; }

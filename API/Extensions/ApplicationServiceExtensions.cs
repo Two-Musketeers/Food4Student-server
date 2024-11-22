@@ -29,6 +29,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IFoodItemRepository, FoodItemRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         
+        // Add Photo services
         services.AddScoped<IPhotoService, PhotoService>();
         services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
 
@@ -58,6 +59,9 @@ public static class ApplicationServiceExtensions
                 policy.RequireRole("User", "Admin", "Moderator"));
 
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
         return services;
     }
 }

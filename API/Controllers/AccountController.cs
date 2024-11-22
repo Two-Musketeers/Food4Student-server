@@ -8,11 +8,11 @@ namespace API.Controllers;
 /// <summary>
 /// Controller for register and delete user account
 /// </summary>
-public class AccountController (IUserRepository userRepository,
+public class AccountController(IUserRepository userRepository,
     IFirebaseService firebaseService) : BaseApiController
 {
-    [HttpPost("user")]
-    public async Task<ActionResult> Register(RegisterDto registerDto)
+    [HttpPost("user-register")]
+    public async Task<ActionResult> Register(UserDto userDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -21,9 +21,7 @@ public class AccountController (IUserRepository userRepository,
         var user = new AppUser
         {
             Id = userId,
-            DisplayName = registerDto.Username,
-            Email = registerDto.Email,
-            PhoneNumber = registerDto.PhoneNumber,
+            PhoneNumber = userDto.PhoneNumber,
         };
 
         userRepository.AddUser(user);
@@ -37,8 +35,8 @@ public class AccountController (IUserRepository userRepository,
         return Ok("User has successfully registered");
     }
 
-    [HttpPost("restaurant")]
-    public async Task<ActionResult> RegisterRestaurant(RegisterDto registerDto)
+    [HttpPost("restaurant-register")]
+    public async Task<ActionResult> RegisterRestaurant(UserDto userDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -47,9 +45,7 @@ public class AccountController (IUserRepository userRepository,
         var user = new AppUser
         {
             Id = userId,
-            DisplayName = registerDto.Username,
-            Email = registerDto.Email,
-            PhoneNumber = registerDto.PhoneNumber,
+            PhoneNumber = userDto.PhoneNumber,
         };
 
         userRepository.AddUser(user);
@@ -81,9 +77,27 @@ public class AccountController (IUserRepository userRepository,
         return Ok("User has been deleted");
     }
 
-    #if DEBUG
+    [HttpPut]
+    public async Task<ActionResult> UpdateUser(UserDto userDto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var user = await userRepository.GetUserByIdAsync(userId);
+
+        if (user == null) return NotFound();
+
+        user.PhoneNumber = userDto.PhoneNumber;
+
+        var result = await userRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to update user");
+
+        return Ok("User has been updated");
+    }
+
+#if DEBUG
     [HttpPost("admin-register")]
-    public async Task<ActionResult> RegisterAdmin(RegisterDto registerDto)
+    public async Task<ActionResult> RegisterAdmin(UserDto userDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -92,9 +106,7 @@ public class AccountController (IUserRepository userRepository,
         var user = new AppUser
         {
             Id = userId,
-            DisplayName = registerDto.Username,
-            Email = registerDto.Email,
-            PhoneNumber = registerDto.PhoneNumber,
+            PhoneNumber = userDto.PhoneNumber,
         };
 
         userRepository.AddUser(user);
@@ -108,10 +120,8 @@ public class AccountController (IUserRepository userRepository,
         return Ok("Admin has successfully registered");
     }
 
-    //Development purpose only
-    //TODO: Delete this when done
     [HttpPost("moderator-register")]
-    public async Task<ActionResult> RegisterModerator(RegisterDto registerDto)
+    public async Task<ActionResult> RegisterModerator(UserDto userDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -120,9 +130,7 @@ public class AccountController (IUserRepository userRepository,
         var user = new AppUser
         {
             Id = userId,
-            DisplayName = registerDto.Username,
-            Email = registerDto.Email,
-            PhoneNumber = registerDto.PhoneNumber,
+            PhoneNumber = userDto.PhoneNumber,
         };
 
         userRepository.AddUser(user);
@@ -135,6 +143,6 @@ public class AccountController (IUserRepository userRepository,
 
         return Ok("Moderator has successfully registered");
     }
-    #endif
+#endif
 }
 

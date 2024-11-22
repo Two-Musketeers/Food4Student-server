@@ -1,5 +1,6 @@
 using System;
 using API.DTOs;
+using API.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Interfaces;
@@ -7,8 +8,10 @@ namespace API.Interfaces;
 public interface IRatingRepository
 {
     Task<double> GetAverageRatingAsync(string restaurantId);
-    Task<bool> AddOrUpdateRatingAsync(RatingDto ratingDto);
-    Task<ActionResult<RatingDto>> AddRating(RatingDto ratingDto);
-    Task<ActionResult> UpdateRating(int id, RatingDto ratingDto);
-    Task<ActionResult> DeleteRating(int id);
+    Task<bool> SaveAllAsync();
+    Task<List<Rating>> GetUserRatingsAsync(string userId);
+    Task<Rating?> GetOrderRatingById(string id);
+    void AddRating(Rating rating);
+    void UpdateRating(Rating rating);
+    void DeleteRating(Rating rating);
 }

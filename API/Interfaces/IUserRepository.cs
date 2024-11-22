@@ -1,4 +1,4 @@
-    using API.DTOs;
+using API.DTOs;
 using API.Entities;
 using API.Helpers;
 
@@ -8,7 +8,6 @@ public interface IUserRepository
 {
     Task<IEnumerable<UserDto>> GetMembersAsync(PaginationParams paginationParams);
     Task<AppUser> GetUserByIdAsync(string id);
-    Task<AppUser?> GetUserByUsernameAsync(string username);
     Task<AppUser?> GetMemberAsync(string userid);
     void AddUser(AppUser user);
     void RemoveUser(AppUser user);

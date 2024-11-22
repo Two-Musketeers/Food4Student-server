@@ -22,4 +22,11 @@ public class FirebaseService : IFirebaseService
 
         return "NotRegistered";
     }
+
+    public async Task<string> GetUserDisplayName(string uid)
+    {
+        var user = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+
+        return user.DisplayName ?? throw new Exception("Display name is null");
+    }
 }

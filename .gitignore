@@ -483,3 +483,4 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 API/Services/test-deploy-d038d-firebase-adminsdk-ag34n-78b7bc5615.json
+API/appsettings.json

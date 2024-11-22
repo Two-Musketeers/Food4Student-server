@@ -1,13 +1,10 @@
-using API.DTOs;
 using API.Entities;
 using API.Interfaces;
-using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
 
-public class RatingRepository(DataContext context, IMapper mapper) : IRatingRepository
+public class RatingRepository(DataContext context) : IRatingRepository
 {
     public async Task<double> GetAverageRatingAsync(string restaurantId)
     {
@@ -17,58 +14,36 @@ public class RatingRepository(DataContext context, IMapper mapper) : IRatingRepo
 
         return averageRating;
     }
-
-    public async Task<bool> AddOrUpdateRatingAsync(RatingDto ratingDto)
+    public async Task<bool> SaveAllAsync()
     {
-        var existingRating = await context.Ratings
-            .FirstOrDefaultAsync(r => r.UserId == ratingDto.UserId && r.RestaurantId == ratingDto.RestaurantId);
-
-        if (existingRating != null)
-        {
-            existingRating.Stars = ratingDto.Stars;
-            context.Ratings.Update(existingRating);
-        }
-        else
-        {
-            var rating = mapper.Map<Rating>(ratingDto);
-            context.Ratings.Add(rating);
-        }
-
         return await context.SaveChangesAsync() > 0;
     }
 
-    public async Task<ActionResult<RatingDto>> AddRating(RatingDto ratingDto)
+    public void AddRating(Rating rating)
     {
-        var rating = mapper.Map<Rating>(ratingDto);
         context.Ratings.Add(rating);
-
-        if (await context.SaveChangesAsync() > 0)
-            return new CreatedAtActionResult("GetRating", "Rating", new { id = rating.Id }, mapper.Map<RatingDto>(rating));
-
-        return new BadRequestResult();
     }
 
-    public async Task<ActionResult> UpdateRating(int id, RatingDto ratingDto)
+    public void UpdateRating(Rating rating)
     {
-        var rating = await context.Ratings.FindAsync(id);
-        if (rating == null) return new NotFoundResult();
-
-        mapper.Map(ratingDto, rating);
-
-        if (await context.SaveChangesAsync() > 0) return new NoContentResult();
-
-        return new BadRequestResult();
+        context.Ratings.Update(rating);
     }
 
-    public async Task<ActionResult> DeleteRating(int id)
+    public void DeleteRating(Rating rating)
     {
-        var rating = await context.Ratings.FindAsync(id);
-        if (rating == null) return new NotFoundResult();
-
         context.Ratings.Remove(rating);
+    }
 
-        if (await context.SaveChangesAsync() > 0) return new NoContentResult();
+    public async Task<List<Rating>> GetUserRatingsAsync(string userId)
+    {
+        var user = await context.Users.Include(u => u.Ratings).FirstOrDefaultAsync(u => u.Id == userId)!;
 
-        return new BadRequestResult();
+        return user.Ratings;
+    }
+
+    public async Task<Rating?> GetOrderRatingById(string id)
+    {
+        var order = await context.Orders.FirstOrDefaultAsync(r => r.Id == id);
+        return order.Rating;
     }
 }

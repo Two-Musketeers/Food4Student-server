@@ -9,14 +9,24 @@ namespace API.Controllers;
 
 [Authorize(Policy = "RequireAdminRole")]
 public class AdminController(IRestaurantRepository restaurantRepository,
-    IMapper mapper, IUserRepository userRepository) : BaseApiController
+    IMapper mapper, IUserRepository userRepository, IFirebaseService firebaseService) : BaseApiController
 {
-    [HttpGet("users")]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers([FromQuery] PaginationParams paginationParams)
+    [HttpPut("give-moderator-role")]
+    public async Task<ActionResult> GiveModeratorRole(string id)
     {
-        var users = await userRepository.GetMembersAsync(paginationParams);
+        var user = await userRepository.GetUserByIdAsync(id);
+        if (user == null) return NotFound();
+        await firebaseService.AssignRoleAsync(id, "Moderator");
+        return Ok();
+    }
 
-        return Ok(users);
+    [HttpPut("ban-user")]
+    public async Task<ActionResult> BanUser(string id)
+    {
+        var userRole = await firebaseService.GetUserRoleAsync(id);
+        if (userRole == "Admin") return Unauthorized("You do not have permission to ban me bitch");
+        await firebaseService.AssignRoleAsync(id, "Banned");
+        return Ok();
     }
 }
 

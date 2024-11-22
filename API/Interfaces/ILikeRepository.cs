@@ -6,7 +6,7 @@ namespace API.Interfaces;
 
 public interface ILikeRepository
 {
-    Task<PagedList<LikeRestaurantDto>> GetRestaurantLikesAsync(LikesParams likesParams);
+    Task<PagedList<RestaurantDto>> GetRestaurantLikesAsync(LikesParams likesParams);
     void AddRestaurantLike(RestaurantLike restaurantLike);
     void RemoveRestaurantLike(RestaurantLike restaurantLike);
     Task<bool> ToggleRestaurantLikeAsync(string userId, string restaurantId);

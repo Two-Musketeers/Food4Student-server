@@ -8,12 +8,11 @@ public class AutoMapperProfiles : Profile
 {
     public AutoMapperProfiles()
     {
-        CreateMap<Restaurant, LikeRestaurantDto>();
         CreateMap<Restaurant, RestaurantDto>()
-            .ForMember(dest => dest.Menu, opt => opt.MapFrom(src => src.Menu))
+            .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.Logo != null ? src.Logo.Url : null))
+            .ForMember(dest => dest.BannerUrl, opt => opt.MapFrom(src => src.Banner != null ? src.Banner.Url : null))
             .ForMember(dest => dest.TotalRatings, opt => opt.MapFrom(src => src.Ratings.Count))
             .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.Ratings.Count != 0 ? src.Ratings.Average(r => r.Stars) : 0));
-        CreateMap<Restaurant, GeneralRestaurantDto>();
 
         //Automapper for AppUser
         CreateMap<AppUser, UserDto>();
@@ -26,11 +25,12 @@ public class AutoMapperProfiles : Profile
         CreateMap<FoodItemDto, FoodItem>();
         CreateMap<FoodItemRegisterDto, FoodItem>();
 
+        CreateMap<ShippingAddress, CreateShippingAddressDto>();
+
         //Automapper for Order
         CreateMap<Order, OrderDto>();
         CreateMap<OrderItem, OrderItemDto>()
-            .ForMember(dest => dest.FoodItemId, opt => opt.MapFrom(src => src.OriginalFoodItemId))
-            .ForMember(dest => dest.FoodItemPhoto, opt => opt.MapFrom(src => src.FoodItemPhoto));
+            .ForMember(dest => dest.FoodItemId, opt => opt.MapFrom(src => src.OriginalFoodItemId));
 
         CreateMap<OrderItemDto, OrderItem>();
 

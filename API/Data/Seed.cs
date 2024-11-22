@@ -27,9 +27,7 @@ public class Seed
         for (int i = 0; i < 20; i++)
         {
             var user = users[i];
-            user.Id = Guid.NewGuid().ToString();
 
-            // Assign role and restaurant
             if (i < restaurants.Count - 1)
             {
                 // Assign restaurant to user

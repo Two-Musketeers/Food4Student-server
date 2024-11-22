@@ -20,15 +20,15 @@ public class LikesRepository(DataContext context, IMapper mapper) : ILikeReposit
         context.RestaurantLikes.Remove(restaurantLike);
     }
 
-    public async Task<PagedList<LikeRestaurantDto>> GetRestaurantLikesAsync(LikesParams likesParams)
+    public async Task<PagedList<RestaurantDto>> GetRestaurantLikesAsync(LikesParams likesParams)
     {
         var query = context.RestaurantLikes
             .Where(like => like.SourceUserId == likesParams.UserId)
             .Select(like => like.LikedRestaurant)
-            .ProjectTo<LikeRestaurantDto>(mapper.ConfigurationProvider)
+            .ProjectTo<RestaurantDto>(mapper.ConfigurationProvider)
             .AsQueryable();
 
-        return await PagedList<LikeRestaurantDto>.CreateAsync(query, likesParams.PageNumber, likesParams.PageSize);
+        return await PagedList<RestaurantDto>.CreateAsync(query, likesParams.PageNumber, likesParams.PageSize);
     }
 
     public async Task<bool> ToggleRestaurantLikeAsync(string userId, string restaurantId)

@@ -9,10 +9,9 @@ namespace API.Controllers;
 
 [Authorize(Policy = "RequireModeratorRole")]
 public class ModeratorController(IMapper mapper, IFirebaseService firebaseService,
-    IRestaurantRepository restaurantRepository) : BaseApiController
+    IRestaurantRepository restaurantRepository, IUserRepository userRepository) : BaseApiController
 {
     //Get all unapproved restaurants
-
     [HttpGet("unapproved-restaurant")]
     public async Task<ActionResult<IEnumerable<GeneralRestaurantDto>>> GetUnapprovedRestaurants([FromQuery] RestaurantParams restaurantParams)
     {
@@ -80,6 +79,14 @@ public class ModeratorController(IMapper mapper, IFirebaseService firebaseServic
         if (await restaurantRepository.SaveAllAsync()) return NoContent();
 
         return BadRequest("Failed to unapprove restaurant");
+    }
+
+    [HttpGet("users")]
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers([FromQuery] PaginationParams paginationParams)
+    {
+        var users = await userRepository.GetMembersAsync(paginationParams);
+
+        return Ok(users);
     }
 }
 
