@@ -8,71 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 public class OrdersController(IMapper mapper,
-    IOrderRepository orderRepository,
-    IFoodItemRepository foodItemRepository) : BaseApiController
+    IOrderRepository orderRepository) : BaseApiController
 {
-    [Authorize(Policy = "RequireUserRole")]
-    [HttpPost]
-    public async Task<ActionResult<OrderDto>> CreateOrder(OrderCreateDto orderCreateDto)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        // Ensure the order contains items
-        if (orderCreateDto.OrderItems == null || orderCreateDto.OrderItems.Count == 0)
-            return BadRequest("Order must contain at least one item.");
-
-        // Get the restaurant ID from the first item
-        var firstFoodItem = await foodItemRepository.GetFoodItemByIdAsync(orderCreateDto.OrderItems.First().FoodItemId);
-        if (firstFoodItem == null)
-            return BadRequest("Invalid FoodItem Id.");
-
-        var restaurantId = firstFoodItem.RestaurantId;
-
-        // Verify all items belong to the same restaurant
-        foreach (var itemDto in orderCreateDto.OrderItems)
-        {
-            var foodItem = await foodItemRepository.GetFoodItemByIdAsync(itemDto.FoodItemId);
-            if (foodItem == null)
-                return BadRequest($"FoodItem with ID '{itemDto.FoodItemId}' not found.");
-
-            if (foodItem.RestaurantId != restaurantId)
-                return BadRequest("All items in the order must be from the same restaurant.");
-        }
-
-        var order = new Order
-        {
-            AppUserId = userId!,
-            RestaurantId = restaurantId
-        };
-
-        foreach (var itemDto in orderCreateDto.OrderItems)
-        {
-            var foodItem = await foodItemRepository.GetFoodItemByIdAsync(itemDto.FoodItemId);
-
-            var orderItem = new OrderItem
-            {
-                OriginalFoodItemId = foodItem.Id,
-                FoodName = foodItem.Name,
-                FoodDescription = foodItem.Description,
-                Price = foodItem.Price,
-                FoodItemPhoto = foodItem.FoodItemPhoto,
-                Quantity = itemDto.Quantity
-            };
-
-            order.OrderItems.Add(orderItem);
-        }
-
-        orderRepository.AddOrder(order);
-
-        if (await orderRepository.SaveAllAsync())
-        {
-            var orderDto = mapper.Map<OrderDto>(order);
-            return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, orderDto);
-        }
-
-        return BadRequest("Failed to create order.");
-    }
-
     [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<OrderDto>> GetOrderById(string id)

@@ -11,7 +11,8 @@ namespace API.Controllers;
 
 public class RestaurantsController(IRestaurantRepository restaurantRepository,
         IMapper mapper, IUserRepository userRepository, IPhotoService photoService,
-        IFoodItemRepository foodItemRepository) : BaseApiController
+        IFoodItemRepository foodItemRepository, IOrderRepository orderRepository,
+        IRatingRepository ratingRepository) : BaseApiController
 {
     [Authorize(Policy = "RequireUserRole")]
     [HttpGet]
@@ -24,7 +25,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         return Ok(restaurantsToReturn);
     }
 
-    [Authorize(Policy = "RequireUserRole")]
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<RestaurantDto>> GetRestaurantById(string id)
     {
@@ -134,7 +135,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpPut("food-items/{foodItemId}")]
-    public async Task<ActionResult> UpdateFoodItem(string foodItemId, FoodItemDto foodItemDto)
+    public async Task<ActionResult> UpdateFoodItem(string foodItemId, FoodItemRegisterDto foodItemDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -157,13 +158,27 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
     }
 
     //The get restaurant by id already contain the menu so i just make this in case
-    [Authorize(Policy = "RequireUserRole")]
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpGet("food-items")]
     public async Task<ActionResult<IEnumerable<FoodItemDto>>> GetFoodItems()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         var user = await userRepository.GetUserByIdAsync(userId);
+        if (user == null) return NotFound("User not found");
+
+        var foodItems = await foodItemRepository.GetFoodItemsByRestaurantIdAsync(user.Id);
+
+        var foodItemsToReturn = mapper.Map<IEnumerable<FoodItemDto>>(foodItems);
+
+        return Ok(foodItemsToReturn);
+    }
+
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpGet("{id}/food-items")]
+    public async Task<ActionResult<IEnumerable<FoodItemDto>>> GetFoodItemsByRestaurantId(string id)
+    {
+        var user = await userRepository.GetUserByIdAsync(id);
         if (user == null) return NotFound("User not found");
 
         var foodItems = await foodItemRepository.GetFoodItemsByRestaurantIdAsync(user.Id);
@@ -391,7 +406,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         return BadRequest("Problem deleting photo");
     }
 
-    [Authorize(Policy = "RequireUserRole")]
+    [Authorize]
     [HttpGet("{id}/ratings")]
     public async Task<ActionResult> GetRestaurantRatings(string id)
     {
@@ -399,13 +414,13 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         if (restaurant == null) return NotFound();
 
-        var ratings = restaurant.Ratings;
+        var ratings = await ratingRepository.GetRestaurantRatingsAsync(id);
 
-        return Ok(ratings);
+        var returnRatings = mapper.Map<IEnumerable<RatingDto>>(ratings);
+
+        return Ok(returnRatings);
     }
 
-    // Helper methods
-    [NonAction]
     public async Task<ActionResult<RestaurantDto>> GetOwnedRestaurant()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -417,6 +432,118 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         var restaurantToReturn = mapper.Map<RestaurantDto>(user.OwnedRestaurant);
 
         return Ok(restaurantToReturn);
+    }
+
+    //Order controller
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
+    [HttpGet("orders")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var orders = await orderRepository.GetOrdersByRestaurantIdAsync(userId);
+
+        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+        return Ok(ordersDto);
+
+    }
+
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
+    [HttpGet("orders/{id}")]
+    public async Task<ActionResult<OrderDto>> GetOrderById(string id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var order = await orderRepository.GetOrderByIdAsync(id);
+
+        if (order == null)
+            return NotFound("Order not found.");
+
+        if (order.RestaurantId != userId)
+            return Unauthorized("You do not have access to this order.");
+
+        var orderDto = mapper.Map<OrderDto>(order);
+        return Ok(orderDto);
+    }
+
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
+    [HttpPut("orders/{id}/approve-order")]
+    public async Task<ActionResult> ApproveOrder(string id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var order = await orderRepository.GetOrderByIdAsync(id);
+
+        if (order == null)
+            return NotFound("Order not found.");
+
+        if (order.RestaurantId != userId)
+            return Unauthorized("You do not have access to approve this order.");
+        if (order.Status != "Pending")
+            return BadRequest("You cannot approve an order that is not pending.");
+        if (order.Status == "Delivered")
+            return BadRequest("You cannot approve an order that is already delivered.");
+
+        order.Status = "Approved";
+
+        if (await orderRepository.SaveAllAsync())
+            return NoContent();
+
+        return BadRequest("Failed to approve order.");
+    }
+
+    [HttpPut("orders/{id}/reject-order")]
+    public async Task<ActionResult> RejectOrder(string id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var order = await orderRepository.GetOrderByIdAsync(id);
+
+        if (order == null)
+            return NotFound("Order not found.");
+
+        if (order.RestaurantId != userId)
+            return Unauthorized("You do not have access to reject this order.");
+
+        if (order.Status != "Pending")
+            return BadRequest("You cannot reject an order that is not pending.");
+        if (order.Status == "Delivered")
+            return BadRequest("You cannot reject an order that is already delivered.");
+
+        order.Status = "Rejected";
+
+        if (await orderRepository.SaveAllAsync())
+            return NoContent();
+
+        return BadRequest("Failed to reject order.");
+    }
+
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
+    [HttpPut("orders/{id}/deliver-order")]
+    public async Task<ActionResult> DeliverOrder(string id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var order = await orderRepository.GetOrderByIdAsync(id);
+
+        if (order == null)
+            return NotFound("Order not found.");
+
+        if (order.RestaurantId != userId)
+            return Unauthorized("You do not have access to deliver this order.");
+        if (order.Status != "Approved")
+            return BadRequest("You cannot deliver an order that is not approved.");
+        if (order.Status == "Delivered")
+            return BadRequest("You cannot deliver an order that is already delivered.");
+        if (order.Status == "Rejected")
+            return BadRequest("You cannot deliver an order that is rejected.");
+
+        order.Status = "Delivered";
+
+        if (await orderRepository.SaveAllAsync())
+            return NoContent();
+
+        return BadRequest("Failed to deliver order.");
     }
 }
 

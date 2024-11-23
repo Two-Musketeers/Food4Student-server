@@ -19,7 +19,9 @@ public class OrderRepository(DataContext context) : IOrderRepository
     public async Task<Order?> GetOrderByIdAsync(string id)
     {
         return await context.Orders
+            .Include(o => o.ShippingAddress)
             .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.FoodItemPhoto)
             .FirstOrDefaultAsync(o => o.Id == id);
     }
 
@@ -27,7 +29,9 @@ public class OrderRepository(DataContext context) : IOrderRepository
     {
         return await context.Orders
             .Where(o => o.AppUserId == userId)
+            .Include(o => o.ShippingAddress)
             .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.FoodItemPhoto)
             .ToListAsync();
     }
 
@@ -35,7 +39,9 @@ public class OrderRepository(DataContext context) : IOrderRepository
     {
         return await context.Orders
             .Where(o => o.RestaurantId == restaurantId)
+            .Include(o => o.ShippingAddress)
             .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.FoodItemPhoto)
             .ToListAsync();
     }
 

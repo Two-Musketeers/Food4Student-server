@@ -36,9 +36,20 @@ public class RatingRepository(DataContext context) : IRatingRepository
 
     public async Task<List<Rating>> GetUserRatingsAsync(string userId)
     {
-        var user = await context.Users.Include(u => u.Ratings).FirstOrDefaultAsync(u => u.Id == userId)!;
+        var user = await context.Users
+            .Include(u => u.Ratings)
+            .FirstOrDefaultAsync(u => u.Id == userId)!;
 
         return user.Ratings;
+    }
+
+    public async Task<List<Rating>> GetRestaurantRatingsAsync(string restaurantId)
+    {
+        var restaurant = await context.Restaurants
+            .Include(r => r.Ratings)
+            .FirstOrDefaultAsync(r => r.Id == restaurantId)!;
+
+        return restaurant.Ratings;
     }
 
     public async Task<Rating?> GetOrderRatingById(string id)

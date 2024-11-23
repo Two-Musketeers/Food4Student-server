@@ -7,7 +7,8 @@ public class Order
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public Rating? Rating { get; set; }
     public string Status { get; set; } = "Pending";
-
+    public ShippingAddress? ShippingAddress { get; set; }
+    public string Note { get; set; } = "";
     //AppUser navigation purpose
     public string AppUserId { get; set; }
     public AppUser AppUser { get; set; } = null!;

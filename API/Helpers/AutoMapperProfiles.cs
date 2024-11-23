@@ -24,8 +24,10 @@ public class AutoMapperProfiles : Profile
         CreateMap<FoodItem, FoodItemDto>();
         CreateMap<FoodItemDto, FoodItem>();
         CreateMap<FoodItemRegisterDto, FoodItem>();
+        CreateMap<CreateShippingAddressDto, ShippingAddress>();
 
         CreateMap<ShippingAddress, CreateShippingAddressDto>();
+        CreateMap<ShippingAddress, OrderShippingAddressDto>();
 
         //Automapper for Order
         CreateMap<Order, OrderDto>();
@@ -36,6 +38,7 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<Rating, RatingDto>();
         CreateMap<RatingDto, Rating>();
+        CreateMap<CreatingRatingDto, RatingDto>();
 
         //Automapper for ShippingAddress
         CreateMap<ShippingAddressDto, ShippingAddress>();

@@ -19,6 +19,7 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
             .Where(r => r.Id == id)
             .Include(r => r.Menu)
                 .ThenInclude(m => m.FoodItemPhoto)
+            .Include(r => r.Ratings)
             .SingleOrDefaultAsync();
     }
     
@@ -29,6 +30,7 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
                 .ThenInclude(m => m.FoodItemPhoto)
             .Include(r => r.Logo)
             .Include(r => r.Banner)
+            .Include(r => r.Ratings)
             .AsQueryable();
 
         return await PagedList<Restaurant>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
