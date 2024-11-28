@@ -29,9 +29,12 @@ public class UserRepository(DataContext context) : IUserRepository
             .SingleOrDefaultAsync();
     }
 
-    Task<IEnumerable<UserDto>> IUserRepository.GetMembersAsync(PaginationParams paginationParams)
+    public async Task<PagedList<AppUser>> GetMembersAsync(PaginationParams paginationParams)
     {
-        throw new NotImplementedException();
+        var query = context.Users
+            .Include(u => u.OwnedRestaurant)
+            .AsQueryable();
+        return await PagedList<AppUser>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
     }
 
     public async Task<bool> UserExists(string userId)

@@ -8,8 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers;
 
 [Authorize(Policy = "RequireAdminRole")]
-public class AdminController(IRestaurantRepository restaurantRepository,
-    IMapper mapper, IUserRepository userRepository, IFirebaseService firebaseService) : BaseApiController
+public class AdminController(IUserRepository userRepository, IFirebaseService firebaseService) : BaseApiController
 {
     [HttpPut("give-moderator-role")]
     public async Task<ActionResult> GiveModeratorRole(string id)
@@ -20,12 +19,12 @@ public class AdminController(IRestaurantRepository restaurantRepository,
         return Ok();
     }
 
-    [HttpPut("ban-user")]
-    public async Task<ActionResult> BanUser(string id)
+    [HttpPut("revoke-moderator-role")]
+    public async Task<ActionResult> RevokeModeratorRole(string id)
     {
         var userRole = await firebaseService.GetUserRoleAsync(id);
-        if (userRole == "Admin") return Unauthorized("You do not have permission to ban me bitch");
-        await firebaseService.AssignRoleAsync(id, "Banned");
+        if (userRole == "Admin") return Unauthorized("You do not have permission to revoke admin roles.");
+        await firebaseService.AssignRoleAsync(id, "User");
         return Ok();
     }
 }

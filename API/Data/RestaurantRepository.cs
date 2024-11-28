@@ -17,8 +17,8 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
     {
         return await context.Restaurants
             .Where(r => r.Id == id)
-            .Include(r => r.Menu)
-                .ThenInclude(m => m.FoodItemPhoto)
+            .Include(r => r.Logo)
+            .Include(r => r.Banner)
             .Include(r => r.Ratings)
             .SingleOrDefaultAsync();
     }
@@ -44,10 +44,10 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
             .SingleOrDefaultAsync(r => r.Name == name);
     }
 
-    public async Task<PagedList<Restaurant>> UnapprovedRestaurantsAsync(PaginationParams paginationParams)
+    public async Task<PagedList<Restaurant>> GetApprovedRestaurantsAsync(PaginationParams paginationParams)
     {
         var query = context.Restaurants
-            .Where(r => !r.IsApproved)
+            .Where(r => r.IsApproved)
             .AsQueryable();
 
         return await PagedList<Restaurant>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);

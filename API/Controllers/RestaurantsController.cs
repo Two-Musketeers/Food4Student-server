@@ -18,7 +18,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants([FromQuery] RestaurantParams restaurantParams)
     {
-        var restaurants = await restaurantRepository.GetRestaurantsAsync(restaurantParams);
+        var restaurants = await restaurantRepository.GetApprovedRestaurantsAsync(restaurantParams);
 
         var restaurantsToReturn = mapper.Map<IEnumerable<RestaurantDto>>(restaurants);
 

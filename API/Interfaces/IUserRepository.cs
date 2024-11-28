@@ -6,7 +6,7 @@ namespace API.Interfaces;
 
 public interface IUserRepository
 {
-    Task<IEnumerable<UserDto>> GetMembersAsync(PaginationParams paginationParams);
+    Task<PagedList<AppUser>> GetMembersAsync(PaginationParams paginationParams);
     Task<AppUser> GetUserByIdAsync(string id);
     Task<AppUser?> GetMemberAsync(string userid);
     void AddUser(AppUser user);
