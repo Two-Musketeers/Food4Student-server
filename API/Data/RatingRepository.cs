@@ -39,6 +39,8 @@ public class RatingRepository(DataContext context) : IRatingRepository
         var user = await context.Users
             .Include(u => u.Ratings)
             .FirstOrDefaultAsync(u => u.Id == userId)!;
+        
+        if (user == null) throw new Exception("User not found");
 
         return user.Ratings;
     }
@@ -48,6 +50,8 @@ public class RatingRepository(DataContext context) : IRatingRepository
         var restaurant = await context.Restaurants
             .Include(r => r.Ratings)
             .FirstOrDefaultAsync(r => r.Id == restaurantId)!;
+        
+        if (restaurant == null) throw new Exception("Restaurant not found");
 
         return restaurant.Ratings;
     }
@@ -55,6 +59,7 @@ public class RatingRepository(DataContext context) : IRatingRepository
     public async Task<Rating?> GetOrderRatingById(string id)
     {
         var order = await context.Orders.FirstOrDefaultAsync(r => r.Id == id);
+        if (order == null) throw new Exception("Order not found");
         return order.Rating;
     }
 }

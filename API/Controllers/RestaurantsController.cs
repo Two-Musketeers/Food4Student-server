@@ -11,8 +11,8 @@ namespace API.Controllers;
 
 public class RestaurantsController(IRestaurantRepository restaurantRepository,
         IMapper mapper, IUserRepository userRepository, IPhotoService photoService,
-        IFoodItemRepository foodItemRepository, IOrderRepository orderRepository,
-        IRatingRepository ratingRepository) : BaseApiController
+        IFoodItemRepository foodItemRepository, IRatingRepository ratingRepository,
+        IFoodCategoryRepository foodCategoryRepository) : BaseApiController
 {
     [Authorize(Policy = "RequireUserRole")]
     [HttpGet]
@@ -109,55 +109,41 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         return NoContent();
     }
 
-    //FoodItem controller
+    // FoodItem controller
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPost("food-items")]
-    public async Task<ActionResult<FoodItemDto>> CreateFoodItem(FoodItemRegisterDto foodItemCreateDto)
+    [HttpPost("food-categories/{foodCategoryId}/food-items")]
+    public async Task<ActionResult<FoodItemDto>> CreateFoodItem(string foodCategoryId, FoodItemRegisterDto foodItemCreateDto)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
 
         if (user.OwnedRestaurant == null)
             return BadRequest("User does not own a restaurant");
 
-        var foodItem = mapper.Map<FoodItem>(foodItemCreateDto);
+        // Retrieve the specific FoodCategory
+        var category = await foodCategoryRepository.GetFoodCategoryAsync(foodCategoryId);
+        if (category == null || category.RestaurantId != user.OwnedRestaurant.Id)
+            return BadRequest("Invalid food category");
 
-        user.OwnedRestaurant.Menu.Add(foodItem);
+        var foodItem = mapper.Map<FoodItem>(foodItemCreateDto);
+        foodItem.RestaurantId = user.OwnedRestaurant.Id;
+        foodItem.FoodCategoryId = category.Id;
+
+        // Add the FoodItem to the specific category
+        category.FoodItems.Add(foodItem);
+
+        foodItemRepository.AddFoodItem(foodItem);
 
         if (await foodItemRepository.SaveAllAsync())
         {
             var foodItemDto = mapper.Map<FoodItemDto>(foodItem);
-            return CreatedAtAction(nameof(GetFoodItems), new { id = foodItem.Id }, foodItemDto);
+            return CreatedAtAction(nameof(GetFoodItemById), new { id = foodItem.Id }, foodItemDto);
         }
 
         return BadRequest("Failed to create food item");
     }
 
-    [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPut("food-items/{foodItemId}")]
-    public async Task<ActionResult> UpdateFoodItem(string foodItemId, FoodItemRegisterDto foodItemDto)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (foodItemId == null) return NotFound("Id is required");
-
-        var foodItem = await foodItemRepository.GetFoodItemByIdAsync(foodItemId);
-
-        if (foodItem == null) return NotFound("Food item not found");
-
-        // Ensure the food item belongs to the authenticated user
-        if (foodItem.RestaurantId != userId) return Forbid();
-
-        mapper.Map(foodItemDto, foodItem);
-
-        var result = await foodItemRepository.SaveAllAsync();
-
-        if (!result) return BadRequest("Failed to update food item");
-
-        return Ok("Food item has been updated successfully");
-    }
-
-    //The get restaurant by id already contain the menu so i just make this in case
+    // The get restaurant by id already contains the menu, so this is just in case
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpGet("food-items")]
     public async Task<ActionResult<IEnumerable<FoodItemDto>>> GetFoodItems()
@@ -173,6 +159,42 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         return Ok(foodItemsToReturn);
     }
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
+    [HttpGet("food-categories/{foodCategoryId}/food-items")]
+    public async Task<ActionResult<IEnumerable<FoodItemDto>>> GetFoodItemsByCategory(string foodCategoryId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var user = await userRepository.GetUserByIdAsync(userId);
+
+        if (user.OwnedRestaurant == null)
+            return BadRequest("User does not own a restaurant");
+
+        var category = await foodCategoryRepository.GetFoodCategoryAsync(foodCategoryId);
+        if (category == null || category.RestaurantId != user.OwnedRestaurant.Id)
+            return NotFound("Food category not found");
+
+        var foodItems = await foodItemRepository.GetFoodItemsByCategoryIdAsync(foodCategoryId);
+
+        var foodItemsToReturn = mapper.Map<IEnumerable<FoodItemDto>>(foodItems);
+
+        return Ok(foodItemsToReturn);
+    }
+
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpGet("food-categories/{foodCategoryId}/food-items/{id}")]
+    public async Task<ActionResult<FoodItemDto>> GetFoodItemById(string foodCategoryId, string id)
+    {
+        var category = await foodCategoryRepository.GetFoodCategoryAsync(foodCategoryId);
+        if (category == null)
+            return NotFound("Food category not found");
+
+        var foodItem = await foodItemRepository.GetFoodItemByIdAsync(id);
+        if (foodItem == null || foodItem.FoodCategoryId != foodCategoryId)
+            return NotFound("Food item not found in the specified category");
+
+        var foodItemDto = mapper.Map<FoodItemDto>(foodItem);
+        return Ok(foodItemDto);
+    }
 
     [Authorize(Policy = "RequireUserRole")]
     [HttpGet("{id}/food-items")]
@@ -187,10 +209,9 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         return Ok(foodItemsToReturn);
     }
-
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpDelete("food-items/{id}")]
-    public async Task<ActionResult> DeleteFoodItem(string id)
+    [HttpDelete("food-categories/{foodCategoryId}/food-items/{id}")]
+    public async Task<ActionResult> DeleteFoodItem(string foodCategoryId, string id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
@@ -198,15 +219,20 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         if (user.OwnedRestaurant == null)
             return BadRequest("User does not own a restaurant");
 
+        var category = await foodCategoryRepository.GetFoodCategoryAsync(foodCategoryId);
+        if (category == null || category.RestaurantId != user.OwnedRestaurant.Id)
+            return BadRequest("Invalid food category");
+
         var foodItem = await foodItemRepository.GetFoodItemByIdAsync(id);
 
-        if (foodItem == null)
-            return NotFound();
+        if (foodItem == null || foodItem.FoodCategoryId != foodCategoryId)
+            return NotFound("Food item not found in the specified category");
 
-        if (foodItem.RestaurantId != user.OwnedRestaurant.Id)
-            return Unauthorized("You do not own this food item");
+        // Remove the FoodItem from the category
+        foodCategoryRepository.RemoveFoodItemFromCategory(category, foodItem);
 
-        user.OwnedRestaurant.Menu.Remove(foodItem);
+        // Optionally delete the FoodItem from the database
+        foodItemRepository.DeleteFoodItem(foodItem);
 
         if (await foodItemRepository.SaveAllAsync())
             return NoContent();
@@ -225,7 +251,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         if (user.OwnedRestaurant == null) return BadRequest("User does not own a restaurant");
 
-        //Delete the old photo
+        // Delete the old photo
         if (user.OwnedRestaurant.Logo != null && user.OwnedRestaurant.Logo.PublicId != null)
         {
             var deleteResult = await photoService.DeletePhotoAsync(user.OwnedRestaurant.Logo.PublicId);
@@ -245,7 +271,8 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         user.OwnedRestaurant.Logo = photo;
 
-        if (await restaurantRepository.SaveAllAsync()) return CreatedAtAction(nameof(GetOwnedRestaurant), new { id = user.OwnedRestaurant.Id }, mapper.Map<PhotoDto>(photo));
+        if (await restaurantRepository.SaveAllAsync())
+            return CreatedAtAction(nameof(GetOwnedRestaurant), new { id = user.OwnedRestaurant.Id }, mapper.Map<PhotoDto>(photo));
 
         return BadRequest("Problem adding photo");
     }
@@ -260,7 +287,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         if (user.OwnedRestaurant == null) return BadRequest("User does not own a restaurant");
 
-        //Delete the old photo
+        // Delete the old photo
         if (user.OwnedRestaurant.Banner != null && user.OwnedRestaurant.Banner.PublicId != null)
         {
             var deleteResult = await photoService.DeletePhotoAsync(user.OwnedRestaurant.Banner.PublicId);
@@ -280,14 +307,15 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         user.OwnedRestaurant.Banner = photo;
 
-        if (await restaurantRepository.SaveAllAsync()) return CreatedAtAction(nameof(GetOwnedRestaurant), new { id = user.OwnedRestaurant.Id }, mapper.Map<PhotoDto>(photo));
+        if (await restaurantRepository.SaveAllAsync())
+            return CreatedAtAction(nameof(GetOwnedRestaurant), new { id = user.OwnedRestaurant.Id }, mapper.Map<PhotoDto>(photo));
 
         return BadRequest("Problem adding photo");
     }
 
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPost("food-items/{foodItemId}/photos")]
-    public async Task<ActionResult<PhotoDto>> AddFoodItemPhoto(IFormFile file, string foodItemId)
+    [HttpPost("food-categories/{foodCategoryId}/food-items/{foodItemId}/photos")]
+    public async Task<ActionResult<PhotoDto>> AddFoodItemPhoto(IFormFile file, string foodCategoryId, string foodItemId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -295,11 +323,16 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         if (user.OwnedRestaurant == null) return BadRequest("User does not own a restaurant");
 
-        var foodItem = user.OwnedRestaurant.Menu.FirstOrDefault(f => f.Id == foodItemId);
+        // Retrieve the specific FoodCategory
+        var category = await foodCategoryRepository.GetFoodCategoryAsync(foodCategoryId);
+        if (category == null || category.RestaurantId != user.OwnedRestaurant.Id)
+            return BadRequest("Invalid food category");
 
-        if (foodItem == null) return BadRequest("Food item not found");
+        var foodItem = await foodItemRepository.GetFoodItemByIdAsync(foodItemId);
+        if (foodItem == null || foodItem.FoodCategoryId != foodCategoryId)
+            return BadRequest("Food item not found in the specified category");
 
-        //Delete the old photo
+        // Delete the old photo
         if (foodItem.FoodItemPhoto != null && foodItem.FoodItemPhoto.PublicId != null)
         {
             var deleteResult = await photoService.DeletePhotoAsync(foodItem.FoodItemPhoto.PublicId);
@@ -319,7 +352,8 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         foodItem.FoodItemPhoto = photo;
 
-        if (await restaurantRepository.SaveAllAsync()) return CreatedAtAction(nameof(GetOwnedRestaurant), new { id = user.OwnedRestaurant.Id }, mapper.Map<PhotoDto>(photo));
+        if (await foodItemRepository.SaveAllAsync())
+            return CreatedAtAction(nameof(GetOwnedRestaurant), new { id = user.OwnedRestaurant.Id }, mapper.Map<PhotoDto>(photo));
 
         return BadRequest("Problem adding photo");
     }
@@ -377,8 +411,8 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
     }
 
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpDelete("fooditems/{foodItemId}/photos")]
-    public async Task<ActionResult> DeleteFoodItemPhoto(string foodItemId)
+    [HttpDelete("food-categories/{foodCategoryId}/food-items/{foodItemId}/photos")]
+    public async Task<ActionResult> DeleteFoodItemPhoto(string foodCategoryId, string foodItemId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -386,9 +420,14 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         if (user.OwnedRestaurant == null) return BadRequest("User does not own a restaurant");
 
-        var foodItem = user.OwnedRestaurant.Menu.FirstOrDefault(f => f.Id == foodItemId);
+        // Retrieve the specific FoodCategory
+        var category = await foodCategoryRepository.GetFoodCategoryAsync(foodCategoryId);
+        if (category == null || category.RestaurantId != user.OwnedRestaurant.Id)
+            return BadRequest("Invalid food category");
 
-        if (foodItem == null) return BadRequest("Food item not found");
+        var foodItem = await foodItemRepository.GetFoodItemByIdAsync(foodItemId);
+        if (foodItem == null || foodItem.FoodCategoryId != foodCategoryId)
+            return BadRequest("Food item not found in the specified category");
 
         var photo = foodItem.FoodItemPhoto;
         if (photo == null) return BadRequest("Food item photo not found");
@@ -401,7 +440,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         foodItem.FoodItemPhoto = null;
 
-        if (await restaurantRepository.SaveAllAsync()) return Ok();
+        if (await foodItemRepository.SaveAllAsync()) return Ok();
 
         return BadRequest("Problem deleting photo");
     }
@@ -433,117 +472,4 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         return Ok(restaurantToReturn);
     }
-
-    //Order controller
-    [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpGet("orders")]
-    public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders()
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-        var orders = await orderRepository.GetOrdersByRestaurantIdAsync(userId);
-
-        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
-        return Ok(ordersDto);
-
-    }
-
-    [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpGet("orders/{id}")]
-    public async Task<ActionResult<OrderDto>> GetOrderById(string id)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-        var order = await orderRepository.GetOrderByIdAsync(id);
-
-        if (order == null)
-            return NotFound("Order not found.");
-
-        if (order.RestaurantId != userId)
-            return Unauthorized("You do not have access to this order.");
-
-        var orderDto = mapper.Map<OrderDto>(order);
-        return Ok(orderDto);
-    }
-
-    [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPut("orders/{id}/approve-order")]
-    public async Task<ActionResult> ApproveOrder(string id)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        var order = await orderRepository.GetOrderByIdAsync(id);
-
-        if (order == null)
-            return NotFound("Order not found.");
-
-        if (order.RestaurantId != userId)
-            return Unauthorized("You do not have access to approve this order.");
-        if (order.Status != "Pending")
-            return BadRequest("You cannot approve an order that is not pending.");
-        if (order.Status == "Delivered")
-            return BadRequest("You cannot approve an order that is already delivered.");
-
-        order.Status = "Approved";
-
-        if (await orderRepository.SaveAllAsync())
-            return NoContent();
-
-        return BadRequest("Failed to approve order.");
-    }
-
-    [HttpPut("orders/{id}/reject-order")]
-    public async Task<ActionResult> RejectOrder(string id)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        var order = await orderRepository.GetOrderByIdAsync(id);
-
-        if (order == null)
-            return NotFound("Order not found.");
-
-        if (order.RestaurantId != userId)
-            return Unauthorized("You do not have access to reject this order.");
-
-        if (order.Status != "Pending")
-            return BadRequest("You cannot reject an order that is not pending.");
-        if (order.Status == "Delivered")
-            return BadRequest("You cannot reject an order that is already delivered.");
-
-        order.Status = "Rejected";
-
-        if (await orderRepository.SaveAllAsync())
-            return NoContent();
-
-        return BadRequest("Failed to reject order.");
-    }
-
-    [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPut("orders/{id}/deliver-order")]
-    public async Task<ActionResult> DeliverOrder(string id)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        var order = await orderRepository.GetOrderByIdAsync(id);
-
-        if (order == null)
-            return NotFound("Order not found.");
-
-        if (order.RestaurantId != userId)
-            return Unauthorized("You do not have access to deliver this order.");
-        if (order.Status != "Approved")
-            return BadRequest("You cannot deliver an order that is not approved.");
-        if (order.Status == "Delivered")
-            return BadRequest("You cannot deliver an order that is already delivered.");
-        if (order.Status == "Rejected")
-            return BadRequest("You cannot deliver an order that is rejected.");
-
-        order.Status = "Delivered";
-
-        if (await orderRepository.SaveAllAsync())
-            return NoContent();
-
-        return BadRequest("Failed to deliver order.");
-    }
 }
-

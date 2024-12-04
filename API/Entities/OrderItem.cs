@@ -7,10 +7,11 @@ public class OrderItem
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public required string FoodName { get; set; }
     public string? FoodDescription { get; set; }
-    public required decimal Price { get; set; }
+    public required int Price { get; set; }
     public required int Quantity { get; set; }
     public Photo? FoodItemPhoto { get; set; }
-
+    // Add this property to store selected variations and options
+    public ICollection<OrderItemVariation> OrderItemVariations { get; set; } = [];
     // Order navigation purpose
     public string? OrderId { get; set; }
     public Order Order { get; set; } = null!;

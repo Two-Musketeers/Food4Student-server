@@ -18,6 +18,8 @@ public class AccountController(IUserRepository userRepository,
 
         if (await userRepository.UserExists(userId)) return BadRequest("How did you even get here ?");
 
+        if (userDto.Role != "User") return BadRequest("You can only register as a User");
+
         var user = new AppUser
         {
             Id = userId,

@@ -28,7 +28,10 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IShippingAddressRepository, ShippingAddressRepository>();
         services.AddScoped<IFoodItemRepository, FoodItemRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
-        
+        services.AddScoped<IVariationRepository, VariationRepository>();
+        services.AddScoped<IVariationOptionRepository, VariationOptionRepository>();
+        services.AddScoped<IFoodItemVariationRepository, FoodItemVariationRepository>();
+
         // Add Photo services
         services.AddScoped<IPhotoService, PhotoService>();
         services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));

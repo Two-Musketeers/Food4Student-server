@@ -9,6 +9,6 @@ public class ShippingAddress
     public string? PhoneNumber { get; set; }
     public string? Name { get; set; }
     //Navigation
-    public string AppUserId { get; set; }
+    public string? AppUserId { get; set; }
     public AppUser AppUser { get; set; } = null!;
 }

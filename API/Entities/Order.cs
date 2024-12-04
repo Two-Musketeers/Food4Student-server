@@ -10,10 +10,10 @@ public class Order
     public ShippingAddress? ShippingAddress { get; set; }
     public string Note { get; set; } = "";
     //AppUser navigation purpose
-    public string AppUserId { get; set; }
+    public string? AppUserId { get; set; }
     public AppUser AppUser { get; set; } = null!;
 
     //Restaurant navigation purpose
-    public string RestaurantId { get; set; }
+    public string? RestaurantId { get; set; }
     public Restaurant Restaurant { get; set; } = null!;
 }

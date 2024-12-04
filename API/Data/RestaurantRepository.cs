@@ -6,11 +6,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
 
-public class RestaurantRepository(DataContext context, IMapper mapper) : IRestaurantRepository
+public class RestaurantRepository(DataContext context) : IRestaurantRepository
 {
     public void AddRestaurant(Restaurant restaurant)
     {
         context.Restaurants.Add(restaurant);
+
+        var defaultCategory = new FoodCategory
+        {
+            Name = "Default",
+            RestaurantId = restaurant.Id
+        };
+
+        context.FoodCategories.Add(defaultCategory);
     }
 
     public async Task<Restaurant?> GetRestaurantByIdAsync(string id)
@@ -26,8 +34,9 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
     public async Task<PagedList<Restaurant>> GetRestaurantsAsync(PaginationParams paginationParams)
     {
         var query = context.Restaurants
-            .Include(r => r.Menu)
-                .ThenInclude(m => m.FoodItemPhoto)
+            .Include(r => r.FoodCategories)
+                .ThenInclude(m => m.FoodItems)
+                    .ThenInclude(f => f.FoodItemPhoto)
             .Include(r => r.Logo)
             .Include(r => r.Banner)
             .Include(r => r.Ratings)
@@ -38,7 +47,9 @@ public class RestaurantRepository(DataContext context, IMapper mapper) : IRestau
     public async Task<Restaurant?> GetRestaurantByNameAsync(string name)
     {
         return await context.Restaurants
-            .Include(r => r.Menu)
+            .Include(r => r.FoodCategories)
+                .ThenInclude(m => m.FoodItems)
+                    .ThenInclude(f => f.FoodItemPhoto)
             .Include(r => r.Logo)
             .Include(r => r.Banner)
             .SingleOrDefaultAsync(r => r.Name == name);

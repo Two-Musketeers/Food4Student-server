@@ -47,8 +47,9 @@ public class UserRepository(DataContext context) : IUserRepository
         var user = await context.Users
             .Include(u => u.ShippingAddresses)
             .Include(u => u.OwnedRestaurant)
-                .ThenInclude(r => r.Menu)
-                    .ThenInclude(m => m.FoodItemPhoto)
+                .ThenInclude(r => r.FoodCategories)
+                    .ThenInclude(m => m.FoodItems)
+                        .ThenInclude(f => f.FoodItemPhoto)
             .SingleOrDefaultAsync(u => u.Id == id)
                 ?? throw new Exception("User not found");
         return user;

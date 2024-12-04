@@ -24,6 +24,14 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
             .FirstOrDefaultAsync(f => f.Id == id);
     }
 
+    public async Task<IEnumerable<FoodItem>> GetFoodItemsByCategoryIdAsync(string foodCategoryId)
+    {
+        return await context.FoodItems
+            .Where(fi => fi.FoodCategoryId == foodCategoryId)
+            .Include(fi => fi.FoodItemPhoto)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<FoodItem>> GetFoodItemsByRestaurantIdAsync(string restaurantId)
     {
         return await context.FoodItems

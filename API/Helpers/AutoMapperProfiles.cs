@@ -21,7 +21,9 @@ public class AutoMapperProfiles : Profile
         CreateMap<Photo, PhotoDto>();
 
         //Automapper for FoodItem
-        CreateMap<FoodItem, FoodItemDto>();
+        CreateMap<FoodItem, FoodItemDto>()
+            .ForMember(dest => dest.FoodItemPhotoUrl, opt => opt.MapFrom(src => src.FoodItemPhoto.Url))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.FoodCategory.Name));
         CreateMap<FoodItemDto, FoodItem>();
         CreateMap<FoodItemRegisterDto, FoodItem>();
         CreateMap<CreateShippingAddressDto, ShippingAddress>();
@@ -30,11 +32,14 @@ public class AutoMapperProfiles : Profile
         CreateMap<ShippingAddress, OrderShippingAddressDto>();
 
         //Automapper for Order
-        CreateMap<Order, OrderDto>();
-        CreateMap<OrderItem, OrderItemDto>()
-            .ForMember(dest => dest.FoodItemId, opt => opt.MapFrom(src => src.OriginalFoodItemId));
+        CreateMap<CreateOrderItemDto, OrderItem>();
 
-        CreateMap<OrderItemDto, OrderItem>();
+        CreateMap<OrderItemVariationDto, OrderItemVariation>();
+
+        CreateMap<OrderItem, OrderItemDto>()
+            .ForMember(dest => dest.SelectedVariations, opt => opt.MapFrom(src => src.OrderItemVariations));
+
+        CreateMap<OrderItemVariation, OrderItemVariationDto>();
 
         CreateMap<Rating, RatingDto>();
         CreateMap<RatingDto, Rating>();
@@ -43,5 +48,13 @@ public class AutoMapperProfiles : Profile
         //Automapper for ShippingAddress
         CreateMap<ShippingAddressDto, ShippingAddress>();
         CreateMap<ShippingAddress, ShippingAddressDto>();
+
+        //Automapper for FoodItemVariation
+        CreateMap<FoodItemVariation, FoodItemVariationDto>()
+            .ForMember(dest => dest.VariationId, opt => opt.MapFrom(src => src.Variation.Id))
+            .ForMember(dest => dest.VariationName, opt => opt.MapFrom(src => src.Variation.Name))
+            .ForMember(dest => dest.VariationOptionId, opt => opt.MapFrom(src => src.VariationOption.Id))
+            .ForMember(dest => dest.VariationOptionName, opt => opt.MapFrom(src => src.VariationOption.Name))
+            .ForMember(dest => dest.PriceAdjustment, opt => opt.MapFrom(src => src.VariationOption.PriceAdjustment));
     }
 }
