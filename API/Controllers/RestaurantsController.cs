@@ -126,7 +126,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
             return BadRequest("Invalid food category");
 
         var foodItem = mapper.Map<FoodItem>(foodItemCreateDto);
-        foodItem.RestaurantId = user.OwnedRestaurant.Id;
+        foodItem.FoodCategory.RestaurantId = user.OwnedRestaurant.Id;
         foodItem.FoodCategoryId = category.Id;
 
         // Add the FoodItem to the specific category
@@ -196,19 +196,47 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         return Ok(foodItemDto);
     }
 
+    // **New Endpoint: Get FoodItem by ID Directly**
     [Authorize(Policy = "RequireUserRole")]
-    [HttpGet("{id}/food-items")]
-    public async Task<ActionResult<IEnumerable<FoodItemDto>>> GetFoodItemsByRestaurantId(string id)
+    [HttpGet("food-items/{id}")]
+    public async Task<ActionResult<FoodItemDto>> GetFoodItemByIdDirectly(string id)
     {
-        var user = await userRepository.GetUserByIdAsync(id);
-        if (user == null) return NotFound("User not found");
+        var foodItem = await foodItemRepository.GetFoodItemByIdDirectlyAsync(id);
+        if (foodItem == null)
+            return NotFound("Food item not found.");
 
-        var foodItems = await foodItemRepository.GetFoodItemsByRestaurantIdAsync(user.Id);
-
-        var foodItemsToReturn = mapper.Map<IEnumerable<FoodItemDto>>(foodItems);
-
-        return Ok(foodItemsToReturn);
+        var foodItemDto = mapper.Map<FoodItemDto>(foodItem);
+        return Ok(foodItemDto);
     }
+
+    //Will use it for restaurant Owner
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpGet("{restaurantId}/food-items")]
+    public async Task<ActionResult<IEnumerable<FoodItemDto>>> GetAllFoodItemsByRestaurant(string restaurantId)
+    {
+        var restaurant = await restaurantRepository.GetRestaurantByIdAsync(restaurantId);
+        if (restaurant == null)
+            return NotFound("Restaurant not found.");
+
+        var foodItems = await foodItemRepository.GetFoodItemsByRestaurantIdAsync(restaurantId);
+        var foodItemsDto = mapper.Map<IEnumerable<FoodItemDto>>(foodItems);
+        return Ok(foodItemsDto);
+    }
+
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpGet("{restaurantId}/food-categories")]
+    public async Task<ActionResult<IEnumerable<FoodCategoryDto>>> GetFoodCategoriesWithItems(string restaurantId)
+    {
+        var restaurant = await restaurantRepository.GetRestaurantWithCategoriesAsync(restaurantId);
+        if (restaurant == null)
+            return NotFound("Restaurant not found.");
+
+        var categories = restaurant.FoodCategories;
+
+        var categoriesDto = mapper.Map<IEnumerable<FoodCategoryDto>>(categories);
+        return Ok(categoriesDto);
+    }
+
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpDelete("food-categories/{foodCategoryId}/food-items/{id}")]
     public async Task<ActionResult> DeleteFoodItem(string foodCategoryId, string id)
@@ -460,6 +488,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         return Ok(returnRatings);
     }
 
+    [NonAction]
     public async Task<ActionResult<RestaurantDto>> GetOwnedRestaurant()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;

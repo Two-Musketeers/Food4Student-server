@@ -17,11 +17,28 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
         context.FoodItems.Remove(foodItem);
     }
 
+    public async Task<IEnumerable<FoodItem>> GetAllFoodItemsByRestaurantAsync(string restaurantId)
+    {
+        return await context.FoodItems
+                .Where(fi => fi.FoodCategory.RestaurantId == restaurantId)
+                .Include(fi => fi.FoodCategory)
+                .Include(fi => fi.FoodItemVariations)
+                .ToListAsync();
+    }
+
     public async Task<FoodItem?> GetFoodItemByIdAsync(string id)
     {
         return await context.FoodItems
             .Include(f => f.FoodItemPhoto)
             .FirstOrDefaultAsync(f => f.Id == id);
+    }
+
+    public async Task<FoodItem?> GetFoodItemByIdDirectlyAsync(string id)
+    {
+        return await context.FoodItems
+                .Include(fi => fi.FoodCategory)
+                .Include(fi => fi.FoodItemVariations)
+                .FirstOrDefaultAsync(fi => fi.Id == id);
     }
 
     public async Task<IEnumerable<FoodItem>> GetFoodItemsByCategoryIdAsync(string foodCategoryId)
@@ -35,9 +52,16 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
     public async Task<IEnumerable<FoodItem>> GetFoodItemsByRestaurantIdAsync(string restaurantId)
     {
         return await context.FoodItems
-            .Where(f => f.RestaurantId == restaurantId)
-            .Include(f => f.FoodItemPhoto)
+            .Include(fi => fi.FoodCategory)
+            .Where(fi => fi.FoodCategory.RestaurantId == restaurantId)
             .ToListAsync();
+    }
+
+    public async Task<FoodItem?> GetFoodItemWithCategoryAsync(string id)
+    {
+        return await context.FoodItems
+            .Include(fi => fi.FoodCategory)
+            .FirstOrDefaultAsync(fi => fi.Id == id);
     }
 
     public async Task<bool> SaveAllAsync()

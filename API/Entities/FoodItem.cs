@@ -9,8 +9,6 @@ public class FoodItem
     public required int BasePrice { get; set; }
     public ICollection<FoodItemVariation> FoodItemVariations { get; set; } = [];
     //Navigation properties (required for entity framework one to many relationship)
-    public string? RestaurantId { get; set; }
-    public Restaurant Restaurant { get; set; } = null!;
     public string? FoodCategoryId { get; set; }
     public FoodCategory FoodCategory { get; set; } = null!;
 }

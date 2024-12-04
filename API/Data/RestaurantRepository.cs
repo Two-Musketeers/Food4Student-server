@@ -24,13 +24,12 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
     public async Task<Restaurant?> GetRestaurantByIdAsync(string id)
     {
         return await context.Restaurants
-            .Where(r => r.Id == id)
-            .Include(r => r.Logo)
-            .Include(r => r.Banner)
-            .Include(r => r.Ratings)
-            .SingleOrDefaultAsync();
+            .Include(r => r.FoodCategories)
+                .ThenInclude(fc => fc.FoodItems)
+                    .ThenInclude(fi => fi.FoodItemPhoto)
+            .FirstOrDefaultAsync(r => r.Id == id);
     }
-    
+
     public async Task<PagedList<Restaurant>> GetRestaurantsAsync(PaginationParams paginationParams)
     {
         var query = context.Restaurants
@@ -58,6 +57,9 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
     public async Task<PagedList<Restaurant>> GetApprovedRestaurantsAsync(PaginationParams paginationParams)
     {
         var query = context.Restaurants
+            .Include(r => r.FoodCategories)
+                    .ThenInclude(fc => fc.FoodItems)
+                        .ThenInclude(fi => fi.FoodItemPhoto)
             .Where(r => r.IsApproved)
             .AsQueryable();
 
@@ -77,5 +79,14 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
     public void DeleteRestaurant(Restaurant restaurant)
     {
         context.Restaurants.Remove(restaurant);
+    }
+
+    public async Task<Restaurant?> GetRestaurantWithCategoriesAsync(string restaurantId)
+    {
+        return await context.Restaurants
+        .Include(r => r.FoodCategories)
+            .ThenInclude(fc => fc.FoodItems)
+                .ThenInclude(fi => fi.FoodItemPhoto)
+        .FirstOrDefaultAsync(r => r.Id == restaurantId);
     }
 }

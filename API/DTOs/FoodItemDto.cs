@@ -6,5 +6,5 @@ public class FoodItemDto
     public string? Name { get; set; }
     public string? Description { get; set; }
     public string? FoodItemPhotoUrl { get; set; }
-    public required int Price { get; set; }
+    public int BasePrice { get; set; }
 }

@@ -22,10 +22,13 @@ public class AutoMapperProfiles : Profile
 
         //Automapper for FoodItem
         CreateMap<FoodItem, FoodItemDto>()
-            .ForMember(dest => dest.FoodItemPhotoUrl, opt => opt.MapFrom(src => src.FoodItemPhoto.Url))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.FoodCategory.Name));
+            .ForMember(dest => dest.FoodItemPhotoUrl, opt => opt.MapFrom(src => src.FoodItemPhoto != null ? src.FoodItemPhoto.Url : null));
         CreateMap<FoodItemDto, FoodItem>();
         CreateMap<FoodItemRegisterDto, FoodItem>();
+
+        CreateMap<FoodCategory, FoodCategoryDto>()
+            .ForMember(dest => dest.FoodItems, opt => opt.MapFrom(src => src.FoodItems));
+
         CreateMap<CreateShippingAddressDto, ShippingAddress>();
 
         CreateMap<ShippingAddress, CreateShippingAddressDto>();

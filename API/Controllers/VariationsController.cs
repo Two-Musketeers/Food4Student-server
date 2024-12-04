@@ -187,6 +187,7 @@ public class VariationsController(
 
         return BadRequest("Failed to delete variation option");
     }
+
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpPost("food-items/{foodItemId}/variations")]
     public async Task<ActionResult> AddVariationToFoodItem(string foodItemId, FoodItemVariationCreateDto dto)
@@ -197,9 +198,14 @@ public class VariationsController(
         if (user.OwnedRestaurant == null)
             return BadRequest("User does not own a restaurant");
 
-        var foodItem = await foodItemRepository.GetFoodItemByIdAsync(dto.FoodItemId);
-        if (foodItem == null || foodItem.RestaurantId != user.OwnedRestaurant.Id)
+        // Fetch FoodItem with FoodCategory
+        var foodItem = await foodItemRepository.GetFoodItemWithCategoryAsync(dto.FoodItemId);
+        if (foodItem == null)
             return BadRequest("Invalid food item");
+
+        var restaurantId = foodItem.FoodCategory?.RestaurantId;
+        if (restaurantId == null || restaurantId != user.OwnedRestaurant.Id)
+            return BadRequest("Invalid food item or you do not own the restaurant");
 
         var variation = await variationRepository.GetVariationByIdAsync(dto.VariationId);
         if (variation == null || variation.RestaurantId != user.OwnedRestaurant.Id)
@@ -228,6 +234,7 @@ public class VariationsController(
 
         return BadRequest("Failed to add variation option to food item");
     }
+
     [HttpGet("food-items/{foodItemId}")]
     public async Task<ActionResult<IEnumerable<FoodItemVariationDto>>> GetVariationsForFoodItem(string foodItemId)
     {
@@ -237,9 +244,14 @@ public class VariationsController(
         if (user.OwnedRestaurant == null)
             return BadRequest("User does not own a restaurant");
 
-        var foodItem = await foodItemRepository.GetFoodItemByIdAsync(foodItemId);
-        if (foodItem == null || foodItem.RestaurantId != user.OwnedRestaurant.Id)
+        // Fetch FoodItem with FoodCategory
+        var foodItem = await foodItemRepository.GetFoodItemWithCategoryAsync(foodItemId);
+        if (foodItem == null)
             return BadRequest("Invalid food item");
+
+        var restaurantId = foodItem.FoodCategory?.RestaurantId;
+        if (restaurantId == null || restaurantId != user.OwnedRestaurant.Id)
+            return BadRequest("Invalid food item or you do not own the restaurant");
 
         var variations = await foodItemVariationRepository.GetVariationsByFoodItemIdAsync(foodItemId);
 
@@ -261,6 +273,15 @@ public class VariationsController(
         if (fiv == null)
             return NotFound("Variation option association not found");
 
+        // Fetch FoodItem with FoodCategory to verify ownership
+        var foodItem = await foodItemRepository.GetFoodItemWithCategoryAsync(dto.FoodItemId);
+        if (foodItem == null)
+            return BadRequest("Invalid food item");
+
+        var restaurantId = foodItem.FoodCategory?.RestaurantId;
+        if (restaurantId == null || restaurantId != user.OwnedRestaurant.Id)
+            return BadRequest("You do not own this food item's restaurant");
+
         foodItemVariationRepository.DeleteFoodItemVariation(fiv);
 
         if (await foodItemVariationRepository.SaveAllAsync())
@@ -269,4 +290,3 @@ public class VariationsController(
         return BadRequest("Failed to remove variation option from food item");
     }
 }
-

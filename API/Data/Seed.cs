@@ -23,23 +23,30 @@ public class Seed
 
         if (users == null || restaurants == null) return;
 
-        // Assign unique Ids to users and set their roles
-        for (int i = 0; i < 20; i++)
-        {
-            var user = users[i];
+        // Identify the restaurant owner
+        string ownerUserId = "jS15TdaITTfjZB7eycCXOfzp7WW2";
+        var owner = users.FirstOrDefault(u => u.Id == ownerUserId);
 
-            if (i < restaurants.Count - 1)
-            {
-                // Assign restaurant to user
-                var restaurant = restaurants[i];
-                restaurant.Id = user.Id; // Use user Id as restaurant Id
-                user.OwnedRestaurant = restaurant;
-            }
+        if (owner == null)
+        {
+            Console.WriteLine("Restaurant owner not found in the user data.");
+            return;
         }
 
-        restaurants[9].Id = users[22].Id;
-        users[22].OwnedRestaurant = restaurants[9];
-        
+        if (restaurants.Count == 0)
+        {
+            Console.WriteLine("No restaurants found in the restaurant data.");
+            return;
+        }
+
+        // Assign the first (and only) restaurant to the owner
+        var restaurant = restaurants[0];
+        restaurant.Id = owner.Id; // Use user Id as restaurant Id to maintain relationship
+        owner.OwnedRestaurant = restaurant;
+
+        // Optionally, set other properties or relationships if needed
+        // For example, assign the restaurant to the user's navigation property
+
         // Add users to context
         context.Users.AddRange(users);
 
@@ -48,5 +55,7 @@ public class Seed
 
         // Save changes to context
         await context.SaveChangesAsync();
+
+        Console.WriteLine("Seeding completed successfully.");
     }
 }

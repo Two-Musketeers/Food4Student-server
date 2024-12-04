@@ -137,12 +137,16 @@ public class OrdersController(IMapper mapper,
         if (orderCreateDto.OrderItems == null || orderCreateDto.OrderItems.Count == 0)
             return BadRequest("Order must have at least one item.");
 
-        // Get the restaurant ID from the first item
+        // Get the restaurant ID from the first item's FoodCategory
         var firstFoodItem = await foodItemRepository.GetFoodItemByIdAsync(orderCreateDto.OrderItems.First().FoodItemId!);
         if (firstFoodItem == null)
             return BadRequest("FoodItem not found.");
 
-        var restaurantId = firstFoodItem.RestaurantId;
+        // Ensure FoodCategory is included in the firstFoodItem
+        if (firstFoodItem.FoodCategory == null || firstFoodItem.FoodCategory.RestaurantId == null)
+            return BadRequest("FoodItem does not belong to a valid FoodCategory or Restaurant.");
+
+        var restaurantId = firstFoodItem.FoodCategory.RestaurantId;
         if (restaurantId == null)
             return BadRequest("Restaurant not found.");
 
@@ -152,14 +156,17 @@ public class OrdersController(IMapper mapper,
             AppUserId = userId,
             RestaurantId = restaurantId,
             ShippingAddress = shippingAddress,
-            Note = orderCreateDto.Note // Assuming you have a Note property
+            Note = orderCreateDto.Note! // Assuming you have a Note property
         };
 
         // Verify all items belong to the same restaurant
         foreach (var itemDto in orderCreateDto.OrderItems)
         {
             var foodItem = await foodItemRepository.GetFoodItemByIdAsync(itemDto.FoodItemId!);
-            if (foodItem == null || foodItem.RestaurantId != restaurantId)
+            if (foodItem == null)
+                return BadRequest("FoodItem not found.");
+
+            if (foodItem.FoodCategory == null || foodItem.FoodCategory.RestaurantId != restaurantId)
                 return BadRequest("All items in the order must be from the same restaurant.");
 
             // Calculate the price including variations
