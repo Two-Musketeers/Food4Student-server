@@ -27,13 +27,13 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
     [Authorize]
     [HttpGet("{id}")]
-    public async Task<ActionResult<RestaurantDto>> GetRestaurantById(string id)
+    public async Task<ActionResult<RestaurantDetailDto>> GetRestaurantById(string id)
     {
-        var restaurant = await restaurantRepository.GetRestaurantByIdAsync(id);
+        var restaurant = await restaurantRepository.GetRestaurantWithDetailsAsync(id);
 
         if (restaurant == null) return NotFound();
 
-        var restaurantToReturn = mapper.Map<RestaurantDto>(restaurant);
+        var restaurantToReturn = mapper.Map<RestaurantDetailDto>(restaurant);
 
         return Ok(restaurantToReturn);
     }
@@ -159,6 +159,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         return Ok(foodItemsToReturn);
     }
+    
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpGet("food-categories/{foodCategoryId}/food-items")]
     public async Task<ActionResult<IEnumerable<FoodItemDto>>> GetFoodItemsByCategory(string foodCategoryId)

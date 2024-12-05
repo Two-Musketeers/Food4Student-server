@@ -1,9 +1,8 @@
-using System;
-
 namespace API.DTOs;
 
 public class VariationCreateDto
 {
     public string? Name { get; set; }
-    public bool IsMultiSelect { get; set; }
+    public int MinSelect { get; set; }
+    public int MaxSelect { get; set; }
 }

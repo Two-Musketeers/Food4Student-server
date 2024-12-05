@@ -1,6 +1,6 @@
 namespace API.DTOs;
 
-public class RestaurantDto
+public class RestaurantDetailDto
 {
     public required string Id { get; set; }
     public required bool IsApproved { get; set; }
@@ -13,4 +13,5 @@ public class RestaurantDto
     public string? BannerUrl { get; set; }
     public int TotalRatings { get; set; }
     public double AverageRating { get; set; }
+    public IEnumerable<FoodCategoryDto>? FoodCategories { get; set; }
 }

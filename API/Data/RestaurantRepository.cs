@@ -1,7 +1,6 @@
 using API.Entities;
 using API.Helpers;
 using API.Interfaces;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
@@ -26,7 +25,7 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
         return await context.Restaurants
             .Include(r => r.FoodCategories)
                 .ThenInclude(fc => fc.FoodItems)
-                    .ThenInclude(fi => fi.FoodItemPhoto)
+                    .ThenInclude(fi => fi.FoodItemVariations)
             .FirstOrDefaultAsync(r => r.Id == id);
     }
 
@@ -88,5 +87,27 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
             .ThenInclude(fc => fc.FoodItems)
                 .ThenInclude(fi => fi.FoodItemPhoto)
         .FirstOrDefaultAsync(r => r.Id == restaurantId);
+    }
+
+    public async Task<Restaurant?> GetRestaurantWithDetailsAsync(string id)
+    {
+        return await context.Restaurants
+            .Include(r => r.FoodCategories)
+                .ThenInclude(fc => fc.FoodItems)
+                    .ThenInclude(fi => fi.FoodItemVariations)
+                        .ThenInclude(fiv => fiv.Variation)
+            .Include(r => r.FoodCategories)
+                .ThenInclude(fc => fc.FoodItems)
+                    .ThenInclude(fi => fi.FoodItemVariations)
+                        .ThenInclude(fiv => fiv.VariationOption)
+            .Include(r => r.Ratings)
+            // Include Logo and Banner photos
+            .Include(r => r.Logo)
+            .Include(r => r.Banner)
+            // Include FoodItemPhotos
+            .Include(r => r.FoodCategories)
+                .ThenInclude(fc => fc.FoodItems)
+                    .ThenInclude(fi => fi.FoodItemPhoto)
+            .FirstOrDefaultAsync(r => r.Id == id);
     }
 }

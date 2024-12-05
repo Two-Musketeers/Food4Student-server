@@ -7,4 +7,5 @@ public class FoodItemDto
     public string? Description { get; set; }
     public string? FoodItemPhotoUrl { get; set; }
     public int BasePrice { get; set; }
+    public IEnumerable<FoodItemVariationDto>? FoodItemVariations { get; set; }
 }

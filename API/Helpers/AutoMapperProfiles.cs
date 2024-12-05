@@ -14,6 +14,12 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.TotalRatings, opt => opt.MapFrom(src => src.Ratings.Count))
             .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.Ratings.Count != 0 ? src.Ratings.Average(r => r.Stars) : 0));
 
+        CreateMap<Restaurant, RestaurantDetailDto>()
+            .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.Logo != null ? src.Logo.Url : null))
+                .ForMember(dest => dest.BannerUrl, opt => opt.MapFrom(src => src.Banner != null ? src.Banner.Url : null))
+                .ForMember(dest => dest.TotalRatings, opt => opt.MapFrom(src => src.Ratings.Count))
+                .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.Ratings.Count != 0 ? src.Ratings.Average(r => r.Stars) : 0));
+
         //Automapper for AppUser
         CreateMap<AppUser, UserDto>();
 
@@ -51,6 +57,12 @@ public class AutoMapperProfiles : Profile
         //Automapper for ShippingAddress
         CreateMap<ShippingAddressDto, ShippingAddress>();
         CreateMap<ShippingAddress, ShippingAddressDto>();
+
+        CreateMap<VariationCreateDto, Variation>();
+        CreateMap<Variation, VariationDto>()
+            .ForMember(dest => dest.VariationOptions, opt => opt.MapFrom(src => src.VariationOptions));
+        CreateMap<VariationOptionCreateDto, VariationOption>();
+        CreateMap<VariationOption, VariationOptionDto>();
 
         //Automapper for FoodItemVariation
         CreateMap<FoodItemVariation, FoodItemVariationDto>()

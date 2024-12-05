@@ -1,4 +1,3 @@
-using API.DTOs;
 using API.Entities;
 using API.Helpers;
 
@@ -11,8 +10,9 @@ public interface IRestaurantRepository
     void DeleteRestaurant(Restaurant restaurant);
     Task<bool> SaveAllAsync();
     Task<Restaurant?> GetRestaurantByIdAsync(string id);
-    Task<Restaurant?> GetRestaurantByNameAsync(string name);
+    Task<Restaurant?> GetRestaurantByNameAsync(string name); //Will use to query restaurant in the future
     Task<PagedList<Restaurant>> GetRestaurantsAsync(PaginationParams paginationParams);
     Task<PagedList<Restaurant>> GetApprovedRestaurantsAsync(PaginationParams paginationParams);
     Task<Restaurant?> GetRestaurantWithCategoriesAsync(string restaurantId);
+    Task<Restaurant?> GetRestaurantWithDetailsAsync(string id);
 }

@@ -17,7 +17,23 @@ public class VariationsController(
 {
     // Variation Controller
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPost("variations")]
+    [HttpGet("restaurant")]
+    public async Task<ActionResult<IEnumerable<VariationDto>>> GetVariationsByRestaurant()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var user = await userRepository.GetUserByIdAsync(userId);
+
+        if (user.OwnedRestaurant == null)
+            return BadRequest("User does not own a restaurant");
+
+        var variations = await variationRepository.GetVariationsByRestaurantIdAsync(user.OwnedRestaurant.Id);
+
+        var variationDtos = mapper.Map<IEnumerable<VariationDto>>(variations);
+        return Ok(variationDtos);
+    }
+
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
+    [HttpPost]
     public async Task<ActionResult<VariationDto>> CreateVariation(VariationCreateDto variationCreateDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -98,7 +114,7 @@ public class VariationsController(
 
     // VariationOption Controller
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPost("variations/{variationId}/options")]
+    [HttpPost("{variationId}/options")]
     public async Task<ActionResult<VariationOptionDto>> CreateVariationOption(string variationId, VariationOptionCreateDto optionCreateDto)
     {
         var variation = await variationRepository.GetVariationByIdAsync(variationId);
@@ -189,8 +205,8 @@ public class VariationsController(
     }
 
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPost("food-items/{foodItemId}/variations")]
-    public async Task<ActionResult> AddVariationToFoodItem(string foodItemId, FoodItemVariationCreateDto dto)
+    [HttpPost("food-items")]
+    public async Task<ActionResult> AddVariationToFoodItem(FoodItemVariationCreateDto dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
