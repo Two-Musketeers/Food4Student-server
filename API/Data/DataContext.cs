@@ -59,11 +59,10 @@ public class DataContext(DbContextOptions options) : DbContext(options)
             .HasForeignKey(oi => oi.OriginalFoodItemId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        //Configuration for FoodItemVariation
+        // Configuration for FoodItemVariation
         modelBuilder.Entity<FoodItemVariation>()
             .HasKey(fiv => new { fiv.FoodItemId, fiv.VariationId, fiv.VariationOptionId });
 
-        // Configure relationships
         modelBuilder.Entity<FoodItemVariation>()
             .HasOne(fiv => fiv.FoodItem)
             .WithMany(fi => fi.FoodItemVariations)
@@ -82,24 +81,47 @@ public class DataContext(DbContextOptions options) : DbContext(options)
             .HasForeignKey(fiv => fiv.VariationOptionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-             // Configure OrderItemVariation composite key
+        // Configure OrderItemVariation composite key
         modelBuilder.Entity<OrderItemVariation>()
             .HasKey(oiv => new { oiv.OrderItemId, oiv.VariationId, oiv.VariationOptionId });
 
-        // Configure relationships
         modelBuilder.Entity<OrderItemVariation>()
             .HasOne(oiv => oiv.OrderItem)
             .WithMany(oi => oi.OrderItemVariations)
-            .HasForeignKey(oiv => oiv.OrderItemId);
+            .HasForeignKey(oiv => oiv.OrderItemId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<OrderItemVariation>()
             .HasOne(oiv => oiv.Variation)
             .WithMany()
-            .HasForeignKey(oiv => oiv.VariationId);
+            .HasForeignKey(oiv => oiv.VariationId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<OrderItemVariation>()
             .HasOne(oiv => oiv.VariationOption)
             .WithMany()
-            .HasForeignKey(oiv => oiv.VariationOptionId);
+            .HasForeignKey(oiv => oiv.VariationOptionId)
+            .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete to preserve order history
+
+        // Configuration for Restaurant -> FoodCategories
+        modelBuilder.Entity<Restaurant>()
+            .HasMany(r => r.FoodCategories)
+            .WithOne(fc => fc.Restaurant)
+            .HasForeignKey(fc => fc.RestaurantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure FoodCategory -> FoodItems relationship
+        modelBuilder.Entity<FoodCategory>()
+            .HasMany(fc => fc.FoodItems)
+            .WithOne(fi => fi.FoodCategory)
+            .HasForeignKey(fi => fi.FoodCategoryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Restaurant -> Ratings relationship
+        modelBuilder.Entity<Restaurant>()
+            .HasMany(r => r.Ratings)
+            .WithOne(rt => rt.Restaurant)
+            .HasForeignKey(rt => rt.RestaurantId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

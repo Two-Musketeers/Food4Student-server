@@ -5,8 +5,9 @@ public class OrderItemDto
     public string? Id { get; set;}
     public string? FoodName { get; set; }
     public string? FoodDescription { get; set; }
-    public int Price { get; set; } // TODO: ID
+    public int Price { get; set; }
     public int Quantity { get; set; }
-    public string? FoodItemPhotoUrl { get; set; } // TODO: FoodItemPhotoUrl
+    public string? FoodItemPhotoUrl { get; set; }
+    public string? OriginalFoodItemId { get; set; }
     public List<OrderItemVariationDto> SelectedVariations { get; set; } = [];
 }

@@ -43,6 +43,8 @@ public class AutoMapperProfiles : Profile
         //Automapper for Order
         CreateMap<CreateOrderItemDto, OrderItem>();
 
+        CreateMap<Order, OrderDto>();
+
         CreateMap<OrderItemVariationDto, OrderItemVariation>();
 
         CreateMap<OrderItem, OrderItemDto>()
@@ -63,6 +65,9 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.VariationOptions, opt => opt.MapFrom(src => src.VariationOptions));
         CreateMap<VariationOptionCreateDto, VariationOption>();
         CreateMap<VariationOption, VariationOptionDto>();
+
+        CreateMap<FoodCategory, FoodCategoryDto>();
+        CreateMap<FoodCategoryCreateDto, FoodCategory>();
 
         //Automapper for FoodItemVariation
         CreateMap<FoodItemVariation, FoodItemVariationDto>()

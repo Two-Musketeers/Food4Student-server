@@ -30,6 +30,7 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
     {
         return await context.FoodItems
             .Include(f => f.FoodItemPhoto)
+            .Include(fi => fi.FoodCategory)
             .FirstOrDefaultAsync(f => f.Id == id);
     }
 
@@ -72,5 +73,14 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
     public void UpdateFoodItem(FoodItem foodItem)
     {
         context.FoodItems.Update(foodItem);
+    }
+
+    public async Task<IEnumerable<FoodItem>> GetFoodItemsWithCategoryAsync(IEnumerable<string> foodItemIds)
+    {
+        return await context.FoodItems
+            .Include(fi => fi.FoodCategory) // Eagerly load the FoodCategory
+            .Include(fi => fi.FoodItemPhoto)
+            .Where(fi => foodItemIds.Contains(fi.Id))
+            .ToListAsync();
     }
 }

@@ -20,6 +20,7 @@ public class OrderRepository(DataContext context) : IOrderRepository
     {
         return await context.Orders
             .Include(o => o.ShippingAddress)
+            .Include(o => o.Restaurant) // Include Restaurant
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.FoodItemPhoto)
             .Include(o => o.OrderItems)
@@ -36,8 +37,15 @@ public class OrderRepository(DataContext context) : IOrderRepository
         return await context.Orders
             .Where(o => o.AppUserId == userId)
             .Include(o => o.ShippingAddress)
+            .Include(o => o.Restaurant) // Include Restaurant
             .Include(o => o.OrderItems)
-            .ThenInclude(oi => oi.FoodItemPhoto)
+                .ThenInclude(oi => oi.FoodItemPhoto)
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.OrderItemVariations)
+                    .ThenInclude(oiv => oiv.Variation)
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.OrderItemVariations)
+                    .ThenInclude(oiv => oiv.VariationOption)
             .ToListAsync();
     }
 
@@ -46,6 +54,7 @@ public class OrderRepository(DataContext context) : IOrderRepository
         return await context.Orders
             .Where(o => o.RestaurantId == restaurantId)
             .Include(o => o.ShippingAddress)
+            .Include(o => o.Restaurant) // Include Restaurant
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.FoodItemPhoto)
             .Include(o => o.OrderItems)
