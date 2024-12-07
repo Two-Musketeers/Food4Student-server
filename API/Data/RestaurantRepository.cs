@@ -57,8 +57,11 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
     {
         var query = context.Restaurants
             .Include(r => r.FoodCategories)
-                    .ThenInclude(fc => fc.FoodItems)
-                        .ThenInclude(fi => fi.FoodItemPhoto)
+                .ThenInclude(m => m.FoodItems)
+                    .ThenInclude(f => f.FoodItemPhoto)
+            .Include(r => r.Logo)
+            .Include(r => r.Banner)
+            .Include(r => r.Ratings)
             .Where(r => r.IsApproved)
             .AsQueryable();
 

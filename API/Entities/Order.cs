@@ -4,7 +4,7 @@ public class Order
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public List<OrderItem> OrderItems { get; set; } = [];
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Rating? Rating { get; set; }
     public string Status { get; set; } = "Pending";
     public ShippingAddress? ShippingAddress { get; set; }
