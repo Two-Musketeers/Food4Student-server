@@ -18,7 +18,7 @@ public class DataContext(DbContextOptions options) : DbContext(options)
     public DbSet<FoodCategory> FoodCategories { get; set; } = null!;
     public DbSet<FoodItemVariation> FoodItemVariations { get; set; } = null!;
     public DbSet<Photo> Photos { get; set; } = null!;
-
+    public DbSet<DeviceToken> DeviceTokens { get; set; } = null!;
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

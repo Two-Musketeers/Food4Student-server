@@ -2,11 +2,13 @@ using System.Security.Claims;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
+using FirebaseAdmin.Messaging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 /// <summary>
-/// Controller for register and delete user account
+/// Controller for managing user accounts and device tokens
 /// </summary>
 public class AccountController(IUserRepository userRepository,
     IFirebaseService firebaseService) : BaseApiController
@@ -97,6 +99,101 @@ public class AccountController(IUserRepository userRepository,
         return Ok("User has been updated");
     }
 
+    [Authorize]
+    [HttpPost("device-token")]
+    public async Task<ActionResult> RegisterDeviceToken(DeviceTokenDto deviceTokenDto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        if (await userRepository.TokenExists(deviceTokenDto.Token, userId)) return BadRequest("Device token already exists");
+
+        if (string.IsNullOrEmpty(deviceTokenDto.Token)) return BadRequest("Invalid device token");
+
+        var deviceToken = new DeviceToken
+        {
+            Token = deviceTokenDto.Token,
+            AppUserId = userId
+        };
+
+        var user = await userRepository.GetMemberAsync(userId);
+
+        if (user == null) return NotFound();
+
+        user.DeviceTokens.Add(deviceToken);
+
+        var result = await userRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to add device token");
+
+        return Ok("Device token has been added");
+    }
+
+    [Authorize]
+    [HttpPost("test-notification")]
+    public async Task<ActionResult> SendTestNotification()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var user = await userRepository.GetMemberAsync(userId);
+
+        if (user == null) return NotFound();
+
+        var userDeviceToken = await userRepository.GetDeviceTokens(userId!);
+        if (userDeviceToken.Count > 0)
+        {
+            var notification = new MulticastMessage
+            {
+                Tokens = userDeviceToken,
+                Data = new Dictionary<string, string>
+                {
+                    { "userId", user.Id },
+                    { "phoneNumber", user.PhoneNumber },
+                },
+                Notification = new Notification
+                {
+                    Title = "Thông tin của bạn",
+                    Body = " Coi thử body như nào"
+                }
+            };
+
+            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(notification);
+        }
+
+        return Ok("Test notification has been sent");
+    }
+
+    [Authorize]
+    [HttpPost("test-notification/{userId}")]
+    public async Task<ActionResult> SendTestNotification(string userId)
+    {
+        var user = await userRepository.GetMemberAsync(userId);
+
+        if (user == null) return NotFound();
+
+        var userDeviceToken = await userRepository.GetDeviceTokens(userId!);
+        if (userDeviceToken.Count > 0)
+        {
+            var notification = new MulticastMessage
+            {
+                Tokens = userDeviceToken,
+                Data = new Dictionary<string, string>
+                {
+                    { "userId", user.Id },
+                    { "phoneNumber", user.PhoneNumber },
+                },
+                Notification = new Notification
+                {
+                    Title = "Thông tin của bạn",
+                    Body = " Coi thử body như nào"
+                }
+            };
+
+            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(notification);
+        }
+
+        return Ok("Test notification has been sent");
+    }
+
 #if DEBUG
     [HttpPost("admin-register")]
     public async Task<ActionResult> RegisterAdmin(UserDto userDto)
@@ -145,6 +242,5 @@ public class AccountController(IUserRepository userRepository,
 
         return Ok("Moderator has successfully registered");
     }
-#endif
+#endif   
 }
-

@@ -3,6 +3,7 @@ using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using AutoMapper;
+using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +14,8 @@ public class OrdersController(IMapper mapper,
     IFoodItemRepository foodItemRepository,
     IRestaurantRepository restaurantRepository,
     IVariationRepository variationRepository,
-    IVariationOptionRepository variationOptionRepository) : BaseApiController
+    IVariationOptionRepository variationOptionRepository,
+    IUserRepository userRepository) : BaseApiController
 {
     // Get all orders for the authenticated restaurant owner
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
@@ -126,14 +128,8 @@ public class OrdersController(IMapper mapper,
     [HttpPost]
     public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] OrderCreateDto orderCreateDto)
     {
-        // Check model state validity
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
         // Retrieve the authenticated user's ID
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null)
-            return Unauthorized(new { message = "User not authenticated." });
 
         // Validate shipping address
         var shippingAddress = await shippingAddressRepository.GetShippingAddressByIdAsync(orderCreateDto.ShippingInfoId);
@@ -155,7 +151,7 @@ public class OrdersController(IMapper mapper,
             return BadRequest(new { message = "All items in the order must be from the specified restaurant." });
 
         // Fetch the Restaurant and verify its existence and approval status
-        var restaurant = await restaurantRepository.GetRestaurantByIdAsync(orderCreateDto.RestaurantId);
+        var restaurant = await restaurantRepository.GetRestaurantByIdAsync(orderCreateDto.RestaurantId!);
         if (restaurant == null)
             return BadRequest(new { message = "Restaurant not found." });
 
@@ -247,6 +243,47 @@ public class OrdersController(IMapper mapper,
         // Map the Order entity to OrderDto for the response
         var orderDto = mapper.Map<OrderDto>(order);
         orderDto.RestaurantName = restaurant.Name;
+
+        var restaurantOwnerDeviceToken = await userRepository.GetDeviceTokens(orderCreateDto.RestaurantId);
+        if (restaurantOwnerDeviceToken.Count > 0)
+        {
+            var notification = new MulticastMessage
+            {
+                Tokens = restaurantOwnerDeviceToken,
+                Data = new Dictionary<string, string>
+                {
+                    { "Mã đơn hàng", order.Id },
+                    { "Trạng thái đơn hàng", order.Status },
+                },
+                Notification = new Notification
+                {
+                    Title = "Bạn có đơn hàng mới",
+                    Body = $"Đơn hàng {order.Id} đã được tạo."
+                }
+            };
+
+            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(notification);
+        }
+        var userDeviceToken = await userRepository.GetDeviceTokens(userId!);
+        if (userDeviceToken.Count > 0)
+        {
+            var notification = new MulticastMessage
+            {
+                Tokens = userDeviceToken,
+                Data = new Dictionary<string, string>
+                {
+                    { "Mã đơn hàng", order.Id },
+                    { "Trạng thái đơn hàng", order.Status },
+                },
+                Notification = new Notification
+                {
+                    Title = "Đơn hàng của bạn",
+                    Body = $"Đơn hàng {order.Id} đã được tạo."
+                }
+            };
+
+            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(notification);
+        }
         return CreatedAtAction(nameof(GetOrderById), new { id = orderDto.Id }, orderDto);
     }
 }

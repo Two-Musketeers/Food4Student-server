@@ -13,4 +13,6 @@ public interface IUserRepository
     void RemoveUser(AppUser user);
     Task<bool> SaveAllAsync();
     Task<bool> UserExists(string userId);
+    Task<bool> TokenExists(string token, string userId);
+    Task<List<string>> GetDeviceTokens(string userId);
 }

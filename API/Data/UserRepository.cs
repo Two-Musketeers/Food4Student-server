@@ -54,4 +54,17 @@ public class UserRepository(DataContext context) : IUserRepository
                 ?? throw new Exception("User not found");
         return user;
     }
+
+    public async Task<bool> TokenExists(string token, string userId)
+    {
+        var deviceToken = await context.DeviceTokens.AnyAsync(t => t.Token == token && t.AppUserId == userId);
+        if (deviceToken) return true;
+        return false;
+    }
+
+    public async Task<List<string>> GetDeviceTokens(string userId)
+    {
+        var tokenList = await context.DeviceTokens.Where(t => t.AppUserId == userId).ToListAsync();
+        return tokenList.Select(t => t.Token).ToList();
+    }
 }

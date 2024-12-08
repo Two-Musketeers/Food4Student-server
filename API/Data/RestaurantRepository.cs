@@ -56,9 +56,6 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
     public async Task<PagedList<Restaurant>> GetApprovedRestaurantsAsync(PaginationParams paginationParams)
     {
         var query = context.Restaurants
-            .Include(r => r.FoodCategories)
-                .ThenInclude(m => m.FoodItems)
-                    .ThenInclude(f => f.FoodItemPhoto)
             .Include(r => r.Logo)
             .Include(r => r.Banner)
             .Include(r => r.Ratings)

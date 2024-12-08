@@ -8,6 +8,7 @@ public class AppUser
     public required string Id { get; set; }
     public required string PhoneNumber { get; set; }
     public List<ShippingAddress> ShippingAddresses { get; set; } = [];
+    public ICollection<DeviceToken> DeviceTokens { get; set; } = [];
     public List<Order> Orders { get; set; } = [];
     public List<RestaurantLike> FavoriteRestaurants { get; set; } = [];
     public Restaurant? OwnedRestaurant { get; set; }
