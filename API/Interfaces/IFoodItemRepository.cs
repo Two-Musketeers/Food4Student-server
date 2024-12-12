@@ -13,6 +13,6 @@ public interface IFoodItemRepository
     Task<FoodItem?> GetFoodItemByIdDirectlyAsync(string id);
     Task<IEnumerable<FoodItem>> GetAllFoodItemsByRestaurantAsync(string restaurantId);
     Task<FoodItem?> GetFoodItemWithCategoryAsync(string id);
-    Task<IEnumerable<FoodItem>> GetFoodItemsWithCategoryAsync(IEnumerable<string> foodItemIds);
+    Task<IEnumerable<FoodItem>> GetFoodItemsWithCategoryAsync(List<string> foodItemIds);
     Task<bool> SaveAllAsync();
 }

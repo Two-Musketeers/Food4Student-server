@@ -23,7 +23,7 @@ public class VariationsController(
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
 
-        if (user.OwnedRestaurant == null)
+        if (user.OwnedRestaurant == null || user.OwnedRestaurant.Id == null)
             return BadRequest("User does not own a restaurant");
 
         var variations = await variationRepository.GetVariationsByRestaurantIdAsync(user.OwnedRestaurant.Id);
@@ -79,6 +79,9 @@ public class VariationsController(
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
 
+        if (user == null || user.OwnedRestaurant == null)
+            return BadRequest("User does not own a restaurant");
+
         if (variation.RestaurantId != user.OwnedRestaurant.Id)
             return Unauthorized("You do not own this variation");
 
@@ -100,6 +103,9 @@ public class VariationsController(
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
+
+        if (user == null || user.OwnedRestaurant == null)
+            return BadRequest("User does not own a restaurant");
 
         if (variation.RestaurantId != user.OwnedRestaurant.Id)
             return Unauthorized("You do not own this variation");
@@ -123,6 +129,9 @@ public class VariationsController(
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
+
+        if (user == null || user.OwnedRestaurant == null)
+            return BadRequest("User does not own a restaurant");
 
         if (variation.RestaurantId != user.OwnedRestaurant.Id)
             return Unauthorized("You do not own this variation");
@@ -158,7 +167,7 @@ public class VariationsController(
     public async Task<ActionResult> UpdateVariationOption(string id, VariationOptionCreateDto optionUpdateDto)
     {
         var option = await variationOptionRepository.GetVariationOptionByIdAsync(id);
-        if (option == null)
+        if (option == null || option.VariationId == null)
             return NotFound("Variation option not found");
 
         var variation = await variationRepository.GetVariationByIdAsync(option.VariationId);
@@ -167,6 +176,9 @@ public class VariationsController(
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
+
+        if (user == null || user.OwnedRestaurant == null)
+            return BadRequest("User does not own a restaurant");
 
         if (variation.RestaurantId != user.OwnedRestaurant.Id)
             return Unauthorized("You do not own this variation option");
@@ -183,7 +195,7 @@ public class VariationsController(
     public async Task<ActionResult> DeleteVariationOption(string id)
     {
         var option = await variationOptionRepository.GetVariationOptionByIdAsync(id);
-        if (option == null)
+        if (option == null || option.VariationId == null)
             return NotFound("Variation option not found");
 
         var variation = await variationRepository.GetVariationByIdAsync(option.VariationId);
@@ -192,7 +204,8 @@ public class VariationsController(
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
-
+        if (user == null || user.OwnedRestaurant == null)
+            return NotFound("User is not found or do not owned a restaurant");
         if (variation.RestaurantId != user.OwnedRestaurant.Id)
             return Unauthorized("You do not own this variation option");
 
@@ -213,6 +226,9 @@ public class VariationsController(
 
         if (user.OwnedRestaurant == null)
             return BadRequest("User does not own a restaurant");
+
+        if (dto.FoodItemId == null || dto.VariationId == null || dto.VariationOptionId == null)
+            return BadRequest("Invalid request");
 
         // Fetch FoodItem with FoodCategory
         var foodItem = await foodItemRepository.GetFoodItemWithCategoryAsync(dto.FoodItemId);
@@ -283,6 +299,9 @@ public class VariationsController(
 
         if (user.OwnedRestaurant == null)
             return BadRequest("User does not own a restaurant");
+
+        if (dto.FoodItemId == null || dto.VariationId == null || dto.VariationOptionId == null)
+            return BadRequest("Invalid request");
 
         var fiv = await foodItemVariationRepository.GetFoodItemVariationAsync(
             dto.FoodItemId, dto.VariationId, dto.VariationOptionId);

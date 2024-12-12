@@ -164,6 +164,7 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
         if (order.AppUserId != userId) return Unauthorized("This order does not belong to you.");
         var user = await userRepository.GetUserByIdAsync(userId);
         if (order.Status != "Delivered") return BadRequest("You can only rate a restaurant after the order has been delivered.");
+        if (order.RestaurantId == null) return BadRequest("This order does not have a restaurant.");
         var restaurant = await restaurantRepository.GetRestaurantByIdAsync(order.RestaurantId);
         if (restaurant == null) return NotFound("Restaurant not found.");
         if (restaurant.IsApproved == false) return BadRequest("You cannot rate an unapproved restaurant.");
@@ -312,5 +313,67 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
         if (!result) return BadRequest("Failed to mark notifications as read");
 
         return Ok(mapper.Map<IEnumerable<UserNotificationDto>>(notifications));
+    }
+
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpPost("notifications/{notificationId}")]
+    public async Task<ActionResult<UserNotificationDto>> ReadNotification(string notificationId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var notification = await userNotificationRepository.GetUserNotificationByIdAsync(notificationId);
+
+        if (notification == null) return NotFound("Notification not found");
+
+        if (notification.AppUserId != userId) return Forbid();
+
+        notification.IsUnread = false;
+
+        var result = await userNotificationRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to mark notification as read");
+
+        return Ok(mapper.Map<UserNotificationDto>(notification));
+    }
+
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpDelete("notifications/{notificationId}")]
+    public async Task<ActionResult> DeleteNotification(string notificationId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var notification = await userNotificationRepository.GetUserNotificationByIdAsync(notificationId);
+
+        if (notification == null) return NotFound("Notification not found");
+
+        if (notification.AppUserId != userId) return Forbid();
+
+        userNotificationRepository.RemoveUserNotification(notification);
+
+        var result = await userNotificationRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to delete notification");
+
+        return Ok("Notification has been deleted successfully");
+    }
+
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpDelete("notifications")]
+    public async Task<ActionResult> DeleteAllNotifications()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var notifications = await userNotificationRepository.GetUserNotificationsAsync(userId);
+
+        foreach (var notification in notifications)
+        {
+            userNotificationRepository.RemoveUserNotification(notification);
+        }
+
+        var result = await userNotificationRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to delete notifications");
+
+        return Ok("Notifications have been deleted successfully");
     }
 }

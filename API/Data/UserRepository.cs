@@ -48,11 +48,19 @@ public class UserRepository(DataContext context) : IUserRepository
             .Include(u => u.ShippingAddresses)
             .Include(u => u.DeviceTokens)
             .Include(u => u.OwnedRestaurant)
-                .ThenInclude(r => r.FoodCategories)
-                    .ThenInclude(m => m.FoodItems)
-                        .ThenInclude(f => f.FoodItemPhoto)
             .SingleOrDefaultAsync(u => u.Id == id)
                 ?? throw new Exception("User not found");
+
+        if (user.OwnedRestaurant != null)
+        {
+            await context.Entry(user.OwnedRestaurant)
+                .Collection(r => r.FoodCategories)
+                .Query()
+                .Include(m => m.FoodItems)
+                    .ThenInclude(f => f.FoodItemPhoto)
+                .LoadAsync();
+        }
+
         return user;
     }
 

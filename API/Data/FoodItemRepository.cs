@@ -75,7 +75,7 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
         context.FoodItems.Update(foodItem);
     }
 
-    public async Task<IEnumerable<FoodItem>> GetFoodItemsWithCategoryAsync(IEnumerable<string> foodItemIds)
+    public async Task<IEnumerable<FoodItem>> GetFoodItemsWithCategoryAsync(List<string> foodItemIds)
     {
         return await context.FoodItems
             .Include(fi => fi.FoodCategory) // Eagerly load the FoodCategory

@@ -180,10 +180,12 @@ public class OrdersController(IMapper mapper,
 
     [Authorize(Policy = "RequireUserRole")]
     [HttpPost]
-    public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] OrderCreateDto orderCreateDto)
+    public async Task<ActionResult<OrderDto>> CreateOrder(OrderCreateDto orderCreateDto)
     {
         // Retrieve the authenticated user's ID
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (orderCreateDto == null || orderCreateDto.ShippingInfoId == null) return BadRequest("Bad orderCreateDto go kys");
 
         // Validate shipping address
         var shippingAddress = await shippingAddressRepository.GetShippingAddressByIdAsync(orderCreateDto.ShippingInfoId);
@@ -191,7 +193,14 @@ public class OrdersController(IMapper mapper,
             return BadRequest(new { message = "Invalid shipping address." });
 
         // Extract all non-null FoodItemIds from the order items
-        var foodItemIds = orderCreateDto.OrderItems.Select(oi => oi.FoodItemId).Distinct().ToList();
+        var foodItemIds = orderCreateDto.OrderItems
+            .Select(oi => oi.FoodItemId)
+            .Where(id => id != null) // Filter out null values
+            .Distinct()
+            .Cast<string>() // Cast to non-nullable string
+            .ToList();
+
+        if (foodItemIds == null) return BadRequest("FoodItemIds are null");
 
         // Fetch all corresponding FoodItems with their categories in a single query
         var foodItems = await foodItemRepository.GetFoodItemsWithCategoryAsync(foodItemIds);
@@ -296,9 +305,11 @@ public class OrdersController(IMapper mapper,
 
         // Map the Order entity to OrderDto for the response
         var orderDto = mapper.Map<OrderDto>(order);
+
+        if (orderDto == null || orderDto.RestaurantId == null) return BadRequest("OrderDto got fucked");
         orderDto.RestaurantName = restaurant.Name;
 
-        var restaurantOwnerDeviceToken = await userRepository.GetDeviceTokens(orderCreateDto.RestaurantId);
+        var restaurantOwnerDeviceToken = await userRepository.GetDeviceTokens(orderDto.RestaurantId);
         if (restaurantOwnerDeviceToken.Count > 0)
         {
             var notification = new MulticastMessage

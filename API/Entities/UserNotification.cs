@@ -11,6 +11,6 @@ public class UserNotification
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public bool IsUnread { get; set; } = true;
 
-    public string AppUserId { get; set; }
-    public AppUser AppUser { get; set; }
+    public string? AppUserId { get; set; }
+    public AppUser AppUser { get; set; } = null!;
 }
