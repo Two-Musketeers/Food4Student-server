@@ -13,7 +13,7 @@ namespace API.Controllers;
 public class UsersController(IShippingAddressRepository shippingAddressRepository,
     IUserRepository userRepository, IMapper mapper, ILikeRepository likeRepository,
     IRestaurantRepository restaurantRepository, IRatingRepository ratingRepository,
-    IOrderRepository orderRepository, IFoodItemRepository foodItemRepository) : BaseApiController
+    IOrderRepository orderRepository, IUserNotificationRepository userNotificationRepository) : BaseApiController
 {
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpGet("owned-restaurant")]
@@ -33,7 +33,7 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
     // Address Requests
     [Authorize(Policy = "RequireUserRole")]
     [HttpPost("shipping-addresses")]
-    public async Task<ActionResult> AddShippingAddress(CreateShippingAddressDto shippingAddressDto)
+    public async Task<ActionResult<ShippingAddressDto>> AddShippingAddress(CreateShippingAddressDto shippingAddressDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -262,8 +262,8 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
         if (order.AppUserId != userId)
             return Unauthorized("You do not have access to delete this order.");
 
-        if (order.Status != "Pending")
-            return BadRequest("You cannot delete an order that is not pending.");
+        if (order.Status != "Pending" || order.Status != "Delivered")
+            return BadRequest("You cannot delete an order that is not pending or not delivered.");
 
         orderRepository.DeleteOrder(order);
 
@@ -271,5 +271,46 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
             return NoContent();
 
         return BadRequest("Failed to delete order.");
+    }
+
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpGet("notifications")]
+    public async Task<ActionResult<IEnumerable<UserNotificationDto>>> GetNotifications()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var notifications = await userNotificationRepository.GetUserNotificationsAsync(userId);
+
+        var notificationsDto = notifications.Select(n => new UserNotificationDto
+        {
+            Id = n.Id,
+            Image = n.Image,
+            Title = n.Title,
+            Content = n.Content,
+            Timestamp = n.Timestamp.ToUniversalTime(), // Ensures UTC
+            IsUnread = n.IsUnread
+        }).ToList();
+
+        return Ok(notificationsDto);
+    }
+
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpPost("notifications")]
+    public async Task<ActionResult<IEnumerable<UserNotificationDto>>> ReadAllNotifications()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var notifications = await userNotificationRepository.GetUserNotificationsAsync(userId);
+
+        foreach (var notification in notifications)
+        {
+            notification.IsUnread = false;
+        }
+
+        var result = await userNotificationRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to mark notifications as read");
+
+        return Ok(mapper.Map<IEnumerable<UserNotificationDto>>(notifications));
     }
 }

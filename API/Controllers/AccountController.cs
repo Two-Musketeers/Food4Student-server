@@ -14,13 +14,13 @@ public class AccountController(IUserRepository userRepository,
     IFirebaseService firebaseService) : BaseApiController
 {
     [HttpPost("user-register")]
-    public async Task<ActionResult> Register(UserDto userDto)
+    public async Task<ActionResult> RegisterUser(RegisterAccountDto userDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         if (await userRepository.UserExists(userId)) return BadRequest("How did you even get here ?");
 
-        if (userDto.Role != "User") return BadRequest("You can only register as a User");
+        if (string.IsNullOrEmpty(userDto.PhoneNumber)) return BadRequest("Invalid phone number");
 
         var user = new AppUser
         {
@@ -39,12 +39,18 @@ public class AccountController(IUserRepository userRepository,
         return Ok("User has successfully registered");
     }
 
-    [HttpPost("restaurant-register")]
-    public async Task<ActionResult> RegisterRestaurant(UserDto userDto)
+    [HttpPost("restaurantOwner-register")]
+    public async Task<ActionResult> RegisterRestaurantOwner(UserDto userDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         if (await userRepository.UserExists(userId)) return BadRequest("How did you even get here ?");
+
+        if (string.IsNullOrEmpty(userDto.PhoneNumber)) return BadRequest("Invalid phone number");
+
+        var role = firebaseService.GetUserRoleAsync(userId);
+
+        if (role != null) return BadRequest("You are already registered");
 
         var user = new AppUser
         {
@@ -101,7 +107,7 @@ public class AccountController(IUserRepository userRepository,
 
     [Authorize]
     [HttpPost("device-token")]
-    public async Task<ActionResult> RegisterDeviceToken(DeviceTokenDto deviceTokenDto)
+    public async Task<ActionResult<UserDto>> RegisterDeviceToken(DeviceTokenDto deviceTokenDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -125,7 +131,79 @@ public class AccountController(IUserRepository userRepository,
 
         if (!result) return BadRequest("Failed to add device token");
 
-        return Ok("Device token has been added");
+        return Ok(user);
+    }
+
+    [Authorize]
+    [HttpDelete("device-token/{token}")]
+    public async Task<ActionResult<UserDto>> DeleteDeviceToken(string token)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var user = await userRepository.GetMemberAsync(userId);
+
+        if (user == null) return NotFound();
+
+        var deviceToken = user.DeviceTokens.FirstOrDefault(x => x.Token == token);
+
+        if (deviceToken == null) return NotFound();
+
+        user.DeviceTokens.Remove(deviceToken);
+
+        var result = await userRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to delete device token");
+
+        return Ok(user);
+    }
+
+#if DEBUG
+    [HttpPost("admin-register")]
+    public async Task<ActionResult> RegisterAdmin(UserDto userDto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        if (await userRepository.UserExists(userId)) return BadRequest("How did you even get here ?");
+
+        var user = new AppUser
+        {
+            Id = userId,
+            PhoneNumber = userDto.PhoneNumber,
+        };
+
+        userRepository.AddUser(user);
+
+        var result = await userRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to register admin");
+
+        await firebaseService.AssignRoleAsync(userId, "Admin");
+
+        return Ok("Admin has successfully registered");
+    }
+
+    [HttpPost("moderator-register")]
+    public async Task<ActionResult> RegisterModerator(UserDto userDto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        if (await userRepository.UserExists(userId)) return BadRequest("How did you even get here ?");
+
+        var user = new AppUser
+        {
+            Id = userId,
+            PhoneNumber = userDto.PhoneNumber,
+        };
+
+        userRepository.AddUser(user);
+
+        var result = await userRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to register moderator");
+
+        await firebaseService.AssignRoleAsync(userId, "Moderator");
+
+        return Ok("Moderator has successfully registered");
     }
 
     [Authorize]
@@ -192,55 +270,6 @@ public class AccountController(IUserRepository userRepository,
         }
 
         return Ok("Test notification has been sent");
-    }
-
-#if DEBUG
-    [HttpPost("admin-register")]
-    public async Task<ActionResult> RegisterAdmin(UserDto userDto)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-        if (await userRepository.UserExists(userId)) return BadRequest("How did you even get here ?");
-
-        var user = new AppUser
-        {
-            Id = userId,
-            PhoneNumber = userDto.PhoneNumber,
-        };
-
-        userRepository.AddUser(user);
-
-        var result = await userRepository.SaveAllAsync();
-
-        if (!result) return BadRequest("Failed to register admin");
-
-        await firebaseService.AssignRoleAsync(userId, "Admin");
-
-        return Ok("Admin has successfully registered");
-    }
-
-    [HttpPost("moderator-register")]
-    public async Task<ActionResult> RegisterModerator(UserDto userDto)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-        if (await userRepository.UserExists(userId)) return BadRequest("How did you even get here ?");
-
-        var user = new AppUser
-        {
-            Id = userId,
-            PhoneNumber = userDto.PhoneNumber,
-        };
-
-        userRepository.AddUser(user);
-
-        var result = await userRepository.SaveAllAsync();
-
-        if (!result) return BadRequest("Failed to register moderator");
-
-        await firebaseService.AssignRoleAsync(userId, "Moderator");
-
-        return Ok("Moderator has successfully registered");
     }
 #endif   
 }

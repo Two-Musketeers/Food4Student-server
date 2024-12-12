@@ -76,5 +76,8 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.VariationOptionId, opt => opt.MapFrom(src => src.VariationOption.Id))
             .ForMember(dest => dest.VariationOptionName, opt => opt.MapFrom(src => src.VariationOption.Name))
             .ForMember(dest => dest.PriceAdjustment, opt => opt.MapFrom(src => src.VariationOption.PriceAdjustment));
+
+        CreateMap<UserNotification, UserNotificationDto>()
+            .ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => src.Timestamp));
     }
 }

@@ -46,6 +46,7 @@ public class UserRepository(DataContext context) : IUserRepository
     {
         var user = await context.Users
             .Include(u => u.ShippingAddresses)
+            .Include(u => u.DeviceTokens)
             .Include(u => u.OwnedRestaurant)
                 .ThenInclude(r => r.FoodCategories)
                     .ThenInclude(m => m.FoodItems)

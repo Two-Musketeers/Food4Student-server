@@ -23,6 +23,8 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
     public async Task<Restaurant?> GetRestaurantByIdAsync(string id)
     {
         return await context.Restaurants
+            .Include(r => r.Logo)
+            .Include(r => r.Banner)
             .Include(r => r.FoodCategories)
                 .ThenInclude(fc => fc.FoodItems)
                     .ThenInclude(fi => fi.FoodItemVariations)

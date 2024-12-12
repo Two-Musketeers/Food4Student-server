@@ -27,7 +27,7 @@ public class FirebaseAuthenticationMiddleware(
 // #if DEBUG
 //         var (dSub, dRole) = token switch
 //         {
-//             "user" => ("87UmF1DIVtWTLjvo7ak54diwN3w2", "User"),
+//             "user" => ("99abD8bDz2airpXC7nUuhqEQ6uY2", "User"),
 //             "resOwn" => ("jS15TdaITTfjZB7eycCXOfzp7WW2", "RestaurantOwner"),
 //             "admin" => ("hcz8XP1E2og0W3UrqOwWwi8Q4D92", "Admin"),
 //             _ => ("lmao what", "no")

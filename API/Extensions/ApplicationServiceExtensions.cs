@@ -33,6 +33,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IFoodItemVariationRepository, FoodItemVariationRepository>();
         services.AddScoped<IFoodCategoryRepository, FoodCategoryRepository>();
         services.AddScoped<IPhotoRepository, PhotoRepository>();
+        services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
 
         // Add Photo services
         services.AddScoped<IPhotoService, PhotoService>();

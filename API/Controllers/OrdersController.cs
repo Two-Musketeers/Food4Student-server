@@ -63,6 +63,24 @@ public class OrdersController(IMapper mapper,
         if (order.Status != "Pending")
             return BadRequest(new { message = "You can only approve pending orders." });
 
+        if (order.AppUserId == null)
+            return BadRequest(new { message = "Order does not have a user." });
+
+        var userPlacedOrder = await userRepository.GetUserByIdAsync(order.AppUserId);
+        var restaurant = await restaurantRepository.GetRestaurantByIdAsync(userId);
+
+        if (userPlacedOrder == null || restaurant == null)
+            return BadRequest(new { message = "Failed to approve order." });
+
+        userPlacedOrder.UserNotifications.Add(new UserNotification
+        {
+            Title = "Đơn hàng đã được chấp nhận",
+            Content = $"Đơn hàng của bạn ở quán {restaurant.Name} đã được chấp nhận.",
+            Image = restaurant.Logo?.Url,
+            Timestamp = DateTime.UtcNow,
+            IsUnread = true,
+        });
+
         order.Status = "Approved";
 
         bool isSaved = await orderRepository.SaveAllAsync();
@@ -89,6 +107,24 @@ public class OrdersController(IMapper mapper,
         if (order.Status != "Pending")
             return BadRequest(new { message = "You can only reject pending orders." });
 
+        if (order.AppUserId == null)
+            return BadRequest(new { message = "Order does not have a user." });
+
+        var userPlacedOrder = await userRepository.GetUserByIdAsync(order.AppUserId);
+        var restaurant = await restaurantRepository.GetRestaurantByIdAsync(userId);
+
+        if (userPlacedOrder == null || restaurant == null)
+            return BadRequest(new { message = "Failed to reject order." });
+
+        userPlacedOrder.UserNotifications.Add(new UserNotification
+        {
+            Title = "Đơn hàng đã bị từ chối",
+            Content = $"Đơn hàng của bạn ở quán ${restaurant.Name} đã bị từ chối.",
+            Image = restaurant.Logo?.Url,
+            Timestamp = DateTime.UtcNow,
+            IsUnread = true,
+        });
+
         order.Status = "Rejected";
 
         bool isSaved = await orderRepository.SaveAllAsync();
@@ -114,6 +150,24 @@ public class OrdersController(IMapper mapper,
 
         if (order.Status != "Approved")
             return BadRequest(new { message = "You can only deliver approved orders." });
+
+        if (order.AppUserId == null)
+            return BadRequest(new { message = "Order does not have a user." });
+
+        var userPlacedOrder = await userRepository.GetUserByIdAsync(order.AppUserId);
+        var restaurant = await restaurantRepository.GetRestaurantByIdAsync(userId);
+
+        if (userPlacedOrder == null || restaurant == null)
+            return BadRequest(new { message = "Failed to deliver order." });
+
+        userPlacedOrder.UserNotifications.Add(new UserNotification
+        {
+            Title = $"Đơn hàng tại ${restaurant.Name} đã hoàn tất",
+            Content = "Cảm ơn bạn đã sử dụng dịch vụ Food4Students. Hãy chia sẻ cảm nhận của bạn về đơn hàng để giúp những khách hàng khác có thể tham khảo nhé",
+            Image = restaurant.Logo?.Url,
+            Timestamp = DateTime.UtcNow,
+            IsUnread = true,
+        });
 
         order.Status = "Delivered";
 
