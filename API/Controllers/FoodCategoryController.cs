@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-[Route("api/restaurants/[controller]")]
+[Route("api/restaurants")]
 [ApiController]
 public class FoodCategoryController(IUserRepository userRepository,
     IFoodCategoryRepository foodCategoryRepository,

@@ -161,6 +161,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         return Ok(foodItemsToReturn);
     }
 
+    // Again since you already fetch all of the restaurant details in the get restaurant by id, this is just in case
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpGet("food-categories/{foodCategoryId}/food-items")]
     public async Task<ActionResult<IEnumerable<FoodItemDto>>> GetFoodItemsByCategory(string foodCategoryId)
@@ -182,6 +183,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         return Ok(foodItemsToReturn);
     }
 
+    // Just let this in here
     [Authorize(Policy = "RequireUserRole")]
     [HttpGet("food-categories/{foodCategoryId}/food-items/{id}")]
     public async Task<ActionResult<FoodItemDto>> GetFoodItemById(string foodCategoryId, string id)
@@ -258,7 +260,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
     [Authorize]
     [HttpGet("{id}/ratings")]
-    public async Task<ActionResult> GetRestaurantRatings(string id)
+    public async Task<ActionResult<IEnumerable<RatingDto>>> GetRestaurantRatings(string id)
     {
         var restaurant = await restaurantRepository.GetRestaurantByIdAsync(id);
 
