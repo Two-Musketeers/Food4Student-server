@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers;
 public class OrdersController(IMapper mapper,
     IOrderRepository orderRepository,
-    IShippingAddressRepository shippingAddressRepository,
     IFoodItemRepository foodItemRepository,
     IRestaurantRepository restaurantRepository,
     IVariationRepository variationRepository,
@@ -185,12 +184,7 @@ public class OrdersController(IMapper mapper,
         // Retrieve the authenticated user's ID
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        if (orderCreateDto == null || orderCreateDto.ShippingInfoId == null) return BadRequest("Bad orderCreateDto go kys");
-
-        // Validate shipping address
-        var shippingAddress = await shippingAddressRepository.GetShippingAddressByIdAsync(orderCreateDto.ShippingInfoId);
-        if (shippingAddress == null)
-            return BadRequest(new { message = "Invalid shipping address." });
+        if (orderCreateDto == null) return BadRequest("Bad orderCreateDto go kys");
 
         // Extract all non-null FoodItemIds from the order items
         var foodItemIds = orderCreateDto.OrderItems
@@ -226,7 +220,11 @@ public class OrdersController(IMapper mapper,
         {
             AppUserId = userId,
             RestaurantId = orderCreateDto.RestaurantId,
-            ShippingAddress = shippingAddress,
+            ShippingAddress = orderCreateDto.ShippingAddress,
+            Latitude = orderCreateDto.Latitude,
+            Longitude = orderCreateDto.Longitude,
+            PhoneNumber = orderCreateDto.PhoneNumber,
+            Name = orderCreateDto.Name,
             Note = orderCreateDto.Note ?? string.Empty,
         };
 
@@ -323,26 +321,6 @@ public class OrdersController(IMapper mapper,
                 Notification = new Notification
                 {
                     Title = "Bạn có đơn hàng mới",
-                    Body = $"Đơn hàng {order.Id} đã được tạo."
-                }
-            };
-
-            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(notification);
-        }
-        var userDeviceToken = await userRepository.GetDeviceTokens(userId!);
-        if (userDeviceToken.Count > 0)
-        {
-            var notification = new MulticastMessage
-            {
-                Tokens = userDeviceToken,
-                Data = new Dictionary<string, string>
-                {
-                    { "Mã đơn hàng", order.Id },
-                    { "Trạng thái đơn hàng", order.Status },
-                },
-                Notification = new Notification
-                {
-                    Title = "Đơn hàng của bạn",
                     Body = $"Đơn hàng {order.Id} đã được tạo."
                 }
             };

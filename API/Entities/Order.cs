@@ -7,7 +7,11 @@ public class Order
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Rating? Rating { get; set; }
     public string Status { get; set; } = "Pending";
-    public ShippingAddress? ShippingAddress { get; set; }
+    public required string ShippingAddress { get; set; }
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+    public required string PhoneNumber { get; set; }
+    public required string Name { get; set; }
     public string Note { get; set; } = "";
     public int TotalPrice { get; set; }
     //AppUser navigation purpose

@@ -38,7 +38,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<CreateShippingAddressDto, ShippingAddress>();
 
         CreateMap<ShippingAddress, CreateShippingAddressDto>();
-        CreateMap<ShippingAddress, OrderShippingAddressDto>();
 
         //Automapper for Order
         CreateMap<CreateOrderItemDto, OrderItem>();

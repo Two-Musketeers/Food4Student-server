@@ -316,6 +316,26 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
     }
 
     [Authorize(Policy = "RequireUserRole")]
+    [HttpPut("notifications")]
+    public async Task<ActionResult<IEnumerable<UserNotificationDto>>> UnReadAllNotifications()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var notifications = await userNotificationRepository.GetUserNotificationsAsync(userId);
+
+        foreach (var notification in notifications)
+        {
+            notification.IsUnread = true;
+        }
+
+        var result = await userNotificationRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to mark notifications as unread");
+
+        return Ok(mapper.Map<IEnumerable<UserNotificationDto>>(notifications));
+    }
+
+    [Authorize(Policy = "RequireUserRole")]
     [HttpPost("notifications/{notificationId}")]
     public async Task<ActionResult<UserNotificationDto>> ReadNotification(string notificationId)
     {
@@ -335,6 +355,28 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
 
         return Ok(mapper.Map<UserNotificationDto>(notification));
     }
+
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpPut("notifications/{notificationId}")]
+    public async Task<ActionResult<UserNotificationDto>> UnReadNotification(string notificationId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var notification = await userNotificationRepository.GetUserNotificationByIdAsync(notificationId);
+
+        if (notification == null) return NotFound("Notification not found");
+
+        if (notification.AppUserId != userId) return Forbid();
+
+        notification.IsUnread = true;
+
+        var result = await userNotificationRepository.SaveAllAsync();
+
+        if (!result) return BadRequest("Failed to mark notification as unread");
+
+        return Ok(mapper.Map<UserNotificationDto>(notification));
+    }
+
 
     [Authorize(Policy = "RequireUserRole")]
     [HttpDelete("notifications/{notificationId}")]

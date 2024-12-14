@@ -107,11 +107,11 @@ public class AccountController(IUserRepository userRepository,
 
     [Authorize]
     [HttpPost("device-token")]
-    public async Task<ActionResult<UserDto>> RegisterDeviceToken(DeviceTokenDto deviceTokenDto)
+    public async Task<ActionResult> RegisterDeviceToken(DeviceTokenDto deviceTokenDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-        if (await userRepository.TokenExists(deviceTokenDto.Token, userId)) return BadRequest("Device token already exists");
+        if (await userRepository.TokenExists(deviceTokenDto.Token, userId)) return Ok("Device token already exists");
 
         if (string.IsNullOrEmpty(deviceTokenDto.Token)) return BadRequest("Invalid device token");
 
@@ -131,7 +131,7 @@ public class AccountController(IUserRepository userRepository,
 
         if (!result) return BadRequest("Failed to add device token");
 
-        return Ok(user);
+        return Ok();
     }
 
     [Authorize]
