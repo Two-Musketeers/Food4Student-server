@@ -22,7 +22,8 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
         return await context.FoodItems
                 .Where(fi => fi.FoodCategory.RestaurantId == restaurantId)
                 .Include(fi => fi.FoodCategory)
-                .Include(fi => fi.FoodItemVariations)
+                .Include(fi => fi.Variations)
+                    .ThenInclude(v => v.VariationOptions)
                 .ToListAsync();
     }
 
@@ -38,7 +39,8 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
     {
         return await context.FoodItems
                 .Include(fi => fi.FoodCategory)
-                .Include(fi => fi.FoodItemVariations)
+                .Include(fi => fi.Variations)
+                    .ThenInclude(v => v.VariationOptions)
                 .FirstOrDefaultAsync(fi => fi.Id == id);
     }
 
@@ -78,7 +80,7 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
     public async Task<IEnumerable<FoodItem>> GetFoodItemsWithCategoryAsync(List<string> foodItemIds)
     {
         return await context.FoodItems
-            .Include(fi => fi.FoodCategory) // Eagerly load the FoodCategory
+            .Include(fi => fi.FoodCategory)
             .Include(fi => fi.FoodItemPhoto)
             .Where(fi => foodItemIds.Contains(fi.Id))
             .ToListAsync();

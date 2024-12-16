@@ -16,7 +16,9 @@ public static class ApplicationServiceExtensions
         services.AddControllers();
         services.AddDbContext<DataContext>(opt =>
         {
-            opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
+            opt.UseSqlServer(
+                config.GetConnectionString("DefaultConnection"),
+                x => x.UseNetTopologySuite());
         });
         services.AddCors();
 
@@ -30,7 +32,6 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IVariationRepository, VariationRepository>();
         services.AddScoped<IVariationOptionRepository, VariationOptionRepository>();
-        services.AddScoped<IFoodItemVariationRepository, FoodItemVariationRepository>();
         services.AddScoped<IFoodCategoryRepository, FoodCategoryRepository>();
         services.AddScoped<IPhotoRepository, PhotoRepository>();
         services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();

@@ -7,7 +7,7 @@ public class FoodItem
     public string? Description { get; set; }
     public Photo? FoodItemPhoto { get; set; }
     public required int BasePrice { get; set; }
-    public ICollection<FoodItemVariation> FoodItemVariations { get; set; } = [];
+    public ICollection<Variation> Variations { get; set; } = [];
     //Navigation properties (required for entity framework one to many relationship)
     public string? FoodCategoryId { get; set; }
     public FoodCategory FoodCategory { get; set; } = null!;

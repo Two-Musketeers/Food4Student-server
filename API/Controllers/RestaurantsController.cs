@@ -6,6 +6,7 @@ using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NetTopologySuite.Geometries;
 
 namespace API.Controllers;
 
@@ -50,14 +51,15 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         if (user.OwnedRestaurant != null) return BadRequest("User already owns a restaurant");
 
+        var userLocation = new Point(restaurantRegisterDto.Longitude, restaurantRegisterDto.Latitude) { SRID = 4326 };
+
         var restaurant = new Restaurant
         {
             Id = userId,
             Name = restaurantRegisterDto.Name,
             Description = restaurantRegisterDto.Description,
             Address = restaurantRegisterDto.Address,
-            Latitude = restaurantRegisterDto.Latitude,
-            Longitude = restaurantRegisterDto.Longitude,
+            Location = userLocation
         };
 
         user.OwnedRestaurant = restaurant;
@@ -83,11 +85,12 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         var restaurant = user.OwnedRestaurant;
 
+        var userLocation = new Point(restaurantUpdateDto.Longitude, restaurantUpdateDto.Latitude) { SRID = 4326 };
+
         restaurant.Name = restaurantUpdateDto.Name;
         restaurant.Description = restaurantUpdateDto.Description;
         restaurant.Address = restaurantUpdateDto.Address;
-        restaurant.Latitude = restaurantUpdateDto.Latitude;
-        restaurant.Longitude = restaurantUpdateDto.Longitude;
+        restaurant.Location = userLocation;
 
         await restaurantRepository.SaveAllAsync();
 

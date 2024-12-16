@@ -6,27 +6,17 @@ namespace API.Data;
 
 public class VariationRepository(DataContext context) : IVariationRepository
 {
-    public async Task<IEnumerable<Variation>> GetVariationsByRestaurantIdAsync(string restaurantId)
-    {
-        return await context.Variations
-            .Include(v => v.VariationOptions)
-            .Where(v => v.RestaurantId == restaurantId)
-            .ToListAsync();
-    }
-
-    public async Task<Variation?> GetVariationByIdAsync(string variationId)
-    {
-        return await context.Variations
-            .Include(v => v.VariationOptions)
-            .FirstOrDefaultAsync(v => v.Id == variationId);
-    }
-
     public void AddVariation(Variation variation)
     {
         context.Variations.Add(variation);
     }
 
-    public void DeleteVariation(Variation variation)
+    public async Task<Variation?> GetVariationByIdAsync(string id)
+    {
+        return await context.Variations.FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public void RemoveVariation(Variation variation)
     {
         context.Variations.Remove(variation);
     }

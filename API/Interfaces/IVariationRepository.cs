@@ -4,9 +4,8 @@ namespace API.Interfaces;
 
 public interface IVariationRepository
 {
-    Task<IEnumerable<Variation>> GetVariationsByRestaurantIdAsync(string restaurantId);
-    Task<Variation?> GetVariationByIdAsync(string variationId);
     void AddVariation(Variation variation);
-    void DeleteVariation(Variation variation);
+    void RemoveVariation(Variation variation);
     Task<bool> SaveAllAsync();
+    Task<Variation?> GetVariationByIdAsync(string id);
 }

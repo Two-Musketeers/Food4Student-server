@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using NetTopologySuite.Geometries;
 
 namespace API.Entities;
 
@@ -8,8 +9,7 @@ public class Restaurant
     public required string Name { get; set; }
     public string? Description { get; set; }
     public required string Address { get; set; }
-    public required double Latitude { get; set; }
-    public required double Longitude { get; set; }
+    public required Point Location { get; set; }
     public Photo? Logo { get; set; }
     public Photo? Banner { get; set; }
     public List<RestaurantLike> LikedByUsers { get; set; } = [];
