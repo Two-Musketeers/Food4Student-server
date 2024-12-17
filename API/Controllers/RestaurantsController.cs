@@ -19,11 +19,28 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 {
     [Authorize(Policy = "RequireUserRole")]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants([FromQuery] RestaurantParams restaurantParams)
+    public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants([FromQuery] RestaurantParams restaurantParams, CurrentLocationDto currentLocationDto)
     {
-        var restaurants = await restaurantRepository.GetApprovedRestaurantsAsync(restaurantParams);
+        var restaurants = await restaurantRepository.GetNearbyRestaurantsAsync(currentLocationDto.Latitude, currentLocationDto.Longitude, restaurantParams.PageNumber);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var user = await userRepository.GetUserByIdAsync(userId!);
 
-        var restaurantsToReturn = mapper.Map<IEnumerable<RestaurantDto>>(restaurants);
+        var favoriteRestaurantIds = user.FavoriteRestaurants
+                                    .Select(fr => fr.LikedRestaurantId)
+                                    .ToHashSet();
+
+        var restaurantsToReturn = restaurants.Select(r => new RestaurantDto
+        {
+            Id = r.Id!,
+            Name = r.Name,
+            Description = r.Description,
+            Address = r.Address,
+            Latitude = r.Location.Y,
+            Longitude = r.Location.X,
+            LogoUrl = r.Logo?.Url,
+            BannerUrl = r.Banner?.Url,
+            IsFavorited = favoriteRestaurantIds.Contains(r.Id)
+        }).ToList();
 
         return Ok(restaurantsToReturn);
     }

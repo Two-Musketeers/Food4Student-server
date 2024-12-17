@@ -22,10 +22,10 @@ public class DataContext(DbContextOptions options) : DbContext(options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.Entity<Restaurant>()
-                .HasIndex(r => r.Location);
-                
+                    .Property(r => r.Location)
+                    .HasColumnType("geography");
         // Configuration for RestaurantLike
         modelBuilder.Entity<RestaurantLike>()
             .HasKey(k => new { k.SourceUserId, k.LikedRestaurantId });

@@ -3,7 +3,7 @@ namespace API.DTOs;
 public class RestaurantDto
 {
     public required string Id { get; set; }
-    public required bool IsApproved { get; set; }
+    public bool IsApproved { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
     public string? Address { get; set; }
@@ -13,4 +13,5 @@ public class RestaurantDto
     public string? BannerUrl { get; set; }
     public int TotalRatings { get; set; }
     public double AverageRating { get; set; }
+    public bool IsFavorited { get; set; }
 }

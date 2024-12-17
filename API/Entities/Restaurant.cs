@@ -5,11 +5,12 @@ namespace API.Entities;
 
 public class Restaurant
 {
+    [MaxLength(30)]
     public string? Id { get; set; }
     public required string Name { get; set; }
     public string? Description { get; set; }
     public required string Address { get; set; }
-    public required Point Location { get; set; }
+    public Point Location { get; set; } = new Point(0, 0) { SRID = 4326 };
     public Photo? Logo { get; set; }
     public Photo? Banner { get; set; }
     public List<RestaurantLike> LikedByUsers { get; set; } = [];

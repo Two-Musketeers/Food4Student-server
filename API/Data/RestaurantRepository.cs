@@ -100,10 +100,6 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
                 .ThenInclude(fc => fc.FoodItems)
                     .ThenInclude(fi => fi.Variations)
                         .ThenInclude(fiv => fiv.VariationOptions)
-            .Include(r => r.FoodCategories)
-                .ThenInclude(fc => fc.FoodItems)
-                    .ThenInclude(fi => fi.Variations)
-                        .ThenInclude(fiv => fiv.VariationOptions)
             .Include(r => r.Ratings)
             // Include Logo and Banner photos
             .Include(r => r.Logo)
