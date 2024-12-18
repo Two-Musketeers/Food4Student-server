@@ -111,32 +111,18 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
             .FirstOrDefaultAsync(r => r.Id == id);
     }
 
-    public async Task<PagedList<Restaurant>> GetNearbyRestaurantsAsync(double latitude, double longitude, int pageSize)
+    public async Task<PagedList<Restaurant>> GetNearbyRestaurantsAsync(
+        double latitude,
+        double longitude,
+        int pageSize,
+        int pageNumber)
     {
         var userLocation = new Point(longitude, latitude) { SRID = 4326 };
-        double radiusKm = 3.0;
-        List<Restaurant> nearbyRestaurants = [];
-
-        while (true)
-        {
-            var query = context.Restaurants
-                .Where(r => r.IsApproved && r.Location != null)
-                .Where(r => r.Location.Distance(userLocation) <= radiusKm * 1000) // Distance in meters
-                .OrderBy(r => r.Location.Distance(userLocation))
-                .AsQueryable();
-
-            nearbyRestaurants = await query.ToListAsync();
-
-            if (nearbyRestaurants.Count >= pageSize || radiusKm > 50)
-            {
-                break;
-            }
-
-            radiusKm += 2;
-        }
-
-        var pagedRestaurants = nearbyRestaurants.Take(pageSize).ToList();
-
-        return await PagedList<Restaurant>.CreateAsync(pagedRestaurants.AsQueryable(), 1, pageSize);
+        var query = context.Restaurants
+                        .Where(r => r.IsApproved && r.Location != null)
+                        .Where(r => r.Location.Distance(userLocation) <= 10000)
+                        .OrderBy(r => r.Location.Distance(userLocation));
+        
+        return await PagedList<Restaurant>.CreateAsync(query, pageNumber, pageSize);
     }
 }

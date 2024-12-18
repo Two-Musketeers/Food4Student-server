@@ -9,7 +9,6 @@ public class AutoMapperProfiles : Profile
     public AutoMapperProfiles()
     {
         CreateMap<Restaurant, RestaurantDto>()
-            .ForMember(dest => dest.IsFavorited, opt => opt.MapFrom(src => src.LikedByUsers.Any()))
             .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location.Y))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location.X))
             .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.Logo != null ? src.Logo.Url : null))

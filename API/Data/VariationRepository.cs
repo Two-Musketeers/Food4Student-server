@@ -13,7 +13,11 @@ public class VariationRepository(DataContext context) : IVariationRepository
 
     public async Task<Variation?> GetVariationByIdAsync(string id)
     {
-        return await context.Variations.FirstOrDefaultAsync(x => x.Id == id);
+        return await context.Variations
+            .Include(v => v.FoodItem)
+                .ThenInclude(f => f.FoodCategory)
+            .Include(v => v.VariationOptions)
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public void RemoveVariation(Variation variation)

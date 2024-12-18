@@ -32,6 +32,8 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
         return await context.FoodItems
             .Include(f => f.FoodItemPhoto)
             .Include(fi => fi.FoodCategory)
+            .Include(fi => fi.Variations)
+                .ThenInclude(v => v.VariationOptions)
             .FirstOrDefaultAsync(f => f.Id == id);
     }
 

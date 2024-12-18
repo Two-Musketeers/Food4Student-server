@@ -13,46 +13,61 @@ public class VariationsController(
     IVariationRepository variationRepository,
     IUserRepository userRepository,
     IMapper mapper,
+    IFoodCategoryRepository foodCategoryRepository,
     IFoodItemRepository foodItemRepository) : ControllerBase
 {
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPost("food-items/{foodItemId}/variations")]
-    public async Task<ActionResult<VariationDto>> CreateVariation(VariationCreateDto variationCreateDto, string foodItemId)
+    [HttpPost("food-categories/{foodCategoryId}/food-items/{foodItemId}/variations")]
+    public async Task<ActionResult<VariationDto>> CreateVariation([FromBody] VariationCreateDto variationCreateDto, string foodItemId, string foodCategoryId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
 
-        var foodItem = await foodItemRepository.GetFoodItemWithCategoryAsync(foodItemId);
+        if (user.OwnedRestaurant == null)
+            return BadRequest("User does not own a restaurant");
+
+        var foodCategory = await foodCategoryRepository.GetFoodCategoryAsync(foodCategoryId);
+
+        if (foodCategory == null)
+            return BadRequest("Invalid food category");
+
+        if (foodCategory.RestaurantId != userId)
+            return Unauthorized("You do not own this food category");
+
+        if (foodCategory.FoodItems.All(fi => fi.Id != foodItemId))
+            return BadRequest("Invalid food item");
+
+        var foodItem = await foodItemRepository.GetFoodItemByIdAsync(foodItemId);
 
         if (foodItem == null)
             return BadRequest("Invalid food item");
 
-        if (user.OwnedRestaurant == null)
-            return BadRequest("User does not own a restaurant");
-
         var variation = mapper.Map<Variation>(variationCreateDto);
         variation.FoodItemId = foodItemId;
-        
+
         foodItem.Variations.Add(variation);
 
         variationRepository.AddVariation(variation);
 
         if (await variationRepository.SaveAllAsync())
         {
-            var variationToReturn = mapper.Map<VariationDto>(variation);
-            return Ok(variationToReturn);
+            var variationDto = new VariationDto
+            {
+                Id = variation.Id,
+                Name = variation.Name,
+                MinSelect = variation.MinSelect,
+                MaxSelect = variation.MaxSelect,
+            };
+            return Ok(variationDto);
         }
 
         return BadRequest("Failed to create variation");
     }
 
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPut("food-items/{foodItemId}/variations/{id}")]
-    public async Task<ActionResult> UpdateVariation(string id, VariationCreateDto variationUpdateDto, string foodItemId)
+    [HttpPut("food-categories/{foodCategoryId}/food-items/{foodItemId}/variations/{id}")]
+    public async Task<ActionResult> UpdateVariation(string id, VariationCreateDto variationUpdateDto, string foodItemId, string foodCategoryId)
     {
-        var foodItem = await foodItemRepository.GetFoodItemWithCategoryAsync(foodItemId);
-        if (foodItem == null)
-            return BadRequest("Invalid food item");
         var variation = await variationRepository.GetVariationByIdAsync(id);
         if (variation == null)
             return NotFound("Variation not found");
@@ -60,10 +75,13 @@ public class VariationsController(
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
 
+        if (user.OwnedRestaurant == null)
+            return BadRequest("User does not own a restaurant");
+
         if (variation.FoodItemId != foodItemId)
             return BadRequest("Variation does not belong to this food item");
 
-        if (foodItem.FoodCategory?.RestaurantId != user.OwnedRestaurant?.Id)
+        if (userId != variation.FoodItem.FoodCategory?.RestaurantId)
             return Unauthorized("You do not own this variation");
 
         mapper.Map(variationUpdateDto, variation);
@@ -75,8 +93,8 @@ public class VariationsController(
     }
 
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpDelete("food-items/{foodItemId}/variations/{id}")]
-    public async Task<ActionResult> DeleteVariation(string id, string foodItemId)
+    [HttpDelete("food-categories/{foodCategoryId}/food-items/{foodItemId}/variations/{id}")]
+    public async Task<ActionResult> DeleteVariation(string id, string foodItemId, string foodCategoryId)
     {
         var variation = await variationRepository.GetVariationByIdAsync(id);
         if (variation == null)
@@ -85,13 +103,13 @@ public class VariationsController(
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
 
-        if (user == null || user.OwnedRestaurant == null)
+        if (user.OwnedRestaurant == null)
             return BadRequest("User does not own a restaurant");
 
         if (variation.FoodItemId != foodItemId)
             return BadRequest("Variation does not belong to this food item");
 
-        if (user.OwnedRestaurant.Id != variation.FoodItem.FoodCategory?.RestaurantId)
+        if (userId != variation.FoodItem.FoodCategory?.RestaurantId)
             return Unauthorized("You do not own this variation");
 
         variationRepository.RemoveVariation(variation);
@@ -101,30 +119,26 @@ public class VariationsController(
 
         return BadRequest("Failed to delete variation");
     }
-    
+
     // VariationOption Controller
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPost("food-items/{foodItemId}/variations/{variationId}/variation-options")]
-    public async Task<ActionResult<VariationOptionDto>> CreateVariationOption(string variationId, VariationOptionCreateDto optionCreateDto, string foodItemId)
+    [HttpPost("food-categories/{foodCategoryId}/food-items/{foodItemId}/variations/{variationId}/variation-options")]
+    public async Task<ActionResult<VariationOptionDto>> CreateVariationOption(string variationId, [FromBody] VariationOptionCreateDto optionCreateDto, string foodItemId, string foodCategoryId)
     {
+        var variation = await variationRepository.GetVariationByIdAsync(variationId);
+        if (variation == null)
+            return NotFound("Variation not found");
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
 
         if (user.OwnedRestaurant == null)
             return BadRequest("User does not own a restaurant");
 
-        var foodItem = await foodItemRepository.GetFoodItemWithCategoryAsync(foodItemId);
-        if (foodItem == null)
-            return BadRequest("Invalid food item");
-
-        var variation = await variationRepository.GetVariationByIdAsync(variationId);
-        if (variation == null)
-            return BadRequest("Invalid variation");
-
         if (variation.FoodItemId != foodItemId)
             return BadRequest("Variation does not belong to this food item");
 
-        if (foodItem.FoodCategory.RestaurantId != user.OwnedRestaurant.Id)
+        if (userId != variation.FoodItem.FoodCategory?.RestaurantId)
             return Unauthorized("You do not own this variation");
 
         var option = mapper.Map<VariationOption>(optionCreateDto);
@@ -144,8 +158,8 @@ public class VariationsController(
     }
 
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPut("food-items/{foodItemId}/variations/{variationId}/variation-options/{id}")]
-    public async Task<ActionResult<VariationOptionDto>> UpdateVariationOption(string id, string variationId, VariationOptionCreateDto optionUpdateDto, string foodItemId)
+    [HttpPut("food-categories/{foodCategoryId}/food-items/{foodItemId}/variations/{variationId}/variation-options/{id}")]
+    public async Task<ActionResult<VariationOptionDto>> UpdateVariationOption(string id, string variationId, VariationOptionCreateDto optionUpdateDto, string foodItemId, string foodCategoryId)
     {
         var option = await variationOptionRepository.GetVariationOptionByIdAsync(id);
         if (option == null || variationId == null)
@@ -175,11 +189,11 @@ public class VariationsController(
     }
 
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpDelete("food-items/{foodItemId}/variations/{variationId}/variation-options/{id}")]
-    public async Task<ActionResult> DeleteVariationOption(string id, string variationId, string foodItemId)
+    [HttpDelete("food-categories/{foodCategoryId}/food-items/{foodItemId}/variations/{variationId}/variation-options/{id}")]
+    public async Task<ActionResult> DeleteVariationOption(string id, string variationId, string foodItemId, string foodCategoryId)
     {
         var option = await variationOptionRepository.GetVariationOptionByIdAsync(id);
-        if (option == null)
+        if (option == null || variationId == null)
             return NotFound("Variation option not found");
 
         var variation = await variationRepository.GetVariationByIdAsync(variationId);

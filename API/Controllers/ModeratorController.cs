@@ -14,7 +14,7 @@ public class ModeratorController(IMapper mapper, IFirebaseService firebaseServic
 {
     //Get all unapproved restaurants
     [HttpGet("restaurants")]
-    public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants([FromQuery] RestaurantParams restaurantParams)
+    public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants([FromQuery] PaginationParams restaurantParams)
     {
         var restaurants = await restaurantRepository.GetRestaurantsAsync(restaurantParams);
 
