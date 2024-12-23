@@ -119,10 +119,17 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
     {
         var userLocation = new Point(longitude, latitude) { SRID = 4326 };
         var query = context.Restaurants
+                        .Include(r => r.Logo)
                         .Where(r => r.IsApproved && r.Location != null)
-                        .Where(r => r.Location.Distance(userLocation) <= 10000)
                         .OrderBy(r => r.Location.Distance(userLocation));
         
         return await PagedList<Restaurant>.CreateAsync(query, pageNumber, pageSize);
+    }
+
+    public async Task<Restaurant?> GetRestaurantWithoutAnyInfoByIdAsync(string id)
+    {
+        return await context.Restaurants
+            .Include(r => r.Logo)
+            .FirstOrDefaultAsync(r => r.Id == id);
     }
 }

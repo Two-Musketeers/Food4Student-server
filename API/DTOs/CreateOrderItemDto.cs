@@ -11,5 +11,6 @@ public class CreateOrderItemDto
     [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
     public int Quantity { get; set; }
 
-    public List<VariationSelectionDto>? SelectedVariations { get; set; }
+    [Required(ErrorMessage = "SelectedVariations is required.")]
+    public List<VariationSelectionDto?> SelectedVariations { get; set; } = [];
 }

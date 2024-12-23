@@ -7,9 +7,9 @@ public class OrderItem
     public string? FoodDescription { get; set; }
     public required int Price { get; set; }
     public required int Quantity { get; set; }
-    public Photo? FoodItemPhoto { get; set; }
+    public string? FoodItemPhotoUrl { get; set; }
     // Add this property to store selected variations and options
-    public ICollection<OrderItemVariation> OrderItemVariations { get; set; } = [];
+    public string? Variations { get; set; }
     // Order navigation purpose
     public string? OrderId { get; set; }
     public Order Order { get; set; } = null!;

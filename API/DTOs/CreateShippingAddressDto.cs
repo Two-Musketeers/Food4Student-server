@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using API.Entities;
 
 namespace API.DTOs;
@@ -10,7 +11,8 @@ public class CreateShippingAddressDto
     public string? PhoneNumber { get; set; }
     public string? Name { get; set; }
     public ShippingLocationType LocationType { get; set; }
-    public string? Location { get; set; }
+    [Required(ErrorMessage = "Location is required")]
+    public required string Location { get; set; }
     public string? BuildingNote { get; set; }
     public string? OtherLocationTypeTitle { get; set; }
 }

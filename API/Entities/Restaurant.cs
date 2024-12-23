@@ -8,6 +8,7 @@ public class Restaurant
     [MaxLength(30)]
     public string? Id { get; set; }
     public required string Name { get; set; }
+    public required string PhoneNumber { get; set; }
     public string? Description { get; set; }
     public required string Address { get; set; }
     public Point Location { get; set; } = new Point(0, 0) { SRID = 4326 };

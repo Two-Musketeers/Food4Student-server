@@ -20,6 +20,14 @@ public class VariationRepository(DataContext context) : IVariationRepository
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public async Task<List<Variation>> GetVariationsByIdsAsync(List<string> ids)
+    {
+        return await context.Variations
+                .Include(v => v.VariationOptions)
+                .Where(v => ids.Contains(v.Id))
+                .ToListAsync();
+    }
+
     public void RemoveVariation(Variation variation)
     {
         context.Variations.Remove(variation);

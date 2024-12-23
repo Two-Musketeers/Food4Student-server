@@ -9,6 +9,7 @@ public class Rating
     public int Stars { get; set; }
     [MaxLength(500, ErrorMessage = "Comment cannot exceed 500 characters.")]
     public string? Comment { get; set; }
+    // Navigation
     public string? UserId { get; set; }
     public AppUser User { get; set; } = null!;
     public string? RestaurantId { get; set; }

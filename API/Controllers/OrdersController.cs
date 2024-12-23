@@ -178,136 +178,163 @@ public class OrdersController(IMapper mapper,
     }
 
     [Authorize(Policy = "RequireUserRole")]
-    [HttpPost]
-    public async Task<ActionResult<OrderDto>> CreateOrder(OrderCreateDto orderCreateDto)
+    [HttpPost("restaurants/{restaurantId}")]
+    public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] OrderCreateDto orderCreateDto, string restaurantId)
     {
-        // Retrieve the authenticated user's ID
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (orderCreateDto == null) return BadRequest("Bad orderCreateDto go kys");
-
-        // Extract all non-null FoodItemIds from the order items
-        var foodItemIds = orderCreateDto.OrderItems
-            .Select(oi => oi.FoodItemId)
-            .Where(id => id != null) // Filter out null values
-            .Distinct()
-            .Cast<string>() // Cast to non-nullable string
-            .ToList();
-
-        if (foodItemIds == null) return BadRequest("FoodItemIds are null");
-
-        // Fetch all corresponding FoodItems with their categories in a single query
-        var foodItems = await foodItemRepository.GetFoodItemsWithCategoryAsync(foodItemIds);
-
-        // Check if all food items exist
-        if (foodItems.Count() != foodItemIds.Count)
-            return BadRequest(new { message = "One or more food items not found." });
-
-        // Verify all food items belong to the specified restaurant
-        if (foodItems.Any(fi => fi.FoodCategory.RestaurantId != orderCreateDto.RestaurantId))
-            return BadRequest(new { message = "All items in the order must be from the specified restaurant." });
-
-        // Fetch the Restaurant and verify its existence and approval status
-        var restaurant = await restaurantRepository.GetRestaurantByIdAsync(orderCreateDto.RestaurantId!);
+        // Validate Restaurant
+        var restaurant = await restaurantRepository.GetRestaurantByIdAsync(restaurantId);
         if (restaurant == null)
-            return BadRequest(new { message = "Restaurant not found." });
+            return NotFound(new { message = "Restaurant not found." });
 
-        if (!restaurant.IsApproved)
-            return BadRequest(new { message = "Cannot place an order to an unapproved restaurant." });
+        // Get User ID
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "Invalid user." });
 
-        // Initialize the Order entity
+        var user = await userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+            return Unauthorized(new { message = "User not found." });
+
+        if (orderCreateDto.PhoneNumber == null) {
+            orderCreateDto.PhoneNumber = user.PhoneNumber;
+        }
+        // Initialize Order
         var order = new Order
         {
             AppUserId = userId,
-            RestaurantId = orderCreateDto.RestaurantId,
+            RestaurantId = restaurantId,
             ShippingAddress = orderCreateDto.ShippingAddress,
             Latitude = orderCreateDto.Latitude,
             Longitude = orderCreateDto.Longitude,
             PhoneNumber = orderCreateDto.PhoneNumber,
             Name = orderCreateDto.Name,
-            Note = orderCreateDto.Note ?? string.Empty,
+            Note = orderCreateDto.Note
         };
 
-        int totalPrice = 0;
+        // Collect all VariationIds and VariationOptionIds for bulk fetching
+        var allVariationIds = orderCreateDto.OrderItems
+            .Where(oi => oi.SelectedVariations != null && oi.SelectedVariations.Any())
+            .SelectMany(oi => oi.SelectedVariations.Select(v => v.VariationId))
+            .Distinct()
+            .ToList();
 
-        // Process each Order Item
+        var allVariationOptionIds = orderCreateDto.OrderItems
+            .Where(oi => oi.SelectedVariations != null && oi.SelectedVariations.Any())
+            .SelectMany(oi => oi.SelectedVariations.SelectMany(v => v.VariationOptionIds))
+            .Distinct()
+            .ToList();
+
+        // Fetch Variations and VariationOptions in bulk
+        var variations = await variationRepository.GetVariationsByIdsAsync(allVariationIds);
+        var variationOptions = await variationOptionRepository.GetVariationOptionsByIdsAsync(allVariationOptionIds);
+
+        // Convert to dictionaries for quick lookup
+        var variationDict = variations.ToDictionary(v => v.Id, v => v);
+        var variationOptionDict = variationOptions.ToDictionary(vo => vo.Id, vo => vo);
+
         foreach (var itemDto in orderCreateDto.OrderItems)
         {
-            // Retrieve the corresponding FoodItem
-            var foodItem = foodItems.First(fi => fi.Id == itemDto.FoodItemId);
+            // Validate Quantity and FoodItemId
+            if (itemDto.Quantity <= 0)
+                return BadRequest(new { message = "Quantity must be greater than 0." });
+            if (string.IsNullOrEmpty(itemDto.FoodItemId))
+                return BadRequest(new { message = "Invalid food item id." });
 
-            // Initialize the OrderItem entity
-            var orderItem = new OrderItem
-            {
-                OriginalFoodItemId = foodItem.Id,
-                FoodName = foodItem.Name,
-                FoodDescription = foodItem.Description,
-                Quantity = itemDto.Quantity,
-                FoodItemPhoto = foodItem.FoodItemPhoto,
-                Price = foodItem.BasePrice,
-            };
+            // Validate FoodItem and its association with the Restaurant
+            var foodItem = await foodItemRepository.GetFoodItemWithCategoryAsync(itemDto.FoodItemId);
+            if (foodItem == null || foodItem.FoodCategory.RestaurantId != restaurantId)
+                return BadRequest(new { message = $"FoodItem with ID {itemDto.FoodItemId} not found in the specified restaurant." });
 
-            // Handle Variations if any
-            if (itemDto.SelectedVariations != null)
+            // Initialize Variations List and Price Adjustment
+            var variationsList = new List<string>();
+            int variationOptionPriceAdjustment = 0;
+
+            if (itemDto.SelectedVariations != null && itemDto.SelectedVariations.Count > 0)
             {
-                foreach (var variationDto in itemDto.SelectedVariations)
+                // Group SelectedVariations by VariationId to enforce count constraints
+                var groupedVariations = itemDto.SelectedVariations
+                    .GroupBy(v => v.VariationId)
+                    .ToList();
+
+                foreach (var variationGroup in groupedVariations)
                 {
-                    // Validate VariationIds are not null or empty
-                    if (string.IsNullOrEmpty(variationDto.VariationId) || string.IsNullOrEmpty(variationDto.VariationOptionId))
-                        return BadRequest(new { message = "VariationId and VariationOptionId cannot be null." });
+                    var variationId = variationGroup.Key;
+                    var selectedOptionIds = variationGroup.SelectMany(v => v.VariationOptionIds).ToList(); // Flatten all VariationOptionIds
 
-                    // Fetch Variation
-                    var variation = await variationRepository.GetVariationByIdAsync(variationDto.VariationId);
-                    if (variation == null)
-                        return BadRequest(new { message = $"Variation {variationDto.VariationId} not found." });
+                    // Validate Variation Exists and Belongs to FoodItem
+                    if (!variationDict.TryGetValue(variationId, out var variation) || variation.FoodItemId != foodItem.Id)
+                        return BadRequest(new { message = $"Invalid Variation ID: {variationId} for FoodItem ID: {foodItem.Id}." });
 
-                    // Fetch VariationOption
-                    var variationOption = await variationOptionRepository.GetVariationOptionByIdAsync(variationDto.VariationOptionId);
-                    if (variationOption == null)
-                        return BadRequest(new { message = $"Variation Option {variationDto.VariationOptionId} not found." });
+                    // Enforce Min and Max Select Constraints
+                    if (selectedOptionIds.Count < variation.MinSelect)
+                        return BadRequest(new { message = $"Variation '{variation.Name}' requires at least {variation.MinSelect} selections." });
 
-                    // Ensure VariationOption belongs to the Variation
-                    if (variationOption.VariationId != variation.Id)
-                        return BadRequest(new { message = $"Variation Option {variationOption.Id} does not belong to Variation {variation.Id}." });
+                    if (variation.MaxSelect.HasValue && selectedOptionIds.Count > variation.MaxSelect.Value)
+                        return BadRequest(new { message = $"Variation '{variation.Name}' allows a maximum of {variation.MaxSelect.Value} selections." });
 
-                    // Initialize OrderItemVariation
-                    var orderItemVariation = new OrderItemVariation
+                    // Validate VariationOptions
+                    var validVariationOptions = selectedOptionIds
+                        .Where(variationOptionDict.ContainsKey)
+                        .Select(variationOptionId => variationOptionDict[variationOptionId])
+                        .ToList();
+
+                    if (validVariationOptions.Count != selectedOptionIds.Count)
+                        return BadRequest(new { message = "One or more VariationOptionIds are invalid." });
+
+                    foreach (var variationOption in validVariationOptions)
                     {
-                        VariationId = variation.Id,
-                        Variation = variation,
-                        VariationOptionId = variationOption.Id,
-                        VariationOption = variationOption
-                    };
+                        if (variationOption.VariationId != variationId)
+                            return BadRequest(new { message = $"VariationOption ID: {variationOption.Id} does not belong to Variation ID: {variationId}." });
 
-                    // Add to OrderItemVariations and adjust price
-                    orderItem.OrderItemVariations.Add(orderItemVariation);
-                    orderItem.Price += variationOption.PriceAdjustment;
+                        variationsList.Add($"{variation.Name} - {variationOption.Name}");
+                        variationOptionPriceAdjustment += variationOption.PriceAdjustment;
+                    }
                 }
             }
 
-            // Calculate total price for the order
-            totalPrice += orderItem.Price * orderItem.Quantity;
+            var variationsString = variationsList.Any() ? string.Join(", ", variationsList) : null;
 
-            // Add the OrderItem to the Order
+            var orderItem = new OrderItem
+            {
+                FoodName = foodItem.Name,
+                FoodDescription = foodItem.Description,
+                Price = foodItem.BasePrice + variationOptionPriceAdjustment,
+                Quantity = itemDto.Quantity,
+                FoodItemPhotoUrl = foodItem.FoodItemPhoto?.Url,
+                OriginalFoodItemId = foodItem.Id,
+                Variations = variationsString
+            };
+
             order.OrderItems.Add(orderItem);
         }
 
-        // Assign total price to the Order
-        order.TotalPrice = totalPrice;
+        // Calculate Total Price
+        order.TotalPrice = order.OrderItems.Sum(oi => oi.Price * oi.Quantity);
 
-        // Add the Order to the repository and save changes
+        // Add and Save Order
         orderRepository.AddOrder(order);
-        var result = await orderRepository.SaveAllAsync();
+        var isSaved = await orderRepository.SaveAllAsync();
 
-        if (!result) return BadRequest(new { message = "Failed to create order." });
+        if (!isSaved)
+            return BadRequest(new { message = "Failed to create order." });
 
-        // Map the Order entity to OrderDto for the response
+        // Map to OrderDto
         var orderDto = mapper.Map<OrderDto>(order);
 
-        if (orderDto == null || orderDto.RestaurantId == null) return BadRequest("OrderDto got fucked");
+        // Set Restaurant Name
         orderDto.RestaurantName = restaurant.Name;
 
-        var restaurantOwnerDeviceToken = await userRepository.GetDeviceTokens(orderDto.RestaurantId);
+        var restaurantOwner = await userRepository.GetUserByIdAsync(restaurantId);
+        restaurantOwner.UserNotifications.Add(new UserNotification
+        {
+            Title = "Bạn có đơn hàng mới",
+            Content = "Một người dùng đã tạo đơn hàng mới tại quán của bạn.",
+            Image = restaurant.Logo?.Url,
+            Timestamp = DateTime.UtcNow,
+            IsUnread = true,
+        });
+
+        var restaurantOwnerDeviceToken = await userRepository.GetDeviceTokens(restaurantId);
         if (restaurantOwnerDeviceToken.Count > 0)
         {
             var notification = new MulticastMessage
@@ -327,6 +354,9 @@ public class OrdersController(IMapper mapper,
 
             var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(notification);
         }
+        var result = await orderRepository.SaveAllAsync();
+        if (!result)
+            return BadRequest(new { message = "Failed to create order." });
         return CreatedAtAction(nameof(GetOrderById), new { id = orderDto.Id }, orderDto);
     }
 }

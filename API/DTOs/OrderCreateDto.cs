@@ -16,7 +16,4 @@ public class OrderCreateDto
     [Required(ErrorMessage = "Name is required.")]
     public required string Name { get; set; }
     public string? Note { get; set; }
-
-    [Required(ErrorMessage = "RestaurantId is required.")]
-    public string? RestaurantId { get; set; }
 }

@@ -45,6 +45,8 @@ public class UserRepository(DataContext context) : IUserRepository
     public async Task<AppUser> GetUserByIdAsync(string id)
     {
         var user = await context.Users
+            .Include(u => u.FavoriteRestaurants)
+            .Include(u => u.UserNotifications)
             .Include(u => u.ShippingAddresses)
             .Include(u => u.DeviceTokens)
             .Include(u => u.OwnedRestaurant)
@@ -63,7 +65,7 @@ public class UserRepository(DataContext context) : IUserRepository
 
         return user;
     }
-
+    
     public async Task<bool> TokenExists(string token, string userId)
     {
         var deviceToken = await context.DeviceTokens.AnyAsync(t => t.Token == token && t.AppUserId == userId);
@@ -75,5 +77,13 @@ public class UserRepository(DataContext context) : IUserRepository
     {
         var tokenList = await context.DeviceTokens.Where(t => t.AppUserId == userId).ToListAsync();
         return tokenList.Select(t => t.Token).ToList();
+    }
+
+    public async Task<AppUser> GetUserWithRestaurantByIdAsync(string id)
+    {
+        return await context.Users
+            .Include(u => u.OwnedRestaurant)
+            .SingleOrDefaultAsync(u => u.Id == id)
+                ?? throw new Exception("User not found");
     }
 }

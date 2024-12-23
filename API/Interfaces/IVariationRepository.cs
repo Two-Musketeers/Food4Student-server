@@ -8,4 +8,5 @@ public interface IVariationRepository
     void RemoveVariation(Variation variation);
     Task<bool> SaveAllAsync();
     Task<Variation?> GetVariationByIdAsync(string id);
+    Task<List<Variation>> GetVariationsByIdsAsync(List<string> ids);
 }

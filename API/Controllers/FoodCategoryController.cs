@@ -4,15 +4,13 @@ using API.Entities;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [Route("api/restaurants")]
 [ApiController]
-public class FoodCategoryController(IUserRepository userRepository,
-    IFoodCategoryRepository foodCategoryRepository,
+public class FoodCategoryController(IFoodCategoryRepository foodCategoryRepository,
     IMapper mapper,
     IRestaurantRepository restaurantRepository,
     IFoodItemRepository foodItemRepository) : ControllerBase
@@ -25,11 +23,7 @@ public class FoodCategoryController(IUserRepository userRepository,
     [HttpPost("food-categories")]
     public async Task<ActionResult<FoodCategoryDto>> AddFoodCategory(FoodCategoryCreateDto foodCategoryCreateDto)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var user = await userRepository.GetUserByIdAsync(userId!);
-
-        if (user.OwnedRestaurant == null)
-            return BadRequest("User does not own a restaurant");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         if (string.IsNullOrWhiteSpace(foodCategoryCreateDto.Name))
             return BadRequest("Category name is required");
@@ -37,7 +31,7 @@ public class FoodCategoryController(IUserRepository userRepository,
         var foodCategory = new FoodCategory
         {
             Name = foodCategoryCreateDto.Name,
-            RestaurantId = user.OwnedRestaurant.Id
+            RestaurantId = userId
         };
 
         foodCategoryRepository.AddFoodCategory(foodCategory);
@@ -93,15 +87,11 @@ public class FoodCategoryController(IUserRepository userRepository,
     [HttpPut("food-categories/{id}")]
     public async Task<ActionResult<FoodCategoryDto>> UpdateFoodCategory(string id, FoodCategoryCreateDto foodCategoryUpdateDto)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var user = await userRepository.GetUserByIdAsync(userId!);
-
-        if (user.OwnedRestaurant == null)
-            return BadRequest("User does not own a restaurant");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         var foodCategory = await foodCategoryRepository.GetFoodCategoryAsync(id);
 
-        if (foodCategory == null || foodCategory.RestaurantId != user.OwnedRestaurant.Id)
+        if (foodCategory == null || foodCategory.RestaurantId != userId)
             return NotFound("Food category not found");
 
         if (string.IsNullOrWhiteSpace(foodCategoryUpdateDto.Name))
@@ -124,15 +114,11 @@ public class FoodCategoryController(IUserRepository userRepository,
     [HttpDelete("food-categories/{id}")]
     public async Task<ActionResult> DeleteFoodCategory(string id)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var user = await userRepository.GetUserByIdAsync(userId!);
-
-        if (user.OwnedRestaurant == null)
-            return BadRequest("User does not own a restaurant");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         var foodCategory = await foodCategoryRepository.GetFoodCategoryAsync(id);
 
-        if (foodCategory == null || foodCategory.RestaurantId != user.OwnedRestaurant.Id)
+        if (foodCategory == null || foodCategory.RestaurantId != userId)
             return NotFound("Food category not found");
 
         foodCategoryRepository.RemoveFoodCategory(foodCategory);
@@ -146,17 +132,14 @@ public class FoodCategoryController(IUserRepository userRepository,
     /// <summary>
     /// Migrates a Food Item to a different Food Category.
     /// </summary>
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpPost("food-categories/{foodCategoryId}/migrate-food-item/{foodItemId}")]
     public async Task<ActionResult> MigrateFoodItem(string foodCategoryId, string foodItemId)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var user = await userRepository.GetUserByIdAsync(userId!);
-
-        if (user.OwnedRestaurant == null)
-            return BadRequest("User does not own a restaurant");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         var targetCategory = await foodCategoryRepository.GetFoodCategoryAsync(foodCategoryId);
-        if (targetCategory == null || targetCategory.RestaurantId != user.OwnedRestaurant.Id)
+        if (targetCategory == null || targetCategory.RestaurantId != userId)
             return NotFound("Target food category not found");
 
         var foodItem = await foodItemRepository.GetFoodItemByIdAsync(foodItemId);

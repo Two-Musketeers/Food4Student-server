@@ -5,4 +5,5 @@ public class FoodItemRegisterDto
     public string? Name { get; set; }
     public string? Description { get; set; }
     public int BasePrice { get; set; }
+    public List<VariationCreateDto> Variations { get; set; } = [];
 }

@@ -62,28 +62,6 @@ public class DataContext(DbContextOptions options) : DbContext(options)
             .HasForeignKey(oi => oi.OriginalFoodItemId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // Configure OrderItemVariation composite key
-        modelBuilder.Entity<OrderItemVariation>()
-            .HasKey(oiv => new { oiv.OrderItemId, oiv.VariationId, oiv.VariationOptionId });
-
-        modelBuilder.Entity<OrderItemVariation>()
-            .HasOne(oiv => oiv.OrderItem)
-            .WithMany(oi => oi.OrderItemVariations)
-            .HasForeignKey(oiv => oiv.OrderItemId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<OrderItemVariation>()
-            .HasOne(oiv => oiv.Variation)
-            .WithMany()
-            .HasForeignKey(oiv => oiv.VariationId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<OrderItemVariation>()
-            .HasOne(oiv => oiv.VariationOption)
-            .WithMany()
-            .HasForeignKey(oiv => oiv.VariationOptionId)
-            .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete to preserve order history
-
         // Configuration for Restaurant -> FoodCategories
         modelBuilder.Entity<Restaurant>()
             .HasMany(r => r.FoodCategories)
@@ -104,5 +82,23 @@ public class DataContext(DbContextOptions options) : DbContext(options)
             .WithOne(rt => rt.Restaurant)
             .HasForeignKey(rt => rt.RestaurantId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Variation>()
+            .HasOne(v => v.FoodItem)
+            .WithMany(fi => fi.Variations)
+            .HasForeignKey(v => v.FoodItemId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<VariationOption>()
+            .HasOne(vo => vo.Variation)
+            .WithMany(v => v.VariationOptions)
+            .HasForeignKey(vo => vo.VariationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<FoodCategory>()
+                .HasMany(fc => fc.FoodItems)
+                .WithOne(fi => fi.FoodCategory)
+                .HasForeignKey(fi => fi.FoodCategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
     }
 }

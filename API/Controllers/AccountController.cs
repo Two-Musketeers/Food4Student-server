@@ -5,16 +5,19 @@ using API.Interfaces;
 using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NetTopologySuite.Geometries;
 
 namespace API.Controllers;
 /// <summary>
 /// Controller for managing user accounts and device tokens
 /// </summary>
+[Authorize]
 public class AccountController(IUserRepository userRepository,
-    IFirebaseService firebaseService) : BaseApiController
+    IFirebaseService firebaseService,
+    IRestaurantRepository restaurantRepository) : BaseApiController
 {
     [HttpPost("user-register")]
-    public async Task<ActionResult> RegisterUser(RegisterAccountDto userDto)
+    public async Task<ActionResult> RegisterUser([FromBody] RegisterAccountDto userDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -40,25 +43,33 @@ public class AccountController(IUserRepository userRepository,
     }
 
     [HttpPost("restaurantOwner-register")]
-    public async Task<ActionResult> RegisterRestaurantOwner(UserDto userDto)
+    public async Task<ActionResult> RegisterRestaurantOwner([FromBody] RegisterRestaurantAccountDto userDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         if (await userRepository.UserExists(userId)) return BadRequest("How did you even get here ?");
 
-        if (string.IsNullOrEmpty(userDto.PhoneNumber)) return BadRequest("Invalid phone number");
-
-        var role = firebaseService.GetUserRoleAsync(userId);
-
-        if (role != null) return BadRequest("You are already registered");
-
         var user = new AppUser
         {
             Id = userId,
+            PhoneNumber = userDto.OwnerPhoneNumber,
+        };
+
+        var LocationPoint = new Point(userDto.Longitude, userDto.Latitude) { SRID = 4326 };
+
+        var restaurant = new Restaurant
+        {
+            Id = userId,
+            Name = userDto.Name,
             PhoneNumber = userDto.PhoneNumber,
+            Address = userDto.Address,
+            Description = userDto.Description,
+            Location = LocationPoint
         };
 
         userRepository.AddUser(user);
+
+        restaurantRepository.AddRestaurant(restaurant);
 
         var result = await userRepository.SaveAllAsync();
 
@@ -105,7 +116,6 @@ public class AccountController(IUserRepository userRepository,
         return Ok("User has been updated");
     }
 
-    [Authorize]
     [HttpPost("device-token")]
     public async Task<ActionResult> RegisterDeviceToken(DeviceTokenDto deviceTokenDto)
     {
@@ -134,7 +144,6 @@ public class AccountController(IUserRepository userRepository,
         return Ok();
     }
 
-    [Authorize]
     [HttpDelete("device-token/{token}")]
     public async Task<ActionResult<UserDto>> DeleteDeviceToken(string token)
     {
@@ -206,7 +215,6 @@ public class AccountController(IUserRepository userRepository,
         return Ok("Moderator has successfully registered");
     }
 
-    [Authorize]
     [HttpPost("test-notification")]
     public async Task<ActionResult> SendTestNotification()
     {
@@ -240,7 +248,6 @@ public class AccountController(IUserRepository userRepository,
         return Ok("Test notification has been sent");
     }
 
-    [Authorize]
     [HttpPost("test-notification/{userId}")]
     public async Task<ActionResult> SendTestNotification(string userId)
     {

@@ -44,16 +44,15 @@ public class AutoMapperProfiles : Profile
         CreateMap<ShippingAddress, CreateShippingAddressDto>();
 
         //Automapper for Order
-        CreateMap<CreateOrderItemDto, OrderItem>();
+        CreateMap<OrderCreateDto, Order>()
+                .ForMember(dest => dest.OrderItems, opt => opt.Ignore());
+
+        CreateMap<CreateOrderItemDto, OrderItem>()
+                .ForMember(dest => dest.OriginalFoodItem, opt => opt.Ignore());
 
         CreateMap<Order, OrderDto>();
 
-        CreateMap<OrderItemVariationDto, OrderItemVariation>();
-
-        CreateMap<OrderItem, OrderItemDto>()
-            .ForMember(dest => dest.SelectedVariations, opt => opt.MapFrom(src => src.OrderItemVariations));
-
-        CreateMap<OrderItemVariation, OrderItemVariationDto>();
+        CreateMap<OrderItem, OrderItemDto>();
 
         CreateMap<Rating, RatingDto>();
         CreateMap<RatingDto, Rating>();
@@ -68,6 +67,12 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.VariationOptions, opt => opt.MapFrom(src => src.VariationOptions));
         CreateMap<VariationOptionCreateDto, VariationOption>();
         CreateMap<VariationOption, VariationOptionDto>();
+        CreateMap<VariationOptionUpdateDto, VariationOption>()
+            .ForMember(dest => dest.Id, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Id)));
+        CreateMap<VariationUpdateDto, Variation>()
+            .ForMember(dest => dest.Id, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Id)));
+        CreateMap<FoodItemUpdateDto, FoodItem>()
+            .ForMember(dest => dest.Variations, opt => opt.Ignore());
 
         CreateMap<FoodCategory, FoodCategoryDto>();
         CreateMap<FoodCategoryCreateDto, FoodCategory>();

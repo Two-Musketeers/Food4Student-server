@@ -90,6 +90,19 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
     }
 
     [Authorize(Policy = "RequireUserRole")]
+    [HttpGet("phone")]
+    public async Task<ActionResult<string>> GetUserPhoneNumber()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        var user = await userRepository.GetUserByIdAsync(userId);
+
+        if (user == null) return NotFound("User not found");
+
+        return Ok(user.PhoneNumber);
+    }
+
+    [Authorize(Policy = "RequireUserRole")]
     [HttpGet("shipping-addresses/{shippingAddressId}")]
     public async Task<ActionResult<ShippingAddressDto>> GetShippingAddress(string shippingAddressId)
     {
@@ -134,6 +147,10 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
 
         likesParams.UserId = userId;
         var restaurants = await likeRepository.GetRestaurantLikesAsync(likesParams);
+        for (int i = 0; i < restaurants.Count; i++)
+        {
+            restaurants[i].IsFavorited = true;
+        }
 
         Response.AddPaginationHeader(restaurants.CurrentPage, restaurants.PageSize, restaurants.TotalCount, restaurants.TotalPages);
 
@@ -275,7 +292,7 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
         return BadRequest("Failed to delete order.");
     }
 
-    [Authorize(Policy = "RequireUserRole")]
+    [Authorize]
     [HttpGet("notifications")]
     public async Task<ActionResult<IEnumerable<UserNotificationDto>>> GetNotifications()
     {

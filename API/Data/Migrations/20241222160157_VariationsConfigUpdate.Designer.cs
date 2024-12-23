@@ -4,6 +4,7 @@ using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 
@@ -12,9 +13,11 @@ using NetTopologySuite.Geometries;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20241222160157_VariationsConfigUpdate")]
+    partial class VariationsConfigUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,6 +139,7 @@ namespace API.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Note")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
@@ -178,8 +182,8 @@ namespace API.Data.Migrations
                     b.Property<string>("FoodDescription")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FoodItemPhotoUrl")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("FoodItemPhotoId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FoodName")
                         .IsRequired()
@@ -197,16 +201,35 @@ namespace API.Data.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("Variations")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("FoodItemPhotoId");
 
                     b.HasIndex("OrderId");
 
                     b.HasIndex("OriginalFoodItemId");
 
                     b.ToTable("OrderItems");
+                });
+
+            modelBuilder.Entity("API.Entities.OrderItemVariation", b =>
+                {
+                    b.Property<string>("OrderItemId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("VariationId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("VariationOptionId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("OrderItemId", "VariationId", "VariationOptionId");
+
+                    b.HasIndex("VariationId");
+
+                    b.HasIndex("VariationOptionId");
+
+                    b.ToTable("OrderItemVariation");
                 });
 
             modelBuilder.Entity("API.Entities.Photo", b =>
@@ -513,6 +536,10 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.OrderItem", b =>
                 {
+                    b.HasOne("API.Entities.Photo", "FoodItemPhoto")
+                        .WithMany()
+                        .HasForeignKey("FoodItemPhotoId");
+
                     b.HasOne("API.Entities.Order", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId");
@@ -522,9 +549,38 @@ namespace API.Data.Migrations
                         .HasForeignKey("OriginalFoodItemId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.Navigation("FoodItemPhoto");
+
                     b.Navigation("Order");
 
                     b.Navigation("OriginalFoodItem");
+                });
+
+            modelBuilder.Entity("API.Entities.OrderItemVariation", b =>
+                {
+                    b.HasOne("API.Entities.OrderItem", "OrderItem")
+                        .WithMany("OrderItemVariations")
+                        .HasForeignKey("OrderItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Variation", "Variation")
+                        .WithMany()
+                        .HasForeignKey("VariationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.VariationOption", "VariationOption")
+                        .WithMany()
+                        .HasForeignKey("VariationOptionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("OrderItem");
+
+                    b.Navigation("Variation");
+
+                    b.Navigation("VariationOption");
                 });
 
             modelBuilder.Entity("API.Entities.Rating", b =>
@@ -647,6 +703,11 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.Order", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("API.Entities.OrderItem", b =>
+                {
+                    b.Navigation("OrderItemVariations");
                 });
 
             modelBuilder.Entity("API.Entities.Restaurant", b =>

@@ -14,14 +14,17 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public class RestaurantsController(IRestaurantRepository restaurantRepository,
         IMapper mapper, IUserRepository userRepository,
-        IFoodItemRepository foodItemRepository, IRatingRepository ratingRepository,
-        IFoodCategoryRepository foodCategoryRepository) : ControllerBase
+        IFoodItemRepository foodItemRepository,
+        IRatingRepository ratingRepository,
+        IFoodCategoryRepository foodCategoryRepository,
+        IVariationOptionRepository variationOptionRepository,
+        IVariationRepository variationRepository) : ControllerBase
 {
     [Authorize(Policy = "RequireUserRole")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants(
         [FromQuery] PaginationParams restaurantParams,
-        [FromBody] CurrentLocationDto currentLocationDto)
+        [FromQuery] CurrentLocationDto currentLocationDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var user = await userRepository.GetUserByIdAsync(userId!);
@@ -44,6 +47,8 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
             Id = r.Id!,
             Name = r.Name,
             Description = r.Description,
+            PhoneNumber = r.PhoneNumber,
+            IsApproved = r.IsApproved,
             Address = r.Address,
             Latitude = r.Location.Y,
             Longitude = r.Location.X,
@@ -61,58 +66,32 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
     [HttpGet("{id}")]
     public async Task<ActionResult<RestaurantDetailDto>> GetRestaurantById(string id)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var user = await userRepository.GetUserByIdAsync(userId!);
+
+        // Create a HashSet of favorite restaurant IDs for efficient lookup
+        var favoriteRestaurantIds = user.FavoriteRestaurants
+            .Select(fr => fr.LikedRestaurantId)
+            .ToHashSet();
+
         var restaurant = await restaurantRepository.GetRestaurantWithDetailsAsync(id);
 
-        if (restaurant == null) return NotFound();
-
         var restaurantToReturn = mapper.Map<RestaurantDetailDto>(restaurant);
+
+        restaurantToReturn.IsFavorited = favoriteRestaurantIds.Contains(id);
 
         return Ok(restaurantToReturn);
     }
 
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPost]
-    public async Task<ActionResult<RestaurantDto>> AddRestaurant(RestaurantRegisterDto restaurantRegisterDto)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-        var user = await userRepository.GetUserByIdAsync(userId);
-
-        if (user.OwnedRestaurant != null) return BadRequest("User already owns a restaurant");
-
-        var userLocation = new Point(restaurantRegisterDto.Longitude, restaurantRegisterDto.Latitude) { SRID = 4326 };
-
-        var restaurant = new Restaurant
-        {
-            Id = userId,
-            Name = restaurantRegisterDto.Name,
-            Description = restaurantRegisterDto.Description,
-            Address = restaurantRegisterDto.Address,
-            Location = userLocation
-        };
-
-        user.OwnedRestaurant = restaurant;
-
-        if (await restaurantRepository.SaveAllAsync())
-        {
-            var restaurantToReturn = mapper.Map<RestaurantDto>(restaurant);
-            return Ok(restaurantToReturn);
-        }
-
-        return BadRequest("Problem adding restaurant");
-    }
-
-    [Authorize(Policy = "RequireRestaurantOwnerRole")]
     [HttpPut]
-    public async Task<ActionResult<RestaurantDto>> UpdateRestaurant(RestaurantRegisterDto restaurantUpdateDto)
+    public async Task<ActionResult<RestaurantDto>> UpdateRestaurant(RestaurantUpdateDto restaurantUpdateDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-        var user = await userRepository.GetUserByIdAsync(userId);
+        var restaurant = await restaurantRepository.GetRestaurantWithoutAnyInfoByIdAsync(userId);
 
-        if (user.OwnedRestaurant == null) return BadRequest("User does not own a restaurant");
-
-        var restaurant = user.OwnedRestaurant;
+        if (restaurant == null) return BadRequest("User does not own a restaurant");
 
         var userLocation = new Point(restaurantUpdateDto.Longitude, restaurantUpdateDto.Latitude) { SRID = 4326 };
 
@@ -154,7 +133,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         if (user.OwnedRestaurant == null)
             return BadRequest("User does not own a restaurant");
 
-        // Ensure the category exists
+        // Ensure the category exists and belongs to the user's restaurant
         var category = await foodCategoryRepository.GetFoodCategoryAsync(foodCategoryId);
         if (category == null || category.RestaurantId != user.OwnedRestaurant.Id)
             return BadRequest("Invalid food category");
@@ -264,8 +243,8 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
     }
 
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPut("food-categories/{foodCategoryId}/food-items/{id}")]
-    public async Task<ActionResult<FoodItemDto>> UpdateFoodItem(string id, FoodItemRegisterDto foodItemUpdateDto, string foodCategoryId)
+    [HttpPut("food-categories/{foodCategoryId}/food-items/{foodItemId}")]
+    public async Task<ActionResult<FoodItemDto>> UpdateFoodItem(string foodCategoryId, string foodItemId, [FromBody] FoodItemUpdateDto foodItemUpdateDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await userRepository.GetUserByIdAsync(userId);
@@ -273,17 +252,76 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         if (user.OwnedRestaurant == null)
             return BadRequest("User does not own a restaurant");
 
-        var foodCategory = await foodCategoryRepository.GetFoodCategoryAsync(foodCategoryId);
-
-        if (foodCategory == null || foodCategory.RestaurantId != user.OwnedRestaurant.Id)
-            return NotFound("Food category not found");
-
-        var foodItem = await foodItemRepository.GetFoodItemByIdAsync(id);
-
+        var foodItem = await foodItemRepository.GetFoodItemWithVariationsAsync(foodItemId);
         if (foodItem == null || foodItem.FoodCategoryId != foodCategoryId)
-            return NotFound("Food item not found in the specified category");
+            return BadRequest("Invalid food item or category");
 
-        mapper.Map(foodItemUpdateDto, foodItem);
+        if (foodItem.FoodCategory.RestaurantId != userId)
+            return Unauthorized("You do not own this food item");
+
+        foodItem.Name = foodItemUpdateDto.Name;
+        foodItem.Description = foodItemUpdateDto.Description;
+        foodItem.BasePrice = foodItemUpdateDto.BasePrice;
+
+        // Variation IDs from DTO
+        var variationIdsDto = foodItemUpdateDto.Variations
+            .Where(v => !string.IsNullOrEmpty(v.Id))
+            .Select(v => v.Id)
+            .ToList();
+
+        // Remove deleted Variations
+        var variationsToRemove = foodItem.Variations
+            .Where(v => !variationIdsDto.Contains(v.Id))
+            .ToList();
+
+        foreach (var variation in variationsToRemove)
+        {
+            foodItem.Variations.Remove(variation);
+            variationRepository.RemoveVariation(variation);
+        }
+
+        // Update or Add Variations
+        foreach (var variationDto in foodItemUpdateDto.Variations)
+        {
+            var existingVariation = foodItem.Variations
+                .FirstOrDefault(v => v.Id == variationDto.Id);
+
+            if (existingVariation != null)
+            {
+                // Update existing Variation
+                existingVariation.Name = variationDto.Name;
+                existingVariation.MinSelect = variationDto.MinSelect;
+                existingVariation.MaxSelect = variationDto.MaxSelect;
+
+                // Handle VariationOptions
+                UpdateVariationOptions(existingVariation, variationDto.VariationOptions);
+            }
+            else
+            {
+                // Add new Variation
+                var newVariation = new Variation
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = variationDto.Name,
+                    MinSelect = variationDto.MinSelect,
+                    MaxSelect = variationDto.MaxSelect
+                };
+
+                // Add VariationOptions
+                foreach (var optionDto in variationDto.VariationOptions)
+                {
+                    var newOption = new VariationOption
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = optionDto.Name,
+                        PriceAdjustment = optionDto.PriceAdjustment
+                    };
+                    newVariation.VariationOptions.Add(newOption);
+                }
+
+                foodItem.Variations.Add(newVariation);
+            }
+        }
 
         if (await foodItemRepository.SaveAllAsync())
             return Ok(mapper.Map<FoodItemDto>(foodItem));
@@ -295,10 +333,6 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
     [HttpGet("{id}/ratings")]
     public async Task<ActionResult<IEnumerable<RatingDto>>> GetRestaurantRatings(string id)
     {
-        var restaurant = await restaurantRepository.GetRestaurantByIdAsync(id);
-
-        if (restaurant == null) return NotFound();
-
         var ratings = await ratingRepository.GetRestaurantRatingsAsync(id);
 
         var returnRatings = mapper.Map<IEnumerable<RatingDto>>(ratings);
@@ -314,12 +348,84 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
         var user = await userRepository.GetUserByIdAsync(userId);
 
-        if (user.OwnedRestaurant == null) return NotFound();
-
         var ownedRestaurant = await restaurantRepository.GetRestaurantWithDetailsAsync(user.Id);
 
         var restaurantToReturn = mapper.Map<RestaurantDetailDto>(ownedRestaurant);
 
         return Ok(restaurantToReturn);
+    }
+
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
+    [HttpPost("food-categories/{foodCategoryId}/food-items/batch")]
+    public async Task<ActionResult<FoodItemDto>> AddFoodItemInBatch(string foodCategoryId, [FromBody] FoodItemRegisterDto foodItemCreateDto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        // Ensure the category exists and belongs to the user's restaurant
+        var category = await foodCategoryRepository.GetFoodCategoryAsync(foodCategoryId);
+        if (category == null || category.RestaurantId != userId)
+            return BadRequest("Invalid food category");
+
+        // Map the DTO to FoodItem entity
+        var foodItem = mapper.Map<FoodItem>(foodItemCreateDto);
+        foodItem.FoodCategoryId = category.Id; // Set the foreign key
+
+        // Add the FoodItem to the repository
+        foodItemRepository.AddFoodItem(foodItem);
+
+        // Save all changes
+        if (await foodItemRepository.SaveAllAsync())
+        {
+            // Fetch the FoodItem with Variations and VariationOptions to include generated IDs
+            var createdFoodItem = await foodItemRepository.GetFoodItemWithVariationsAsync(foodItem.Id);
+            var foodItemDto = mapper.Map<FoodItemDto>(createdFoodItem);
+            return Ok(foodItemDto);
+        }
+
+        return BadRequest("Failed to create food item with variations");
+    }
+    private void UpdateVariationOptions(Variation existingVariation, List<VariationOptionUpdateDto> optionDtos)
+    {
+        // Option IDs from DTO
+        var optionIdsDto = optionDtos
+            .Where(o => !string.IsNullOrEmpty(o.Id))
+            .Select(o => o.Id)
+            .ToList();
+
+        // Remove deleted VariationOptions
+        var optionsToRemove = existingVariation.VariationOptions
+            .Where(o => !optionIdsDto.Contains(o.Id))
+            .ToList();
+
+        foreach (var option in optionsToRemove)
+        {
+            existingVariation.VariationOptions.Remove(option);
+            variationOptionRepository.RemoveVariationOption(option);
+        }
+
+        // Update or Add VariationOptions
+        foreach (var optionDto in optionDtos)
+        {
+            var existingOption = existingVariation.VariationOptions
+                .FirstOrDefault(o => o.Id == optionDto.Id);
+
+            if (existingOption != null)
+            {
+                // Update existing Option
+                existingOption.Name = optionDto.Name;
+                existingOption.PriceAdjustment = optionDto.PriceAdjustment;
+            }
+            else
+            {
+                // Add new Option
+                var newOption = new VariationOption
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = optionDto.Name,
+                    PriceAdjustment = optionDto.PriceAdjustment
+                };
+                existingVariation.VariationOptions.Add(newOption);
+            }
+        }
     }
 }

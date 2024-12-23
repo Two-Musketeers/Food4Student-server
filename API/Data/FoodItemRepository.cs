@@ -87,4 +87,12 @@ public class FoodItemRepository(DataContext context) : IFoodItemRepository
             .Where(fi => foodItemIds.Contains(fi.Id))
             .ToListAsync();
     }
+
+    public async Task<FoodItem?> GetFoodItemWithVariationsAsync(string foodItemId)
+    {
+        return await context.FoodItems
+            .Include(fi => fi.Variations)
+                .ThenInclude(v => v.VariationOptions)
+            .FirstOrDefaultAsync(fi => fi.Id == foodItemId);
+    }
 }

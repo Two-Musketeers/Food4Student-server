@@ -9,5 +9,5 @@ public class OrderItemDto
     public int Quantity { get; set; }
     public string? FoodItemPhotoUrl { get; set; }
     public string? OriginalFoodItemId { get; set; }
-    public List<OrderItemVariationDto> SelectedVariations { get; set; } = [];
+    public string? Variations { get; set; }
 }

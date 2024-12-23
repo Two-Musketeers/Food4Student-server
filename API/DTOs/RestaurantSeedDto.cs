@@ -1,17 +1,19 @@
-using System.ComponentModel.DataAnnotations;
+using System;
+using API.Entities;
 
 namespace API.DTOs;
 
-public class RestaurantUpdateDto
+public class RestaurantSeedDto
 {
-    [Required]
+    public string? Id { get; set; }
     public required string Name { get; set; }
     public required string PhoneNumber { get; set; }
     public string? Description { get; set; }
     public required string Address { get; set; }
-    [Range(-90.0, 90.0, ErrorMessage = "Latitude must be between -90 and 90.")]
     public double Latitude { get; set; }
-
-    [Range(-180.0, 180.0, ErrorMessage = "Longitude must be between -180 and 180.")]
     public double Longitude { get; set; }
+    public Photo? Logo { get; set; }
+    public Photo? Banner { get; set; }
+    public bool IsApproved { get; set; } = false;
+    public List<FoodCategory> FoodCategories { get; set; } = [];
 }

@@ -1,5 +1,4 @@
 namespace API.Entities;
-// TODO: add shipping address
 public class Order
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -12,7 +11,7 @@ public class Order
     public double Longitude { get; set; }
     public required string PhoneNumber { get; set; }
     public required string Name { get; set; }
-    public string Note { get; set; } = "";
+    public string? Note { get; set; } = "";
     public int TotalPrice { get; set; }
     //AppUser navigation purpose
     public string? AppUserId { get; set; }
