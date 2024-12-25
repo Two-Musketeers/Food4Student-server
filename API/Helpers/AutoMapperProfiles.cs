@@ -25,7 +25,8 @@ public class AutoMapperProfiles : Profile
                 .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.Ratings.Count != 0 ? src.Ratings.Average(r => r.Stars) : 0));
 
         //Automapper for AppUser
-        CreateMap<AppUser, UserDto>();
+        CreateMap<AppUser, UserDto>()
+            .ForMember(dest => dest.OwnedRestaurant, opt => opt.MapFrom(src => src.OwnedRestaurant != null));
 
         //Automapper for PhotoDto (if applicable)
         CreateMap<Photo, PhotoDto>();
@@ -50,9 +51,13 @@ public class AutoMapperProfiles : Profile
         CreateMap<CreateOrderItemDto, OrderItem>()
                 .ForMember(dest => dest.OriginalFoodItem, opt => opt.Ignore());
 
-        CreateMap<Order, OrderDto>();
+        CreateMap<Order, OrderDto>()
+            .ForMember(dest => dest.PhotoUrl, 
+                       opt => opt.MapFrom(src => src.Restaurant.Logo.Url));
 
-        CreateMap<OrderItem, OrderItemDto>();
+        CreateMap<OrderItem, OrderItemDto>()
+            .ForMember(dest => dest.FoodItemPhotoUrl, 
+                       opt => opt.MapFrom(src => src.OriginalFoodItem.FoodItemPhoto != null ? src.OriginalFoodItem.FoodItemPhoto.Url : null));
 
         CreateMap<Rating, RatingDto>();
         CreateMap<RatingDto, Rating>();

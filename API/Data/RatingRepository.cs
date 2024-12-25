@@ -45,21 +45,16 @@ public class RatingRepository(DataContext context) : IRatingRepository
         return user.Ratings;
     }
 
-    public async Task<List<Rating>> GetRestaurantRatingsAsync(string restaurantId)
-    {
-        var restaurant = await context.Restaurants
-            .Include(r => r.Ratings)
-            .FirstOrDefaultAsync(r => r.Id == restaurantId)!;
-        
-        if (restaurant == null) throw new Exception("Restaurant not found");
-
-        return restaurant.Ratings;
-    }
+    public async Task<IEnumerable<Rating>> GetRestaurantRatingsAsync(string restaurantId)
+        {
+            return await context.Ratings
+                .Where(r => r.RestaurantId == restaurantId)
+                .ToListAsync();
+        }
 
     public async Task<Rating?> GetOrderRatingById(string id)
     {
         var order = await context.Orders.FirstOrDefaultAsync(r => r.Id == id);
-        if (order == null) throw new Exception("Order not found");
         return order.Rating;
     }
 }

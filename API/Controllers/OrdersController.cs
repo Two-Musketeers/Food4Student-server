@@ -17,12 +17,134 @@ public class OrdersController(IMapper mapper,
     IUserRepository userRepository) : BaseApiController
 {
     // Get all orders for the authenticated restaurant owner
-    [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpGet]
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpGet("users")]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var orders = await orderRepository.GetOrdersByUserIdAsync(userId);
+        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+        return Ok(ordersDto);
+    }
+
+    [Authorize(Policy = "RequireRestaurantOwnerRole")]
+    [HttpGet("restaurants")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersByRestaurant()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var orders = await orderRepository.GetOrdersByRestaurantIdAsync(userId);
+        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+        return Ok(ordersDto);
+    }
+
+    [Authorize]
+    [HttpGet("users/pending")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetPendingOrders()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var orders = await orderRepository.GetOrdersByStatusAsync(OrderStatus.Pending);
+        for (int i = 0; i < orders.Count(); i++)
+        {
+            orders = orders.Where(o => o.AppUserId == userId).ToList();
+        }
+        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+        return Ok(ordersDto);
+    }
+
+    [Authorize]
+    [HttpGet("users/approved")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetApprovedOrders()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var orders = await orderRepository.GetOrdersByStatusAsync(OrderStatus.Approved);
+        for (int i = 0; i < orders.Count(); i++)
+        {
+            orders = orders.Where(o => o.AppUserId == userId).ToList();
+        }
+        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+        return Ok(ordersDto);
+    }
+
+    [Authorize]
+    [HttpGet("users/delivered")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetDeliveredOrders()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var orders = await orderRepository.GetOrdersByStatusAsync(OrderStatus.Delivered);
+        for (int i = 0; i < orders.Count(); i++)
+        {
+            orders = orders.Where(o => o.AppUserId == userId).ToList();
+        }
+        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+        return Ok(ordersDto);
+    }
+
+    [Authorize]
+    [HttpGet("users/cancelled")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetCancelledOrders()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var orders = await orderRepository.GetOrdersByStatusAsync(OrderStatus.Cancelled);
+        for (int i = 0; i < orders.Count(); i++)
+        {
+            orders = orders.Where(o => o.AppUserId == userId).ToList();
+        }
+        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+        return Ok(ordersDto);
+    }
+
+    [Authorize]
+    [HttpGet("restaurants/pending")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetPendingOrdersByRestaurant()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var orders = await orderRepository.GetOrdersByStatusAsync(OrderStatus.Pending);
+        for (int i = 0; i < orders.Count(); i++)
+        {
+            orders = orders.Where(o => o.RestaurantId == userId).ToList();
+        }
+        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+        return Ok(ordersDto);
+    }
+
+    [Authorize]
+    [HttpGet("restaurants/approved")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetApprovedOrdersByRestaurant()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var orders = await orderRepository.GetOrdersByStatusAsync(OrderStatus.Approved);
+        for (int i = 0; i < orders.Count(); i++)
+        {
+            orders = orders.Where(o => o.RestaurantId == userId).ToList();
+        }
+        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+        return Ok(ordersDto);
+    }
+
+    [Authorize]
+    [HttpGet("restaurants/delivered")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetDeliveredOrdersByRestaurant()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var orders = await orderRepository.GetOrdersByStatusAsync(OrderStatus.Delivered);
+        for (int i = 0; i < orders.Count(); i++)
+        {
+            orders = orders.Where(o => o.RestaurantId == userId).ToList();
+        }
+        var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
+        return Ok(ordersDto);
+    }
+
+    [Authorize]
+    [HttpGet("restaurants/cancelled")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetCancelledOrdersByRestaurant()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var orders = await orderRepository.GetOrdersByStatusAsync(OrderStatus.Cancelled);
+        for (int i = 0; i < orders.Count(); i++)
+        {
+            orders = orders.Where(o => o.RestaurantId == userId).ToList();
+        }
         var ordersDto = mapper.Map<IEnumerable<OrderDto>>(orders);
         return Ok(ordersDto);
     }
@@ -59,7 +181,7 @@ public class OrdersController(IMapper mapper,
         if (order.RestaurantId != userId)
             return Unauthorized(new { message = "You do not have access to approve this order." });
 
-        if (order.Status != "Pending")
+        if (order.Status != OrderStatus.Pending)
             return BadRequest(new { message = "You can only approve pending orders." });
 
         if (order.AppUserId == null)
@@ -80,7 +202,28 @@ public class OrdersController(IMapper mapper,
             IsUnread = true,
         });
 
-        order.Status = "Approved";
+        order.Status = OrderStatus.Approved;
+
+        var userDeviceToken = await userRepository.GetDeviceTokens(userId);
+        if (userDeviceToken.Count > 0)
+        {
+            var notification = new MulticastMessage
+            {
+                Tokens = userDeviceToken,
+                Data = new Dictionary<string, string>
+                {
+                    { "Mã đơn hàng", order.Id.Split("-")[0] },
+                    { "Trạng thái đơn hàng", "Đã được đặt" },
+                },
+                Notification = new Notification
+                {
+                    Title = "Bạn có đơn hàng mới",
+                    Body = $"Đơn hàng {order.Id} đã được tạo."
+                }
+            };
+
+            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(notification);
+        }
 
         bool isSaved = await orderRepository.SaveAllAsync();
         if (!isSaved)
@@ -91,8 +234,8 @@ public class OrdersController(IMapper mapper,
 
     // Reject order
     [Authorize(Policy = "RequireRestaurantOwnerRole")]
-    [HttpPut("{id}/reject-order")]
-    public async Task<IActionResult> RejectOrder(string id)
+    [HttpPut("{id}/cancel-order")]
+    public async Task<IActionResult> CancelOrder(string id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var order = await orderRepository.GetOrderByIdAsync(id);
@@ -103,7 +246,7 @@ public class OrdersController(IMapper mapper,
         if (order.RestaurantId != userId)
             return Unauthorized(new { message = "You do not have access to reject this order." });
 
-        if (order.Status != "Pending")
+        if (order.Status != OrderStatus.Pending)
             return BadRequest(new { message = "You can only reject pending orders." });
 
         if (order.AppUserId == null)
@@ -124,7 +267,7 @@ public class OrdersController(IMapper mapper,
             IsUnread = true,
         });
 
-        order.Status = "Rejected";
+        order.Status = OrderStatus.Cancelled;
 
         bool isSaved = await orderRepository.SaveAllAsync();
         if (!isSaved)
@@ -147,7 +290,7 @@ public class OrdersController(IMapper mapper,
         if (order.RestaurantId != userId)
             return Unauthorized(new { message = "You do not have access to deliver this order." });
 
-        if (order.Status != "Approved")
+        if (order.Status != OrderStatus.Approved)
             return BadRequest(new { message = "You can only deliver approved orders." });
 
         if (order.AppUserId == null)
@@ -168,7 +311,7 @@ public class OrdersController(IMapper mapper,
             IsUnread = true,
         });
 
-        order.Status = "Delivered";
+        order.Status = OrderStatus.Delivered;
 
         bool isSaved = await orderRepository.SaveAllAsync();
         if (!isSaved)
@@ -195,9 +338,7 @@ public class OrdersController(IMapper mapper,
         if (user == null)
             return Unauthorized(new { message = "User not found." });
 
-        if (orderCreateDto.PhoneNumber == null) {
-            orderCreateDto.PhoneNumber = user.PhoneNumber;
-        }
+        orderCreateDto.PhoneNumber ??= user.PhoneNumber;
         // Initialize Order
         var order = new Order
         {
@@ -310,7 +451,7 @@ public class OrdersController(IMapper mapper,
 
         // Calculate Total Price
         order.TotalPrice = order.OrderItems.Sum(oi => oi.Price * oi.Quantity);
-
+        user.Orders.Add(order);
         // Add and Save Order
         orderRepository.AddOrder(order);
         var isSaved = await orderRepository.SaveAllAsync();
@@ -343,7 +484,7 @@ public class OrdersController(IMapper mapper,
                 Data = new Dictionary<string, string>
                 {
                     { "Mã đơn hàng", order.Id },
-                    { "Trạng thái đơn hàng", order.Status },
+                    { "Trạng thái đơn hàng", "Đã được đặt" },
                 },
                 Notification = new Notification
                 {

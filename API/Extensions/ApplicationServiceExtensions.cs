@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using API.Data;
 using API.Helpers;
 using API.Interfaces;
@@ -13,7 +14,12 @@ public static class ApplicationServiceExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services,
         IConfiguration config)
     {
-        services.AddControllers();
+        services.AddControllers()
+            .AddJsonOptions(x =>
+            {
+                x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                x.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
+            });
         services.AddDbContext<DataContext>(opt =>
         {
             opt.UseSqlServer(

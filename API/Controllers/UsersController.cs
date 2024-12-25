@@ -54,7 +54,7 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
 
     [Authorize(Policy = "RequireUserRole")]
     [HttpPut("shipping-addresses/{addressId}")]
-    public async Task<ActionResult> UpdateShippingAddress(string addressId, CreateShippingAddressDto shippingAddressDto)
+    public async Task<ActionResult<ShippingAddressDto>> UpdateShippingAddress(string addressId, CreateShippingAddressDto shippingAddressDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -64,15 +64,13 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
         // Ensure the shipping address belongs to the authenticated user
         if (shippingAddress.AppUserId != userId) return Forbid();
 
-
-
-        mapper.Map(shippingAddressDto, shippingAddress);
+        var returnMap = mapper.Map(shippingAddressDto, shippingAddress);
 
         var result = await shippingAddressRepository.SaveAllAsync();
 
         if (!result) return BadRequest("Failed to update shipping address");
 
-        return Ok("Shipping address has been updated successfully");
+        return Ok(returnMap);
     }
 
     [Authorize(Policy = "RequireUserRole")]
@@ -181,7 +179,7 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
         if (order == null) return NotFound("Order not found.");
         if (order.AppUserId != userId) return Unauthorized("This order does not belong to you.");
         var user = await userRepository.GetUserByIdAsync(userId);
-        if (order.Status != "Delivered") return BadRequest("You can only rate a restaurant after the order has been delivered.");
+        if (order.Status != OrderStatus.Delivered) return BadRequest("You can only rate a restaurant after the order has been delivered.");
         if (order.RestaurantId == null) return BadRequest("This order does not have a restaurant.");
         var restaurant = await restaurantRepository.GetRestaurantByIdAsync(order.RestaurantId);
         if (restaurant == null) return NotFound("Restaurant not found.");
@@ -269,7 +267,7 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
 
     [Authorize(Policy = "RequireUserRole")]
     [HttpDelete("orders/{id}")]
-    public async Task<ActionResult> DeleteOrder(string id)
+    public async Task<ActionResult> CancelOrder(string id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -281,10 +279,10 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
         if (order.AppUserId != userId)
             return Unauthorized("You do not have access to delete this order.");
 
-        if (order.Status != "Pending" || order.Status != "Delivered")
+        if (order.Status != OrderStatus.Pending || order.Status != OrderStatus.Delivered)
             return BadRequest("You cannot delete an order that is not pending or not delivered.");
 
-        orderRepository.DeleteOrder(order);
+        order.Status = OrderStatus.Cancelled;
 
         if (await orderRepository.SaveAllAsync())
             return NoContent();

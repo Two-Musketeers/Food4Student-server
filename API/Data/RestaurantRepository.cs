@@ -120,6 +120,7 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
         var userLocation = new Point(longitude, latitude) { SRID = 4326 };
         var query = context.Restaurants
                         .Include(r => r.Logo)
+                        .Include(r => r.Ratings)
                         .Where(r => r.IsApproved && r.Location != null)
                         .OrderBy(r => r.Location.Distance(userLocation));
         
@@ -132,4 +133,21 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
             .Include(r => r.Logo)
             .FirstOrDefaultAsync(r => r.Id == id);
     }
+
+    public async Task<PagedList<Restaurant>> SearchRestaurantsByNameAsync(string query, int pageNumber, int pageSize)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return await PagedList<Restaurant>.CreateAsync(context.Restaurants, pageNumber, pageSize);
+
+            query = query.Trim().ToLower();
+
+            var restaurantsQuery = context.Restaurants
+                .Where(r => r.Name.ToLower().Contains(query))
+                .Include(r => r.Logo)
+                .Include(r => r.Ratings)
+                .AsNoTracking()
+                .OrderBy(r => r.Name); // You can customize the ordering as needed
+
+            return await PagedList<Restaurant>.CreateAsync(restaurantsQuery, pageNumber, pageSize);
+        }
 }

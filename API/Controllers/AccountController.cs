@@ -68,6 +68,7 @@ public class AccountController(IUserRepository userRepository,
         };
 
         userRepository.AddUser(user);
+        user.OwnedRestaurant = restaurant;
 
         restaurantRepository.AddRestaurant(restaurant);
 

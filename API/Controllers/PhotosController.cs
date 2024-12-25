@@ -20,8 +20,6 @@ public class PhotosController(IUserRepository userRepository,
 
         var user = await userRepository.GetUserByIdAsync(userId);
 
-        if (user.OwnedRestaurant == null) return BadRequest("User does not own a restaurant");
-
         // Delete the old photo
         if (user.OwnedRestaurant.Logo != null && user.OwnedRestaurant.Logo.PublicId != null)
         {
@@ -56,8 +54,6 @@ public class PhotosController(IUserRepository userRepository,
 
         var user = await userRepository.GetUserByIdAsync(userId);
 
-        if (user.OwnedRestaurant == null) return BadRequest("User does not own a restaurant");
-
         // Delete the old photo
         if (user.OwnedRestaurant.Banner != null && user.OwnedRestaurant.Banner.PublicId != null)
         {
@@ -66,7 +62,7 @@ public class PhotosController(IUserRepository userRepository,
             if (deleteResult.Error != null) return BadRequest(deleteResult.Error.Message);
         }
 
-        var result = await photoService.AddPhotoAsync(file);
+        var result = await photoService.AddBannerPhotoAsync(file);
 
         if (result.Error != null) return BadRequest(result.Error.Message);
 

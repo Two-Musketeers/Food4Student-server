@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
@@ -20,6 +21,22 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         IVariationOptionRepository variationOptionRepository,
         IVariationRepository variationRepository) : ControllerBase
 {
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpGet("search")]
+    public async Task<ActionResult<PagedList<RestaurantDto>>> SearchRestaurants(
+            [FromQuery] string query,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 20)
+    {
+        var restaurants = await restaurantRepository.SearchRestaurantsByNameAsync(query, pageNumber, pageSize);
+
+        var restaurantsDto = mapper.Map<IEnumerable<RestaurantDto>>(restaurants);
+
+        Response.AddPaginationHeader(restaurants.CurrentPage, restaurants.PageSize, restaurants.TotalCount, restaurants.TotalPages);
+
+        return Ok(restaurantsDto);
+    }
+
     [Authorize(Policy = "RequireUserRole")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants(
@@ -94,11 +111,12 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         if (restaurant == null) return BadRequest("User does not own a restaurant");
 
         var userLocation = new Point(restaurantUpdateDto.Longitude, restaurantUpdateDto.Latitude) { SRID = 4326 };
-
+        
         restaurant.Name = restaurantUpdateDto.Name;
         restaurant.Description = restaurantUpdateDto.Description;
         restaurant.Address = restaurantUpdateDto.Address;
         restaurant.Location = userLocation;
+        restaurant.PhoneNumber = restaurantUpdateDto.PhoneNumber;
 
         await restaurantRepository.SaveAllAsync();
 
@@ -338,6 +356,36 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
         var returnRatings = mapper.Map<IEnumerable<RatingDto>>(ratings);
 
         return Ok(returnRatings);
+    }
+
+    [Authorize]
+    [HttpGet("{id}/ratings-summary")]
+    public async Task<ActionResult<RestaurantRatingsSummaryDto>> GetRestaurantRatingsSummary(string id)
+    {
+        var ratings = await ratingRepository.GetRestaurantRatingsAsync(id);
+
+        var totalRatings = ratings.Count();
+        var averageRating = totalRatings > 0 ? ratings.Average(r => r.Stars) : 0.0;
+
+        var perStarRatings = new List<int> { 0, 0, 0, 0, 0 }; // 1-star to 5-star
+
+        foreach (var rating in ratings)
+        {
+            if (rating.Stars >= 1 && rating.Stars <= 5)
+                perStarRatings[rating.Stars - 1]++;
+        }
+
+        var ratingsDto = mapper.Map<List<RatingDto>>(ratings);
+
+        var summaryDto = new RestaurantRatingsSummaryDto
+        {
+            TotalRatings = totalRatings,
+            AverageRating = averageRating,
+            PerStarRatings = perStarRatings,
+            Ratings = ratingsDto
+        };
+
+        return Ok(summaryDto);
     }
 
     [Authorize(Policy = "RequireRestaurantOwnerRole")]

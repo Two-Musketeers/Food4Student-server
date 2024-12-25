@@ -19,7 +19,6 @@ public class OrderRepository(DataContext context) : IOrderRepository
     public async Task<Order?> GetOrderByIdAsync(string id)
     {
         return await context.Orders
-            .Include(o => o.ShippingAddress)
             .Include(o => o.Restaurant) // Include Restaurant
             .Include(o => o.OrderItems)
             .FirstOrDefaultAsync(o => o.Id == id);
@@ -29,8 +28,8 @@ public class OrderRepository(DataContext context) : IOrderRepository
     {
         return await context.Orders
             .Where(o => o.AppUserId == userId)
-            .Include(o => o.ShippingAddress)
             .Include(o => o.Restaurant)
+                .ThenInclude(r => r.Logo)
             .Include(o => o.OrderItems)
             .ToListAsync();
     }
@@ -39,8 +38,8 @@ public class OrderRepository(DataContext context) : IOrderRepository
     {
         return await context.Orders
             .Where(o => o.RestaurantId == restaurantId)
-            .Include(o => o.ShippingAddress)
-            .Include(o => o.Restaurant) // Include Restaurant
+            .Include(o => o.Restaurant)
+                .ThenInclude(r => r.Logo)
             .Include(o => o.OrderItems)
             .ToListAsync();
     }
@@ -53,5 +52,18 @@ public class OrderRepository(DataContext context) : IOrderRepository
     public void UpdateOrder(Order order)
     {
         context.Orders.Update(order);
+    }
+
+    public async Task<IEnumerable<Order>> GetOrdersByStatusAsync(OrderStatus status)
+    {
+        return await context.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.OriginalFoodItem)
+                    .ThenInclude(fi => fi.FoodItemPhoto)
+            .Include(o => o.Restaurant)
+                .ThenInclude(r => r.Logo)
+            .Where(o => o.Status == status)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
     }
 }

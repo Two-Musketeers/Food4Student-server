@@ -5,7 +5,7 @@ public class Order
     public List<OrderItem> OrderItems { get; set; } = [];
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Rating? Rating { get; set; }
-    public string Status { get; set; } = "Pending";
+    public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public required string ShippingAddress { get; set; }
     public double Latitude { get; set; }
     public double Longitude { get; set; }

@@ -36,6 +36,26 @@ public class PhotoService : IPhotoService
 
          return uploadResult;
     }
+    public async Task<ImageUploadResult> AddBannerPhotoAsync(IFormFile file)
+    {
+        var uploadResult = new ImageUploadResult();
+
+        if (file.Length > 0)
+        {
+            using var stream = file.OpenReadStream();
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(file.FileName, stream),
+                Transformation = new Transformation()
+                    .Height(500).Width(1000).Crop("fill").Gravity("face"),
+                Folder = "food4students"
+            };
+
+            uploadResult = await _cloudinary.UploadAsync(uploadParams);
+        }
+
+         return uploadResult;
+    }
 
     public async Task<DeletionResult> DeletePhotoAsync(string publicId)
     {
