@@ -54,7 +54,7 @@ public class RatingRepository(DataContext context) : IRatingRepository
 
     public async Task<Rating?> GetOrderRatingById(string id)
     {
-        var order = await context.Orders.FirstOrDefaultAsync(r => r.Id == id);
-        return order.Rating;
+        return await context.Ratings
+            .FirstOrDefaultAsync(r => r.Id == id);
     }
 }

@@ -39,7 +39,7 @@ public class RestaurantsController(IRestaurantRepository restaurantRepository,
 
     [Authorize(Policy = "RequireUserRole")]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants(
+public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants(
         [FromQuery] PaginationParams restaurantParams,
         [FromQuery] CurrentLocationDto currentLocationDto)
     {

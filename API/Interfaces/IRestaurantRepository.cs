@@ -18,4 +18,5 @@ public interface IRestaurantRepository
     Task<Restaurant?> GetRestaurantWithDetailsAsync(string id);
     Task<PagedList<Restaurant>> GetNearbyRestaurantsAsync(double latitude, double longitude, int pageSize, int pageNumber);
     Task<PagedList<Restaurant>> SearchRestaurantsByNameAsync(string query, int pageNumber, int pageSize);
+    Task<PagedList<Restaurant>> GetRestaurantForAdmin(PaginationParams paginationParams);
 }

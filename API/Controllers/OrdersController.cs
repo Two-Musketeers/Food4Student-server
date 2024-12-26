@@ -175,23 +175,8 @@ public class OrdersController(IMapper mapper,
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var order = await orderRepository.GetOrderByIdAsync(id);
 
-        if (order == null)
-            return NotFound(new { message = "Order not found." });
-
-        if (order.RestaurantId != userId)
-            return Unauthorized(new { message = "You do not have access to approve this order." });
-
-        if (order.Status != OrderStatus.Pending)
-            return BadRequest(new { message = "You can only approve pending orders." });
-
-        if (order.AppUserId == null)
-            return BadRequest(new { message = "Order does not have a user." });
-
         var userPlacedOrder = await userRepository.GetUserByIdAsync(order.AppUserId);
         var restaurant = await restaurantRepository.GetRestaurantByIdAsync(userId);
-
-        if (userPlacedOrder == null || restaurant == null)
-            return BadRequest(new { message = "Failed to approve order." });
 
         userPlacedOrder.UserNotifications.Add(new UserNotification
         {
@@ -204,7 +189,7 @@ public class OrdersController(IMapper mapper,
 
         order.Status = OrderStatus.Approved;
 
-        var userDeviceToken = await userRepository.GetDeviceTokens(userId);
+        var userDeviceToken = await userRepository.GetDeviceTokens(order.AppUserId);
         if (userDeviceToken.Count > 0)
         {
             var notification = new MulticastMessage
@@ -213,12 +198,12 @@ public class OrdersController(IMapper mapper,
                 Data = new Dictionary<string, string>
                 {
                     { "Mã đơn hàng", order.Id.Split("-")[0] },
-                    { "Trạng thái đơn hàng", "Đã được đặt" },
+                    { "Trạng thái đơn hàng", "Đã được duyệt" },
                 },
                 Notification = new Notification
                 {
-                    Title = "Bạn có đơn hàng mới",
-                    Body = $"Đơn hàng {order.Id} đã được tạo."
+                    Title = "Đơn hàng của bạn đã được duyệt",
+                    Body = $"Đơn hàng {order.Id.Split("-")[0]} đã được tạo."
                 }
             };
 
@@ -267,6 +252,27 @@ public class OrdersController(IMapper mapper,
             IsUnread = true,
         });
 
+        var userDeviceToken = await userRepository.GetDeviceTokens(order.AppUserId);
+        if (userDeviceToken.Count > 0)
+        {
+            var notification = new MulticastMessage
+            {
+                Tokens = userDeviceToken,
+                Data = new Dictionary<string, string>
+                {
+                    { "Mã đơn hàng", order.Id.Split("-")[0] },
+                    { "Trạng thái đơn hàng", "Đã bị từ chối" },
+                },
+                Notification = new Notification
+                {
+                    Title = "Đơn hàng của bạn đã bị từ chối",
+                    Body = $"Đơn hàng {order.Id.Split("-")[0]} đã bị từ chối."
+                }
+            };
+
+            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(notification);
+        }
+
         order.Status = OrderStatus.Cancelled;
 
         bool isSaved = await orderRepository.SaveAllAsync();
@@ -304,12 +310,33 @@ public class OrdersController(IMapper mapper,
 
         userPlacedOrder.UserNotifications.Add(new UserNotification
         {
-            Title = $"Đơn hàng tại ${restaurant.Name} đã hoàn tất",
+            Title = $"Đơn hàng tại {restaurant.Name} đã hoàn tất",
             Content = "Cảm ơn bạn đã sử dụng dịch vụ Food4Students. Hãy chia sẻ cảm nhận của bạn về đơn hàng để giúp những khách hàng khác có thể tham khảo nhé",
             Image = restaurant.Logo?.Url,
             Timestamp = DateTime.UtcNow,
             IsUnread = true,
         });
+
+        var userDeviceToken = await userRepository.GetDeviceTokens(order.AppUserId);
+        if (userDeviceToken.Count > 0)
+        {
+            var notification = new MulticastMessage
+            {
+                Tokens = userDeviceToken,
+                Data = new Dictionary<string, string>
+                {
+                    { "Mã đơn hàng", order.Id.Split("-")[0] },
+                    { "Trạng thái đơn hàng", "đã hoàn tất" },
+                },
+                Notification = new Notification
+                {
+                    Title = "Cảm ơn bạn đã sử dụng dịch vụ của Food4Student",
+                    Body = "Tụi mình hi vọng sẽ gặp bạn nhiều hơn nhé"
+                }
+            };
+
+            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(notification);
+        }
 
         order.Status = OrderStatus.Delivered;
 
@@ -483,7 +510,7 @@ public class OrdersController(IMapper mapper,
                 Tokens = restaurantOwnerDeviceToken,
                 Data = new Dictionary<string, string>
                 {
-                    { "Mã đơn hàng", order.Id },
+                    { "Mã đơn hàng", order.Id.Split("-")[0] },
                     { "Trạng thái đơn hàng", "Đã được đặt" },
                 },
                 Notification = new Notification

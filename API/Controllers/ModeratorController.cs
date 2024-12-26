@@ -16,7 +16,7 @@ public class ModeratorController(IMapper mapper, IFirebaseService firebaseServic
     [HttpGet("restaurants")]
     public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants([FromQuery] PaginationParams restaurantParams)
     {
-        var restaurants = await restaurantRepository.GetRestaurantsAsync(restaurantParams);
+        var restaurants = await restaurantRepository.GetRestaurantForAdmin(restaurantParams);
 
         var restaurantsToReturn = mapper.Map<IEnumerable<RestaurantDto>>(restaurants);
 

@@ -57,6 +57,17 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
             .SingleOrDefaultAsync(r => r.Name == name);
     }
 
+    public async Task<PagedList<Restaurant>> GetRestaurantForAdmin(PaginationParams paginationParams)
+    {
+        var query = context.Restaurants
+            .Include(r => r.Logo)
+            .Include(r => r.Banner)
+            .Include(r => r.Ratings)
+            .AsQueryable();
+
+        return await PagedList<Restaurant>.CreateAsync(query, paginationParams.PageNumber, paginationParams.PageSize);
+    }
+
     public async Task<PagedList<Restaurant>> GetApprovedRestaurantsAsync(PaginationParams paginationParams)
     {
         var query = context.Restaurants
@@ -143,7 +154,7 @@ public class RestaurantRepository(DataContext context) : IRestaurantRepository
 
             var restaurantsQuery = context.Restaurants
                 .Where(r => r.Name.ToLower().Contains(query))
-                .Include(r => r.Logo)
+                .Include(r => r.Logo)   
                 .Include(r => r.Ratings)
                 .AsNoTracking()
                 .OrderBy(r => r.Name); // You can customize the ordering as needed

@@ -177,14 +177,8 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
         var order = await orderRepository.GetOrderByIdAsync(orderId);
 
         if (order == null) return NotFound("Order not found.");
-        if (order.AppUserId != userId) return Unauthorized("This order does not belong to you.");
         var user = await userRepository.GetUserByIdAsync(userId);
-        if (order.Status != OrderStatus.Delivered) return BadRequest("You can only rate a restaurant after the order has been delivered.");
-        if (order.RestaurantId == null) return BadRequest("This order does not have a restaurant.");
         var restaurant = await restaurantRepository.GetRestaurantByIdAsync(order.RestaurantId);
-        if (restaurant == null) return NotFound("Restaurant not found.");
-        if (restaurant.IsApproved == false) return BadRequest("You cannot rate an unapproved restaurant.");
-        if (order.Rating != null) return BadRequest("You have already rated this order.");
 
         var rating = new Rating
         {
@@ -198,6 +192,7 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
         user.Ratings.Add(rating);
         restaurant.Ratings.Add(rating);
         ratingRepository.AddRating(rating);
+        order.Rating = rating;
 
         var result = await ratingRepository.SaveAllAsync();
         if (result) return CreatedAtAction(nameof(GetRatingByOrderId), new { orderId = order.Id }, mapper.Map<RatingDto>(rating));
@@ -220,15 +215,13 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
 
     [Authorize(Policy = "RequireUserRole")]
     [HttpGet("ratings/{orderId}")]
-    public async Task<ActionResult> GetRatingByOrderId(string orderId)
+    public async Task<ActionResult<RatingDto>> GetRatingByOrderId(string orderId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         var rating = await ratingRepository.GetOrderRatingById(orderId);
 
         if (rating == null) return NotFound("Rating not found.");
-
-        if (rating.UserId != userId) return Unauthorized("You do not have access to this rating.");
 
         var ratingDto = mapper.Map<RatingDto>(rating);
 
@@ -279,9 +272,6 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
         if (order.AppUserId != userId)
             return Unauthorized("You do not have access to delete this order.");
 
-        if (order.Status != OrderStatus.Pending || order.Status != OrderStatus.Delivered)
-            return BadRequest("You cannot delete an order that is not pending or not delivered.");
-
         order.Status = OrderStatus.Cancelled;
 
         if (await orderRepository.SaveAllAsync())
@@ -311,7 +301,7 @@ public class UsersController(IShippingAddressRepository shippingAddressRepositor
         return Ok(notificationsDto);
     }
 
-    [Authorize(Policy = "RequireUserRole")]
+    [Authorize]
     [HttpPost("notifications")]
     public async Task<ActionResult<IEnumerable<UserNotificationDto>>> ReadAllNotifications()
     {
